@@ -1,18 +1,18 @@
 ---
 gsd_state_version: "1.0"
 milestone: V2
-current_phase: 4
-current_phase_name: Commercial Subscriptions & Dual Payment Gateways
-status: completed
-stopped_at: Phase 4 complete and verified across 61 unit/integration tests and frontend production build
-last_updated: "2026-10-02T19:40:00.000Z"
+current_phase: 5
+current_phase_name: AI Code Assistant & Token-Bucket Rate Limiter
+status: planned
+stopped_at: Phase 5 planned with 2 plans (05-01 Token-Bucket Rate Limiter and 05-02 Gemini 2.5 Flash Assistant)
+last_updated: "2026-10-02T19:46:00.000Z"
 last_activity: 2026-10-02
-last_activity_desc: Phase 4 complete with Stripe & Razorpay dual-gateway monetization verified
-state_head: 84e2b74
+last_activity_desc: Phase 5 planned with Token-Bucket rate limiting and Gemini AI Assistant
+state_head: 48210b1
 progress:
   total_phases: 7
   completed_phases: 4
-  total_plans: 12
+  total_plans: 14
   completed_plans: 12
   percent: 57
 ---
@@ -24,14 +24,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-02)
 
 **Core value:** Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing paired with a frictionless developer experience and contest integrity.
-**Current focus:** Phase 4 — Commercial Subscriptions & Dual Payment Gateways (Completed)
+**Current focus:** Phase 5 — AI Code Assistant & Token-Bucket Rate Limiter (Planned)
 
 ## Current Position
 
-Phase: 4 (Commercial Subscriptions & Dual Payment Gateways) — COMPLETED
-Plan: 3 of 3
-Status: Phase 4 Verified (61/61 tests passing, production build clean)
-Last activity: 2026-10-02 — Phase 4 complete with Stripe & Razorpay dual-gateway monetization verified
+Phase: 5 (AI Code Assistant & Token-Bucket Rate Limiter) — PLANNED
+Plan: 0 of 2 (Wave 1: 05-01, Wave 2: 05-02)
+Status: Ready for execution (/gsd-execute-phase 5)
+Last activity: 2026-10-02 — Phase 5 planned with Token-Bucket rate limiting and Gemini AI Assistant
 
 Progress: [██████░░░░] 57%
 
