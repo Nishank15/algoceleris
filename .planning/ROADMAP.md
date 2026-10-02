@@ -13,7 +13,7 @@ Cloud-Judge V2 is a commercial, production-grade online judge platform built wit
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Isolated Sandbox & Multi-Language Runner** - Secure Linux cgroup sandbox running C++, Python 3.12, and Java 21 with strict 256MB RAM/1 CPU limits and no network.
-- [ ] **Phase 2: Asynchronous Queue & Real-Time Streaming** - FastAPI gateway, Redis broker, concurrent worker daemons, and live WebSocket test-case execution streaming.
+- [x] **Phase 2: Asynchronous Queue & Real-Time Streaming** - FastAPI gateway, Redis broker, concurrent worker daemons, and live WebSocket test-case execution streaming.
 - [ ] **Phase 3: Midnight Dark Linear IDE Frontend** - 3-pane resizable Monaco editor layout with Zen/Normal mode and real-time streaming run output.
 - [ ] **Phase 4: Commercial Subscriptions & Dual Payment Gateways** - Free vs. Pro tier entitlements with automated Stripe and Razorpay checkout & webhook processing.
 - [ ] **Phase 5: AI Code Assistant & Token-Bucket Rate Limiter** - Gemini 2.5 Flash debugging suggestions and explanation engine bounded by Redis Token-Bucket rate limits.
@@ -60,9 +60,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: FastAPI submission gateway with schema validation and Redis task queue producer
-- [ ] 02-02: Concurrent worker daemon runner consuming Redis jobs and piping executions to Phase 1 sandbox
-- [ ] 02-03: WebSocket event streaming broadcaster delivering live per-testcase progress and execution telemetry
+- [x] 02-01: FastAPI submission gateway with schema validation and Redis task queue producer
+- [x] 02-02: Concurrent worker daemon runner consuming Redis jobs and piping executions to Phase 1 sandbox
+- [x] 02-03: WebSocket event streaming broadcaster delivering live per-testcase progress and execution telemetry
 
 ### Phase 3: Midnight Dark Linear IDE Frontend
 
@@ -163,7 +163,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Isolated Sandbox & Multi-Language Runner | 3/3 | Complete | 2026-10-02 |
-| 2. Asynchronous Queue & Real-Time Streaming | 0/3 | Not started | - |
+| 2. Asynchronous Queue & Real-Time Streaming | 3/3 | Complete | 2026-10-02 |
 | 3. Midnight Dark Linear IDE Frontend | 0/3 | Not started | - |
 | 4. Commercial Subscriptions & Dual Payment Gateways | 0/3 | Not started | - |
 | 5. AI Code Assistant & Token-Bucket Rate Limiter | 0/2 | Not started | - |
