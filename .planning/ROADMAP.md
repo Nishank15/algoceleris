@@ -79,9 +79,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Next.js/Vite project setup with Linear midnight dark design system and responsive 3-pane layout
-- [ ] 03-02: Monaco Editor integration with multi-language syntax support, theme matching, and Zen mode toggle
-- [ ] 03-03: Interactive problem viewer, sample run harness, and WebSocket streaming console pane
+- [x] 03-01: Next.js/Vite project setup with Linear midnight dark design system and responsive 3-pane layout
+- [x] 03-02: Monaco Editor integration with multi-language syntax support, theme matching, and Zen mode toggle
+- [x] 03-03: Interactive problem viewer, sample run harness, and WebSocket streaming console pane
 
 ### Phase 4: Commercial Subscriptions & Dual Payment Gateways
 

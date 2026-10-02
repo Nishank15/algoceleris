@@ -1,0 +1,107 @@
+import React from 'react';
+import { Play, Send, Maximize2, Minimize2, Terminal } from 'lucide-react';
+import { Language, Problem } from '../types';
+
+interface HeaderProps {
+  problems: Problem[];
+  activeProblemId: string;
+  onSelectProblem: (id: string) => void;
+  activeLanguage: Language;
+  onLanguageChange: (lang: Language) => void;
+  isZenMode: boolean;
+  onToggleZenMode: () => void;
+  onRunSamples: () => void;
+  onSubmit: () => void;
+  isRunning: boolean;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  problems,
+  activeProblemId,
+  onSelectProblem,
+  activeLanguage,
+  onLanguageChange,
+  isZenMode,
+  onToggleZenMode,
+  onRunSamples,
+  onSubmit,
+  isRunning,
+}) => {
+  return (
+    <header className="header-nav">
+      <div className="header-left">
+        <div className="brand-badge" title="Cloud-Judge V2 Online Judge">
+          <Terminal className="logo-icon" />
+          <span>CLOUD-JUDGE</span>
+          <span className="version-pill">V2</span>
+        </div>
+
+        <div className="nav-divider" />
+
+        <div className="problem-breadcrumb">
+          <span>Problem:</span>
+          <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+            <select
+              value={activeProblemId}
+              onChange={(e) => onSelectProblem(e.target.value)}
+              disabled={isRunning}
+            >
+              {problems.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title} ({p.difficulty})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="header-right">
+        {/* Language Selector */}
+        <select
+          className="lang-select"
+          value={activeLanguage}
+          onChange={(e) => onLanguageChange(e.target.value as Language)}
+          disabled={isRunning}
+          aria-label="Programming Language"
+        >
+          <option value="cpp">C++20 (GCC)</option>
+          <option value="python">Python 3.12</option>
+          <option value="java">Java 21 (OpenJDK)</option>
+        </select>
+
+        {/* Zen Mode Toggle */}
+        <button
+          className={`btn btn-icon ${isZenMode ? 'active' : ''}`}
+          onClick={onToggleZenMode}
+          title={isZenMode ? 'Exit Zen Mode (Esc)' : 'Enter Zen Mode (Distraction-Free)'}
+          aria-label="Toggle Zen Mode"
+        >
+          {isZenMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+        </button>
+
+        {/* Run Samples Action */}
+        <button
+          className="btn btn-secondary"
+          onClick={onRunSamples}
+          disabled={isRunning}
+          title="Run sample test cases"
+        >
+          <Play size={14} fill="currentColor" />
+          <span>{isRunning ? 'Running...' : 'Run Samples'}</span>
+        </button>
+
+        {/* Submit Solution Action */}
+        <button
+          className="btn btn-primary"
+          onClick={onSubmit}
+          disabled={isRunning}
+          title="Submit solution to online judge"
+        >
+          <Send size={14} />
+          <span>{isRunning ? 'Judging...' : 'Submit Solution'}</span>
+        </button>
+      </div>
+    </header>
+  );
+};

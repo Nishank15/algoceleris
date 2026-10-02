@@ -1,0 +1,47 @@
+import type { editor } from 'monaco-editor';
+
+export const LINEAR_MIDNIGHT_THEME_NAME = 'linear-midnight';
+
+export const LINEAR_MIDNIGHT_THEME: editor.IStandaloneThemeData = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [
+    { token: '', foreground: 'f1f5f9', background: '090b10' },
+    { token: 'comment', foreground: '64748b', fontStyle: 'italic' },
+    { token: 'keyword', foreground: '818cf8', fontStyle: 'bold' },
+    { token: 'keyword.control', foreground: 'a78bfa', fontStyle: 'bold' },
+    { token: 'operator', foreground: '94a3b8' },
+    { token: 'string', foreground: '34d399' },
+    { token: 'string.escape', foreground: '6ee7b7' },
+    { token: 'number', foreground: 'fbbf24' },
+    { token: 'type', foreground: 'c084fc' },
+    { token: 'type.identifier', foreground: 'c084fc' },
+    { token: 'function', foreground: '60a5fa' },
+    { token: 'identifier', foreground: 'f1f5f9' },
+    { token: 'delimiter', foreground: '94a3b8' },
+    { token: 'tag', foreground: 'f43f5e' },
+  ],
+  colors: {
+    'editor.background': '#090b10',
+    'editor.foreground': '#f1f5f9',
+    'editorLineNumber.foreground': '#475569',
+    'editorLineNumber.activeForeground': '#c7d2fe',
+    'editorCursor.foreground': '#6366f1',
+    'editor.lineHighlightBackground': '#121622',
+    'editor.selectionBackground': '#2d3356',
+    'editor.inactiveSelectionBackground': '#1c223a',
+    'editorIndentGuide.background1': 'rgba(255, 255, 255, 0.05)',
+    'editorIndentGuide.activeBackground1': 'rgba(99, 102, 241, 0.3)',
+    'editorWhitespace.foreground': 'rgba(255, 255, 255, 0.06)',
+    'editorGutter.background': '#090b10',
+    'scrollbarSlider.background': 'rgba(255, 255, 255, 0.08)',
+    'scrollbarSlider.hoverBackground': 'rgba(255, 255, 255, 0.16)',
+    'scrollbarSlider.activeBackground': 'rgba(99, 102, 241, 0.4)',
+    'editorWidget.background': '#0f121a',
+    'editorWidget.border': 'rgba(255, 255, 255, 0.1)',
+    'editorSuggestWidget.background': '#0f121a',
+    'editorSuggestWidget.border': 'rgba(255, 255, 255, 0.1)',
+    'editorSuggestWidget.selectedBackground': '#1e2438',
+    'editorSuggestWidget.highlightForeground': '#818cf8',
+  },
+};
