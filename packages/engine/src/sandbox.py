@@ -40,6 +40,9 @@ class IsolationSandbox:
             "LC_ALL": "en_US.UTF-8",
             "PYTHONUNBUFFERED": "1",
         }
+        for key in ("DEVELOPER_DIR", "SDKROOT", "TMPDIR"):
+            if key in os.environ:
+                clean_env[key] = os.environ[key]
         if env:
             clean_env.update(env)
 
@@ -54,6 +57,8 @@ class IsolationSandbox:
 
         # Configure resource limits preexec hook
         def preexec_limits():
+            import platform
+
             # Drop CPU limit signal (SIGXCPU)
             cpu_seconds = max(1, limits.time_limit_ms // 1000 + 1)
             try:
@@ -61,18 +66,18 @@ class IsolationSandbox:
             except (ValueError, OSError):
                 pass
 
-            # Drop maximum memory limit
-            try:
-                # RLIMIT_AS (address space) limits virtual memory
-                resource.setrlimit(resource.RLIMIT_AS, (limits.memory_limit_bytes, limits.memory_limit_bytes))
-            except (ValueError, OSError):
-                pass
+            # On Linux, enforce rlimit fallbacks for memory and process limits
+            if platform.system() != "Darwin":
+                try:
+                    # RLIMIT_AS (address space) limits virtual memory
+                    resource.setrlimit(resource.RLIMIT_AS, (limits.memory_limit_bytes, limits.memory_limit_bytes))
+                except (ValueError, OSError):
+                    pass
 
-            # Limit number of processes
-            try:
-                resource.setrlimit(resource.RLIMIT_NPROC, (limits.pids_limit, limits.pids_limit))
-            except (ValueError, OSError):
-                pass
+                try:
+                    resource.setrlimit(resource.RLIMIT_NPROC, (limits.pids_limit, limits.pids_limit))
+                except (ValueError, OSError):
+                    pass
 
         try:
             proc = subprocess.Popen(
