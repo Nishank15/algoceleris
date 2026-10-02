@@ -12,7 +12,7 @@ Cloud-Judge V2 is a commercial, production-grade online judge platform built wit
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Isolated Sandbox & Multi-Language Runner** - Secure Linux cgroup sandbox running C++, Python 3.12, and Java 21 with strict 256MB RAM/1 CPU limits and no network.
+- [x] **Phase 1: Isolated Sandbox & Multi-Language Runner** - Secure Linux cgroup sandbox running C++, Python 3.12, and Java 21 with strict 256MB RAM/1 CPU limits and no network.
 - [ ] **Phase 2: Asynchronous Queue & Real-Time Streaming** - FastAPI gateway, Redis broker, concurrent worker daemons, and live WebSocket test-case execution streaming.
 - [ ] **Phase 3: Midnight Dark Linear IDE Frontend** - 3-pane resizable Monaco editor layout with Zen/Normal mode and real-time streaming run output.
 - [ ] **Phase 4: Commercial Subscriptions & Dual Payment Gateways** - Free vs. Pro tier entitlements with automated Stripe and Razorpay checkout & webhook processing.
@@ -38,13 +38,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 **Wave 1**
-- [ ] 01-01: Linux cgroups v2 resource controller and isolation jail harness (256MB RAM, 1 CPU, network drop)
+- [x] 01-01: Linux cgroups v2 resource controller and isolation jail harness (256MB RAM, 1 CPU, network drop)
 
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 01-02: C++ (gcc:latest) and Python 3.12 compilation and execution runner modules with TLE/MLE detection
+- [x] 01-02: C++ (gcc:latest) and Python 3.12 compilation and execution runner modules with TLE/MLE detection
 
 **Wave 3** *(blocked on Wave 2 completion)*
-- [ ] 01-03: Java 21 compilation & JVM runner harness with test case evaluation harness and error mapping
+- [x] 01-03: Java 21 compilation & JVM runner harness with test case evaluation harness and error mapping
 
 ### Phase 2: Asynchronous Queue & Real-Time Streaming
 
@@ -162,7 +162,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Isolated Sandbox & Multi-Language Runner | 0/3 | Not started | - |
+| 1. Isolated Sandbox & Multi-Language Runner | 3/3 | Complete | 2026-10-02 |
 | 2. Asynchronous Queue & Real-Time Streaming | 0/3 | Not started | - |
 | 3. Midnight Dark Linear IDE Frontend | 0/3 | Not started | - |
 | 4. Commercial Subscriptions & Dual Payment Gateways | 0/3 | Not started | - |
