@@ -30,7 +30,13 @@ class ProcessWatcher:
         start_wall = time.monotonic()
         time_limit_sec = limits.time_limit_ms / 1000.0
         # Allow modest grace period for wall-clock vs CPU time
-        wall_limit_sec = time_limit_sec * 2.0
+        wall_limit_sec = max(time_limit_sec * 1.5, time_limit_sec + 0.5)
+
+        try:
+            rusage_before = resource.getrusage(resource.RUSAGE_CHILDREN)
+            cpu_before_sec = rusage_before.ru_utime + rusage_before.ru_stime
+        except OSError:
+            cpu_before_sec = 0.0
 
         stdout_chunks = []
         stderr_chunks = []
@@ -85,13 +91,10 @@ class ProcessWatcher:
 
         # Get final resource usage from rusage
         try:
-            rusage = resource.getrusage(resource.RUSAGE_CHILDREN)
+            rusage_after = resource.getrusage(resource.RUSAGE_CHILDREN)
             # macOS ru_maxrss is in bytes, Linux ru_maxrss is in kilobytes
-            # Normalize to bytes
-            raw_rss = rusage.ru_maxrss
+            raw_rss = rusage_after.ru_maxrss
             if raw_rss > 0:
-                # If value is less than 1GB represented in KB, convert KB -> bytes on Linux
-                # On macOS raw_rss is already in bytes
                 import platform
                 if platform.system() != "Darwin":
                     rss_bytes = raw_rss * 1024
@@ -100,7 +103,9 @@ class ProcessWatcher:
                 if rss_bytes > peak_memory_bytes:
                     peak_memory_bytes = rss_bytes
 
-            cpu_time_ms = int((rusage.ru_utime + rusage.ru_stime) * 1000)
+            cpu_after_sec = rusage_after.ru_utime + rusage_after.ru_stime
+            cpu_delta_sec = max(0.0, cpu_after_sec - cpu_before_sec)
+            cpu_time_ms = int(cpu_delta_sec * 1000)
         except OSError:
             cpu_time_ms = total_wall_ms
 
@@ -112,7 +117,7 @@ class ProcessWatcher:
                 oom_killed = True
 
         # Determine verdict
-        if timed_out or (cpu_time_ms > limits.time_limit_ms):
+        if timed_out or (cpu_time_ms > limits.time_limit_ms) or (total_wall_ms > int(limits.time_limit_ms * 1.5)):
             verdict = ExecutionVerdict.TIME_LIMIT_EXCEEDED
         elif oom_killed or (exit_code in (137, -9) and peak_memory_bytes >= limits.memory_limit_bytes):
             verdict = ExecutionVerdict.MEMORY_LIMIT_EXCEEDED
