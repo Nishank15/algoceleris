@@ -23,6 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Isolated Sandbox & Multi-Language Runner
+
 **Goal**: Build isolated execution sandbox with Linux cgroups and compile/run workers for C++, Python 3.12, and Java 21 with strict limits.
 **Mode:** mvp
 **Depends on**: Nothing (first phase)
@@ -32,14 +33,21 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Python 3.12 code executes inside cgroup isolation, correctly flagging Time Limit Exceeded (TLE) and Memory Limit Exceeded (MLE).
   3. Java 21 programs compile and run within bounded JVM heap and cgroup restrictions.
   4. Non-zero exit codes, runtime errors, and signal terminations are safely trapped and parsed.
+
 **Plans**: 3 plans
 
 Plans:
+**Wave 1**
 - [ ] 01-01: Linux cgroups v2 resource controller and isolation jail harness (256MB RAM, 1 CPU, network drop)
+
+**Wave 2** *(blocked on Wave 1 completion)*
 - [ ] 01-02: C++ (gcc:latest) and Python 3.12 compilation and execution runner modules with TLE/MLE detection
+
+**Wave 3** *(blocked on Wave 2 completion)*
 - [ ] 01-03: Java 21 compilation & JVM runner harness with test case evaluation harness and error mapping
 
 ### Phase 2: Asynchronous Queue & Real-Time Streaming
+
 **Goal**: Implement FastAPI gateway, Redis queue broker, worker daemon execution pool, and live WebSocket streaming feedback.
 **Mode:** mvp
 **Depends on**: Phase 1
@@ -48,6 +56,7 @@ Plans:
   1. FastAPI submission endpoint validates and enqueues jobs onto Redis with unique submission IDs.
   2. Worker daemon pool processes queue jobs concurrently against test case suites.
   3. WebSocket client connects and receives real-time live execution events (compiling, running test case N, passed/failed, stdout/stderr).
+
 **Plans**: 3 plans
 
 Plans:
@@ -56,6 +65,7 @@ Plans:
 - [ ] 02-03: WebSocket event streaming broadcaster delivering live per-testcase progress and execution telemetry
 
 ### Phase 3: Midnight Dark Linear IDE Frontend
+
 **Goal**: Build high-performance frontend IDE with Monaco Editor, 3-pane resizable layout, Zen/Normal mode, and live test run feedback.
 **Mode:** mvp
 **Depends on**: Phase 2
@@ -65,6 +75,7 @@ Plans:
   2. User can resize the 3-pane layout (problem description, code editor, test console) smoothly.
   3. User can toggle between Normal mode and distraction-free Zen mode in Linear midnight dark aesthetic.
   4. User can trigger sample runs and view streaming WebSocket execution updates directly in the console.
+
 **Plans**: 3 plans
 
 Plans:
@@ -73,6 +84,7 @@ Plans:
 - [ ] 03-03: Interactive problem viewer, sample run harness, and WebSocket streaming console pane
 
 ### Phase 4: Commercial Subscriptions & Dual Payment Gateways
+
 **Goal**: Deliver Free vs. Pro tier entitlement gating with Stripe and Razorpay checkout sessions and webhook processing.
 **Mode:** mvp
 **Depends on**: Phase 3
@@ -81,6 +93,7 @@ Plans:
   1. User can view tiered pricing page comparing Free vs. Pro features.
   2. User can complete Stripe checkout and receive verified Pro entitlement upon webhook confirmation.
   3. User can complete Razorpay checkout with signature verification and webhook fulfillment.
+
 **Plans**: 3 plans
 
 Plans:
@@ -89,6 +102,7 @@ Plans:
 - [ ] 04-03: Razorpay payment gateway integration, HMAC signature verification, and entitlement provisioning
 
 ### Phase 5: AI Code Assistant & Token-Bucket Rate Limiter
+
 **Goal**: Implement Gemini 2.5 Flash debugging assistant with Redis Token-Bucket rate limiting per user tier.
 **Mode:** mvp
 **Depends on**: Phase 4
@@ -96,6 +110,7 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Pro user can click "AI Debug" and receive contextual error explanations and diff fixes from Gemini 2.5 Flash.
   2. Redis Token-Bucket algorithm accurately meters requests, enforcing rate limits and providing reset counters.
+
 **Plans**: 2 plans
 
 Plans:
@@ -103,6 +118,7 @@ Plans:
 - [ ] 05-02: Gemini 2.5 Flash integration with structured debugging prompt engineering and frontend diff viewer
 
 ### Phase 6: Real-time Contest Engine & Proctoring
+
 **Goal**: Implement timed contest environment with live Redis Sorted Set leaderboards, fullscreen enforcement, and clipboard protection.
 **Mode:** mvp
 **Depends on**: Phase 3
@@ -112,6 +128,7 @@ Plans:
   2. Live contest leaderboard updates in real-time using Redis Sorted Sets with O(log N) rank lookups.
   3. Contest window enforces fullscreen mode and displays warnings on exit attempts.
   4. Clipboard copy and paste events are disabled inside the contest code editor.
+
 **Plans**: 3 plans
 
 Plans:
@@ -120,6 +137,7 @@ Plans:
 - [ ] 06-03: Browser proctoring module: fullscreen enforcement, exit-warning modal, and copy/paste protection
 
 ### Phase 7: Plagiarism Engine, 3D Isometric Analytics & HAProxy Ingress
+
 **Goal**: Implement AST Winnowing plagiarism detection, 3D isometric contribution heatmap & cube loader, and HAProxy Layer 7 reverse proxy.
 **Mode:** mvp
 **Depends on**: Phase 5, Phase 6
@@ -129,6 +147,7 @@ Plans:
   2. User profile displays an interactive 3D isometric contribution heatmap with activity levels.
   3. Custom 3D isometric cube loader renders smoothly during execution and state loading.
   4. HAProxy distributes incoming HTTP and WebSocket traffic across gateway instances with healthy failover.
+
 **Plans**: 3 plans
 
 Plans:
