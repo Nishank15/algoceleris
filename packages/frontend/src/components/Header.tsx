@@ -1,6 +1,6 @@
 import React from 'react';
-import { Play, Send, Maximize2, Minimize2, Terminal } from 'lucide-react';
-import { Language, Problem } from '../types';
+import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles } from 'lucide-react';
+import { Language, Problem, SubscriptionTier } from '../types';
 
 interface HeaderProps {
   problems: Problem[];
@@ -13,6 +13,8 @@ interface HeaderProps {
   onRunSamples: () => void;
   onSubmit: () => void;
   isRunning: boolean;
+  currentTier: SubscriptionTier;
+  onOpenPricingModal: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
   onRunSamples,
   onSubmit,
   isRunning,
+  currentTier,
+  onOpenPricingModal,
 }) => {
   return (
     <header className="header-nav">
@@ -57,6 +61,27 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-right">
+        {/* Pro Badge or Upgrade to Pro Action */}
+        {currentTier === 'pro' ? (
+          <div
+            className="pro-badge-header"
+            onClick={onOpenPricingModal}
+            title="Active Pro Member — Click to view plan details"
+          >
+            <Sparkles size={12} />
+            <span>PRO</span>
+          </div>
+        ) : (
+          <button
+            className="btn btn-upgrade"
+            onClick={onOpenPricingModal}
+            title="Upgrade to Cloud-Judge Pro"
+          >
+            <Sparkles size={13} />
+            <span>Upgrade to Pro</span>
+          </button>
+        )}
+
         {/* Language Selector */}
         <select
           className="lang-select"

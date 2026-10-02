@@ -85,3 +85,17 @@ export interface SubmissionResponse {
   status: SubmissionStatus;
   message: string;
 }
+
+export type SubscriptionTier = 'free' | 'pro';
+
+export type Currency = 'USD' | 'INR';
+
+export interface EntitlementState {
+  user_id: string;
+  tier: SubscriptionTier;
+  can_use_ai_assistant: boolean;
+  has_priority_queue: boolean;
+  can_view_plagiarism_audit: boolean;
+  rate_limit_per_minute: number;
+}
+

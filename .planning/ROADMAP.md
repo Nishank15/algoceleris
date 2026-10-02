@@ -97,9 +97,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Tiered subscription data model, feature access gates, and pricing matrix UI
-- [ ] 04-02: Stripe Checkout session integration and webhook handler for automated subscription lifecycle
-- [ ] 04-03: Razorpay payment gateway integration, HMAC signature verification, and entitlement provisioning
+- [x] 04-01: Tiered subscription data model, feature access gates, and pricing matrix UI
+- [x] 04-02: Stripe Checkout session integration and webhook handler for automated subscription lifecycle
+- [x] 04-03: Razorpay payment gateway integration, HMAC signature verification, and entitlement provisioning
 
 ### Phase 5: AI Code Assistant & Token-Bucket Rate Limiter
 

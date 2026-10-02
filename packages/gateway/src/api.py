@@ -68,7 +68,14 @@ def create_router(broker: QueueBroker) -> APIRouter:
     return router
 
 
-def create_app(broker: Optional[QueueBroker] = None) -> FastAPI:
+from .subscriptions import SubscriptionStore, get_subscription_store
+from .subscriptions.router import create_subscriptions_router
+
+
+def create_app(
+    broker: Optional[QueueBroker] = None,
+    subscription_store: Optional[SubscriptionStore] = None,
+) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
         title="Cloud-Judge V2 Gateway",
@@ -76,9 +83,15 @@ def create_app(broker: Optional[QueueBroker] = None) -> FastAPI:
         version="0.1.0",
     )
     active_broker = broker or get_queue_broker()
+    active_sub_store = subscription_store or get_subscription_store()
+
     app.state.broker = active_broker
+    app.state.subscription_store = active_sub_store
 
     api_router = create_router(active_broker)
+    sub_router = create_subscriptions_router(active_sub_store)
+    api_router.include_router(sub_router)
+
     app.include_router(api_router)
 
     @app.get("/health", summary="Service health check")
@@ -86,6 +99,7 @@ def create_app(broker: Optional[QueueBroker] = None) -> FastAPI:
         return {
             "status": "healthy",
             "broker": active_broker.__class__.__name__,
+            "subscription_store": active_sub_store.__class__.__name__,
         }
 
     return app

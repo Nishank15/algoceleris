@@ -91,3 +91,104 @@ export function subscribeSubmissionStream(
     }
   };
 }
+
+export async function getUserEntitlements(userId: string): Promise<any> {
+  const url = `${API_BASE_URL}/api/v1/subscriptions/entitlements/${userId}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch entitlements (${response.status})`);
+  }
+  return response.json();
+}
+
+export async function createStripeCheckoutSession(
+  userId: string,
+  email?: string
+): Promise<{
+  session_id: string;
+  checkout_url: string;
+  amount_total: number;
+  currency: string;
+}> {
+  const url = `${API_BASE_URL}/api/v1/subscriptions/stripe/create-checkout-session`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      email: email || 'coder@cloudjudge.io',
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to create Stripe checkout session: ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function createRazorpayOrder(
+  userId: string,
+  email?: string,
+  amount: number = 149900,
+  currency: string = 'INR'
+): Promise<{
+  order_id: string;
+  amount: number;
+  currency: string;
+  key_id: string;
+}> {
+  const url = `${API_BASE_URL}/api/v1/subscriptions/razorpay/create-order`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      email: email || 'coder@cloudjudge.io',
+      amount,
+      currency,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to create Razorpay order: ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function verifyRazorpayPayment(payload: {
+  user_id: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}): Promise<{
+  status: string;
+  user_id: string;
+  tier: string;
+  message: string;
+}> {
+  const url = `${API_BASE_URL}/api/v1/subscriptions/razorpay/verify-payment`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Razorpay signature verification failed: ${errorText}`);
+  }
+
+  return response.json();
+}
+
+

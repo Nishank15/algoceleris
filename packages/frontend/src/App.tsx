@@ -7,11 +7,13 @@ import { ProblemPane } from './components/ProblemPane';
 import { CodeEditor } from './components/CodeEditor';
 import { TestConsole } from './components/TestConsole';
 import { ZenModeBanner } from './components/ZenModeBanner';
+import { PricingModal } from './components/PricingModal';
 import {
   Language,
   SubmissionStatus,
   SubmissionReport,
   StreamEvent,
+  SubscriptionTier,
 } from './types';
 import { submitCode, subscribeSubmissionStream, getSubmission } from './services/api';
 
@@ -19,6 +21,11 @@ export const App: React.FC = () => {
   const [problems] = useState(PROBLEMS);
   const [activeProblemId, setActiveProblemId] = useState<string>('two-sum');
   const [activeLanguage, setActiveLanguage] = useState<Language>('cpp');
+
+  // Subscription state
+  const [userTier, setUserTier] = useState<SubscriptionTier>('free');
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState<boolean>(false);
+  const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
 
   // Multi-language code buffer
   const [codeBuffers, setCodeBuffers] = useState<Record<Language, string>>(
@@ -219,6 +226,35 @@ export const App: React.FC = () => {
     executeSubmission(false);
   }, [executeSubmission]);
 
+  // Pricing Modal actions
+  const handleOpenPricingModal = useCallback(() => {
+    setIsPricingModalOpen(true);
+  }, []);
+
+  const handleClosePricingModal = useCallback(() => {
+    setIsPricingModalOpen(false);
+  }, []);
+
+  const handleUpgradeStripe = useCallback(() => {
+    setIsUpgrading(true);
+    // Simulate instant Pro upgrade for demo/testing or proceed to Stripe session
+    setTimeout(() => {
+      setUserTier('pro');
+      setIsUpgrading(false);
+      setIsPricingModalOpen(false);
+    }, 1000);
+  }, []);
+
+  const handleUpgradeRazorpay = useCallback(() => {
+    setIsUpgrading(true);
+    // Simulate instant Pro upgrade for demo/testing or proceed to Razorpay session
+    setTimeout(() => {
+      setUserTier('pro');
+      setIsUpgrading(false);
+      setIsPricingModalOpen(false);
+    }, 1000);
+  }, []);
+
   return (
     <div className="app-container">
       <Header
@@ -232,6 +268,8 @@ export const App: React.FC = () => {
         onRunSamples={handleRunSamples}
         onSubmit={handleSubmit}
         isRunning={isRunning}
+        currentTier={userTier}
+        onOpenPricingModal={handleOpenPricingModal}
       />
 
       <ResizableLayout
@@ -261,6 +299,15 @@ export const App: React.FC = () => {
       />
 
       {isZenMode && <ZenModeBanner onExit={() => setIsZenMode(false)} />}
+
+      <PricingModal
+        isOpen={isPricingModalOpen}
+        onClose={handleClosePricingModal}
+        currentTier={userTier}
+        onUpgradeStripe={handleUpgradeStripe}
+        onUpgradeRazorpay={handleUpgradeRazorpay}
+        isProcessing={isUpgrading}
+      />
     </div>
   );
 };
