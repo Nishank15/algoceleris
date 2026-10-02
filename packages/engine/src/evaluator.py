@@ -1,7 +1,7 @@
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from .comparator import OutputComparator
 from .models import ExecutionMetrics, ExecutionResult, ExecutionVerdict, ResourceLimits
@@ -86,6 +86,7 @@ class JudgeEvaluator:
         self,
         job: SubmissionJob,
         stop_on_first_failure: bool = True,
+        progress_callback: Optional[Any] = None,
     ) -> SubmissionReport:
         """Evaluate submission job across all provided test cases."""
         runner = self.get_runner(job.language)
@@ -94,13 +95,27 @@ class JudgeEvaluator:
             time_limit_ms=job.time_limit_ms,
         )
 
+        if progress_callback:
+            progress_callback(
+                "compiling",
+                {"submission_id": job.submission_id, "language": job.language},
+            )
+
         with tempfile.TemporaryDirectory(prefix=f"eval_{job.submission_id}_") as temp_dir:
             work_dir = Path(temp_dir)
             comp_res = runner.compile(job.source_code, work_dir)
 
             # Short-circuit on compilation failure
             if comp_res is not None and not comp_res.success:
-                return SubmissionReport(
+                if progress_callback:
+                    progress_callback(
+                        "compilation_failed",
+                        {
+                            "submission_id": job.submission_id,
+                            "diagnostics": comp_res.diagnostics,
+                        },
+                    )
+                report = SubmissionReport(
                     submission_id=job.submission_id,
                     verdict=ExecutionVerdict.COMPILATION_ERROR,
                     test_cases_passed=0,
@@ -110,6 +125,19 @@ class JudgeEvaluator:
                     test_case_results=[],
                     compile_output=comp_res.diagnostics,
                 )
+                if progress_callback:
+                    progress_callback(
+                        "completed",
+                        {
+                            "submission_id": job.submission_id,
+                            "verdict": report.verdict.value,
+                            "test_cases_passed": report.test_cases_passed,
+                            "total_test_cases": report.total_test_cases,
+                            "max_time_ms": report.max_time_ms,
+                            "max_memory_bytes": report.max_memory_bytes,
+                        },
+                    )
+                return report
 
             exec_target = comp_res.output_path if (comp_res and comp_res.output_path) else work_dir
 
@@ -120,6 +148,16 @@ class JudgeEvaluator:
             overall_verdict = ExecutionVerdict.ACCEPTED
 
             for tc in job.test_cases:
+                if progress_callback:
+                    progress_callback(
+                        "test_case_start",
+                        {
+                            "submission_id": job.submission_id,
+                            "test_case_id": tc.id,
+                            "total_test_cases": len(job.test_cases),
+                        },
+                    )
+
                 run_res = runner.execute(
                     exec_target,
                     input_data=tc.input_data,
@@ -144,17 +182,29 @@ class JudgeEvaluator:
                 else:
                     tc_verdict = run_res.verdict
 
-                test_results.append(
-                    TestCaseResult(
-                        test_case_id=tc.id,
-                        verdict=tc_verdict,
-                        execution_time_ms=time_used,
-                        memory_used_bytes=mem_used,
-                        stdout=run_res.stdout,
-                        stderr=run_res.stderr or run_res.error_message or "",
-                        diff=diff_str,
-                    )
+                tc_result = TestCaseResult(
+                    test_case_id=tc.id,
+                    verdict=tc_verdict,
+                    execution_time_ms=time_used,
+                    memory_used_bytes=mem_used,
+                    stdout=run_res.stdout,
+                    stderr=run_res.stderr or run_res.error_message or "",
+                    diff=diff_str,
                 )
+                test_results.append(tc_result)
+
+                if progress_callback:
+                    progress_callback(
+                        "test_case_result",
+                        {
+                            "submission_id": job.submission_id,
+                            "test_case_id": tc.id,
+                            "verdict": tc_verdict.value,
+                            "execution_time_ms": time_used,
+                            "memory_used_bytes": mem_used,
+                            "diff": diff_str,
+                        },
+                    )
 
                 if tc_verdict != ExecutionVerdict.ACCEPTED:
                     if overall_verdict == ExecutionVerdict.ACCEPTED:
@@ -162,7 +212,7 @@ class JudgeEvaluator:
                     if stop_on_first_failure:
                         break
 
-            return SubmissionReport(
+            report = SubmissionReport(
                 submission_id=job.submission_id,
                 verdict=overall_verdict,
                 test_cases_passed=passed_count,
@@ -172,3 +222,18 @@ class JudgeEvaluator:
                 test_case_results=test_results,
                 compile_output=comp_res.diagnostics if comp_res else None,
             )
+
+            if progress_callback:
+                progress_callback(
+                    "completed",
+                    {
+                        "submission_id": job.submission_id,
+                        "verdict": report.verdict.value,
+                        "test_cases_passed": report.test_cases_passed,
+                        "total_test_cases": report.total_test_cases,
+                        "max_time_ms": report.max_time_ms,
+                        "max_memory_bytes": report.max_memory_bytes,
+                    },
+                )
+
+            return report

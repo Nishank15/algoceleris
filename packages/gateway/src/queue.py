@@ -47,7 +47,7 @@ class InMemoryQueueBroker(QueueBroker):
     def __init__(self):
         self._queues: Dict[str, queue.Queue] = {}
         self._status_store: Dict[str, Dict[str, Any]] = {}
-        self._subscribers: Dict[str, List[asyncio.Queue]] = {}
+        self._subscribers: Dict[str, List[Any]] = {}
         self._lock = threading.Lock()
 
     def _get_queue(self, queue_name: str) -> queue.Queue:
@@ -70,10 +70,13 @@ class InMemoryQueueBroker(QueueBroker):
     def publish(self, channel: str, event: Dict[str, Any]) -> None:
         with self._lock:
             subs = list(self._subscribers.get(channel, []))
-        for sub in subs:
+        for loop, sub in subs:
             try:
-                sub.put_nowait(event)
-            except asyncio.QueueFull:
+                if loop.is_running():
+                    loop.call_soon_threadsafe(sub.put_nowait, event)
+                else:
+                    sub.put_nowait(event)
+            except Exception:
                 pass
 
     def set_status(self, submission_id: str, status_data: Dict[str, Any]) -> None:
@@ -88,11 +91,12 @@ class InMemoryQueueBroker(QueueBroker):
             return dict(data) if data is not None else None
 
     async def listen_channel(self, channel: str) -> AsyncIterator[Dict[str, Any]]:
+        current_loop = asyncio.get_running_loop()
         sub_queue: asyncio.Queue = asyncio.Queue()
         with self._lock:
             if channel not in self._subscribers:
                 self._subscribers[channel] = []
-            self._subscribers[channel].append(sub_queue)
+            self._subscribers[channel].append((current_loop, sub_queue))
         try:
             while True:
                 event = await sub_queue.get()
@@ -100,8 +104,10 @@ class InMemoryQueueBroker(QueueBroker):
                 sub_queue.task_done()
         finally:
             with self._lock:
-                if channel in self._subscribers and sub_queue in self._subscribers[channel]:
-                    self._subscribers[channel].remove(sub_queue)
+                if channel in self._subscribers:
+                    self._subscribers[channel] = [
+                        item for item in self._subscribers[channel] if item[1] is not sub_queue
+                    ]
 
 
 class RedisQueueBroker(QueueBroker):
