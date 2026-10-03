@@ -74,9 +74,9 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 10-01: Problem taxonomy schema, acceptance rates, and expanded competitive problem dataset
+- [x] 10-01: Problem taxonomy schema, acceptance rates, and expanded competitive problem dataset
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 10-02: High-density LeetCode catalog UI with sub-50ms search, difficulty pills, and topic filters
+- [x] 10-02: High-density LeetCode catalog UI with sub-50ms search, difficulty pills, and topic filters
 
 ### Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog
 

@@ -21,6 +21,9 @@ export interface Problem {
   hiddenCases?: ProblemTestCase[];
   timeLimitMs: number;
   memoryLimitBytes: number;
+  acceptanceRate: number;
+  tags: string[];
+  solvedStatus?: 'solved' | 'attempted' | 'unsolved';
 }
 
 export type SubmissionStatus =

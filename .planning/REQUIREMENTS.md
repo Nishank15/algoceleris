@@ -29,8 +29,8 @@ Requirements for Milestone v2.1. Each maps to roadmap phases.
 
 ### Problem Catalog & Filtering
 
-- [ ] **CAT-01**: High-density LeetCode-grade problem catalog at `/problems` displaying problem title, acceptance rate, difficulty badge, and solved status.
-- [ ] **CAT-02**: Topic tag filtering (e.g. Array, DP, Trees, Graph), difficulty filter pills (Pulse Green #27a644 for Easy, Amber #f59e0b for Medium, Coral Red #eb5757 for Hard), and real-time title search.
+- [x] **CAT-01**: High-density LeetCode-grade problem catalog at `/problems` displaying problem title, acceptance rate, difficulty badge, and solved status.
+- [x] **CAT-02**: Topic tag filtering (e.g. Array, DP, Trees, Graph), difficulty filter pills (Pulse Green #27a644 for Easy, Amber #f59e0b for Medium, Coral Red #eb5757 for Hard), and real-time title search.
 
 ### Distraction-Free IDE Workspace
 
@@ -82,8 +82,8 @@ Which phases cover which requirements. Filled during roadmap creation.
 | LAND-02 | Phase 9 | Complete |
 | AUTH-01 | Phase 9 | Complete |
 | AUTH-02 | Phase 9 | Complete |
-| CAT-01 | Phase 10 | Pending |
-| CAT-02 | Phase 10 | Pending |
+| CAT-01 | Phase 10 | Complete |
+| CAT-02 | Phase 10 | Complete |
 | IDE-01 | Phase 11 | Pending |
 | IDE-02 | Phase 11 | Pending |
 | IDE-03 | Phase 11 | Pending |
