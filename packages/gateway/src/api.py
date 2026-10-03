@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 
 from .ai import GeminiDebugAssistant, create_ai_router, get_ai_assistant
+from .contests import ContestStore, create_contests_router, get_contest_store
 from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
 from .queue import QueueBroker, get_queue_broker
 from .ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
@@ -82,6 +83,7 @@ def create_app(
     subscription_store: Optional[SubscriptionStore] = None,
     rate_limiter: Optional[TokenBucketLimiter] = None,
     ai_assistant: Optional[GeminiDebugAssistant] = None,
+    contest_store: Optional[ContestStore] = None,
 ) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
@@ -93,11 +95,13 @@ def create_app(
     active_sub_store = subscription_store or get_subscription_store()
     active_limiter = rate_limiter or get_limiter()
     active_assistant = ai_assistant or get_ai_assistant()
+    active_contest_store = contest_store or get_contest_store()
 
     app.state.broker = active_broker
     app.state.subscription_store = active_sub_store
     app.state.rate_limiter = active_limiter
     app.state.ai_assistant = active_assistant
+    app.state.contest_store = active_contest_store
 
     api_router = create_router(active_broker, rate_limiter=active_limiter)
     sub_router = create_subscriptions_router(active_sub_store)
@@ -106,8 +110,13 @@ def create_app(
         assistant=active_assistant,
         limiter=active_limiter,
     )
+    contests_router = create_contests_router(
+        store=active_contest_store,
+        broker=active_broker,
+    )
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
+    api_router.include_router(contests_router)
 
     app.include_router(api_router)
 
@@ -119,7 +128,9 @@ def create_app(
             "subscription_store": active_sub_store.__class__.__name__,
             "rate_limiter": active_limiter.storage.__class__.__name__,
             "ai_assistant": active_assistant.__class__.__name__,
+            "contest_store": active_contest_store.__class__.__name__,
         }
 
     return app
+
 
