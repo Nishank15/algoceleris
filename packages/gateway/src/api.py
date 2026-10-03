@@ -15,6 +15,7 @@ from .contests import (
     get_proctoring_store,
 )
 from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
+from .plagiarism import PlagiarismDetector, create_plagiarism_router
 from .queue import QueueBroker, get_queue_broker
 from .ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
 from .subscriptions import SubscriptionStore, get_subscription_store
@@ -95,6 +96,7 @@ def create_app(
     contest_store: Optional[ContestStore] = None,
     leaderboard_engine: Optional[LeaderboardEngine] = None,
     proctoring_store: Optional[ProctoringStore] = None,
+    plagiarism_detector: Optional[PlagiarismDetector] = None,
 ) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
@@ -109,6 +111,7 @@ def create_app(
     active_contest_store = contest_store or get_contest_store()
     active_leaderboard = leaderboard_engine or get_leaderboard_engine(active_contest_store)
     active_proctoring = proctoring_store or get_proctoring_store()
+    active_detector = plagiarism_detector or PlagiarismDetector()
 
     ws_manager = WebSocketConnectionManager()
     app.state.broker = active_broker
@@ -118,6 +121,7 @@ def create_app(
     app.state.contest_store = active_contest_store
     app.state.leaderboard_engine = active_leaderboard
     app.state.proctoring_store = active_proctoring
+    app.state.plagiarism_detector = active_detector
     app.state.ws_manager = ws_manager
 
     api_router = create_router(active_broker, rate_limiter=active_limiter)
@@ -133,9 +137,14 @@ def create_app(
         leaderboard=active_leaderboard,
         proctoring=active_proctoring,
     )
+    plagiarism_router = create_plagiarism_router(
+        store=active_contest_store,
+        detector=active_detector,
+    )
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
     api_router.include_router(contests_router)
+    api_router.include_router(plagiarism_router)
 
     app.include_router(api_router)
 
@@ -158,6 +167,7 @@ def create_app(
             "contest_store": active_contest_store.__class__.__name__,
             "leaderboard_engine": active_leaderboard.__class__.__name__,
             "proctoring_store": active_proctoring.__class__.__name__,
+            "plagiarism_detector": active_detector.__class__.__name__,
         }
 
     return app

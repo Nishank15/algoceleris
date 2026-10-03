@@ -147,6 +147,19 @@ def create_contests_router(
         )
 
         active_store.update_participant_score(updated_participant)
+        active_store.record_submission(
+            contest_id=contest_id,
+            submission={
+                "submission_id": submission_id,
+                "contest_id": contest_id,
+                "user_id": request.user_id,
+                "problem_id": request.problem_id,
+                "language": request.language,
+                "source_code": request.source_code,
+                "verdict": verdict,
+                "submitted_at": now,
+            },
+        )
         new_rank = active_leaderboard.record_score(contest_id, updated_participant)
 
         # Also publish submission event to queue/pubsub if broker available
