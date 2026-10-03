@@ -1,0 +1,48 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v2.0",
+  "phases": [
+    {
+      "number": "1",
+      "name": "Isolated Sandbox & Multi-Language Runner",
+      "status": "complete"
+    },
+    {
+      "number": "2",
+      "name": "Asynchronous Queue & Real-Time Streaming",
+      "status": "complete"
+    },
+    {
+      "number": "3",
+      "name": "Midnight Dark Linear IDE Frontend",
+      "status": "complete"
+    },
+    {
+      "number": "4",
+      "name": "Commercial Subscriptions & Dual Payment Gateways",
+      "status": "complete"
+    },
+    {
+      "number": "5",
+      "name": "AI Code Assistant & Token-Bucket Rate Limiter",
+      "status": "complete"
+    },
+    {
+      "number": "6",
+      "name": "Real-time Contest Engine & Proctoring",
+      "status": "complete"
+    },
+    {
+      "number": "7",
+      "name": "Plagiarism Engine, 3D Isometric Analytics & HAProxy Ingress",
+      "status": "complete"
+    }
+  ],
+  "next": {
+    "command": "/gsd-progress",
+    "label": "Show progress",
+    "reason": "Unsure of state — showing progress"
+  },
+  "updated_at": "2026-10-03T06:08:33.995Z"
+}

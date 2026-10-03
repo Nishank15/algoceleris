@@ -19,31 +19,34 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Multi-language isolated execution sandbox (C++, Python 3.12, Java 21) with Linux cgroups (256MB RAM, 1 CPU, network disabled) — v2.0
+- ✓ Asynchronous task queue architecture (FastAPI gateway, Redis broker, concurrent worker daemon pool) — v2.0
+- ✓ Real-time execution streaming over WebSockets providing live per-test-case status and stdout/stderr feedback — v2.0
+- ✓ Frontend IDE with Monaco Editor, 3-pane resizable layout, midnight dark Linear aesthetics, and Zen/Normal mode toggle — v2.0
+- ✓ Tiered subscription billing system (Free vs. Pro) integrating Stripe and Razorpay checkout & webhooks — v2.0
+- ✓ AI code assistant debugging suggestions powered by Gemini 2.5 Flash with Redis Token-Bucket rate limiting — v2.0
+- ✓ Real-time contest engine with live Redis Sorted Set leaderboards, fullscreen proctoring, and clipboard protection — v2.0
+- ✓ Post-contest plagiarism detection engine using AST-based Winnowing / MOSS algorithm — v2.0
+- ✓ Developer analytics including 21st.dev 3D isometric contribution activity skyline heatmap and tumbling cube loader — v2.0
+- ✓ High-throughput Layer 7 reverse proxy and load balancing using HAProxy — v2.0
 
-### Active
+### Active (Next Milestone Candidates)
 
-- [ ] Multi-language isolated execution sandbox (C++, Python 3.12, Java 21) with Linux cgroups (256MB RAM, 1 CPU, network disabled)
-- [ ] Asynchronous task queue architecture (FastAPI gateway, Redis broker, concurrent worker daemon pool)
-- [ ] Real-time execution streaming over WebSockets providing live per-test-case status and stdout/stderr feedback
-- [ ] Next.js/Vite frontend IDE with Monaco Editor, 3-pane resizable layout, midnight dark Linear aesthetics, and Zen/Normal mode toggle
-- [ ] Tiered subscription billing system (Free vs. Pro) integrating Stripe and Razorpay checkout & webhooks
-- [ ] AI code assistant debugging suggestions powered by Gemini 2.5 Flash with Redis Token-Bucket rate limiting
-- [ ] Real-time contest engine with live Redis Sorted Set leaderboards, fullscreen proctoring, and clipboard protection
-- [ ] Post-contest plagiarism detection engine using AST-based Winnowing / MOSS algorithm
-- [ ] Developer analytics including a 3D isometric contribution activity heatmap and custom isometric cube loader
-- [ ] High-throughput Layer 7 reverse proxy and load balancing using HAProxy
+- [ ] Real-time multiplayer collaborative coding interview rooms with live cursors and shared terminal
+- [ ] User-defined custom compiler flags and sandbox container image selection
+- [ ] WebRTC webcam proctoring with automated face gaze tracking and acoustic anomaly detection
 
 ### Out of Scope
 
 - [ ] Native mobile apps — Web application with responsive desktop focus is priority for IDE experience
 - [ ] Dynamic Kubernetes pod-per-run container orchestration — High overhead per submission; Linux cgroups daemon workers chosen for sub-second start latency
+- [ ] Manual human code review — Automated sandbox judge, AST plagiarism, and AI assistant handle evaluation
 
 ## Context
 
-- Building Cloud-Judge V2 as a state-of-the-art commercial online judge platform.
-- Security and isolation require cgroups v2/namespaces or containerized worker sandboxes with strict memory, CPU, process, and network limits.
-- Modern frontend demands Linear-level craft: deep slate/black palettes, high-performance Monaco integration, silky smooth pane resizing, and responsive WebSocket updates.
+- Shipped Milestone v2.0 as a complete commercial competitive programming platform.
+- Total 7 phases, 20 plans, 102 passing backend tests, and production Vite frontend bundle.
+- Architecture: Decoupled FastAPI gateway, Redis queue broker, worker daemons, and HAProxy Layer 7 reverse proxy.
 
 ## Constraints
 
@@ -56,28 +59,13 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Linux cgroups over heavy VM spinup | Ultra-fast execution startup times critical for competitive programming | — Pending |
-| WebSockets instead of HTTP polling | Lower latency and reduced server overhead during multi-testcase runs | — Pending |
-| Dual payment gateways (Stripe + Razorpay) | Global coverage (Stripe) and seamless domestic India support (Razorpay) | — Pending |
-| Gemini 2.5 Flash with Token-Bucket rate limits | Fast, intelligent debugging explanations with cost predictability and abuse prevention | — Pending |
-| Redis Sorted Sets for contest leaderboards | O(log(N)) ranking updates and real-time range queries for live contests | — Pending |
-
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
+| Linux cgroups over heavy VM spinup | Ultra-fast execution startup times critical for competitive programming | ✓ Good |
+| WebSockets instead of HTTP polling | Lower latency and reduced server overhead during multi-testcase runs | ✓ Good |
+| Dual payment gateways (Stripe + Razorpay) | Global coverage (Stripe) and seamless domestic India support (Razorpay) | ✓ Good |
+| Gemini 2.5 Flash with Token-Bucket rate limits | Fast, intelligent debugging explanations with cost predictability and abuse prevention | ✓ Good |
+| Redis Sorted Sets for contest leaderboards | O(log(N)) ranking updates and real-time range queries for live contests | ✓ Good |
+| AST Winnowing / MOSS for plagiarism | Invariant to variable renaming, whitespace, and comments | ✓ Good |
+| HAProxy Layer 7 reverse proxy | Robust WebSocket upgrade handling and round-robin load distribution | ✓ Good |
 
 ---
-*Last updated: 2026-10-02 after initialization*
+*Last updated: 2026-10-03 after v2.0 milestone*
