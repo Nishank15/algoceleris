@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
   X,
   BarChart3,
@@ -8,7 +8,6 @@ import {
   ArrowUpRight,
   TrendingUp,
 } from 'lucide-react';
-import { IsometricHeatmap } from './IsometricHeatmap';
 import { UserAnalytics } from '../types';
 
 interface DeveloperAnalyticsModalProps {
@@ -22,13 +21,6 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
   onClose,
   analytics,
 }) => {
-  const heatmapData = useMemo(() => {
-    if (!analytics?.history || analytics.history.length === 0) return undefined;
-    return analytics.history.map((d) => ({
-      date: d.date,
-      count: d.count,
-    }));
-  }, [analytics?.history]);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -59,7 +51,7 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
       <div
         className="modal-container analytics-modal"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxWidth: '980px', width: '95%' }}
+        style={{ maxWidth: '720px', width: '95%', maxHeight: '86vh' }}
       >
         {/* Header */}
         <div className="modal-header">
@@ -70,7 +62,7 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
             <div>
               <h2 className="modal-title">Developer Analytics & Telemetry</h2>
               <p className="modal-subtitle">
-                3D isometric submission heatmap, performance metrics, and contest journey
+                Performance metrics and contest journey
               </p>
             </div>
           </div>
@@ -189,16 +181,6 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* 3D Isometric Heatmap Section */}
-          <div className="heatmap-section-container" style={{ background: '#0f1011', border: '1px solid rgba(255, 255, 255, 0.07)', borderRadius: '12px' }}>
-            <IsometricHeatmap
-              data={heatmapData}
-              palette="github"
-              defaultView="3d"
-              unit="submission"
-            />
           </div>
 
           {/* Contest History Table */}

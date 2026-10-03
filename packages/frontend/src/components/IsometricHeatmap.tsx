@@ -367,7 +367,6 @@ const CubeIcon = () => (
   </svg>
 )
 
-const MUTED = "var(--color-muted-foreground, #737373)"
 
 function Stat({
   label,
@@ -388,50 +387,27 @@ function Stat({
 }) {
   if (align === "stack") {
     return (
-      <div className="min-w-0">
-        <div className="text-[13px] leading-tight" style={{ color: MUTED }}>
-          {label}
-        </div>
-        <div className="mt-1 flex items-baseline gap-1.5">
-          <span
-            className="font-semibold tabular-nums transition-colors duration-500 motion-reduce:transition-none"
-            style={{ color: accent, fontSize: size, lineHeight: 1, letterSpacing: "-0.02em" }}
-          >
+      <div className="hm-stat">
+        <div className="hm-stat-label">{label}</div>
+        <div className="hm-stat-line">
+          <span className="hm-stat-value" style={{ color: accent, fontSize: size }}>
             {value}
           </span>
-          <span className="text-[14px]">{unit}</span>
+          <span className="hm-stat-unit">{unit}</span>
         </div>
-        <div className="mt-0.5 truncate text-[12px]" style={{ color: MUTED }}>
-          {sub}
-        </div>
+        <div className="hm-stat-sub">{sub}</div>
       </div>
     )
   }
   return (
-    <div className="grid grid-cols-[auto_auto] items-end gap-x-2" style={{ justifyContent: align }}>
-      {align === "end" ? (
-        <>
-          <div className="text-right text-[13px] leading-tight" style={{ color: MUTED }}>
-            {label}
-          </div>
-          <div />
-        </>
-      ) : (
-        <div className="col-span-2 text-[13px] leading-tight" style={{ color: MUTED }}>
-          {label}
-        </div>
-      )}
-      <div
-        className="text-right font-semibold tabular-nums transition-colors duration-500 motion-reduce:transition-none"
-        style={{ color: accent, fontSize: size, lineHeight: 0.95, letterSpacing: "-0.02em" }}
-      >
+    <div className={"hm-hud-stat hm-hud-stat--" + align}>
+      <div className="hm-hud-label">{label}</div>
+      <div className="hm-hud-value" style={{ color: accent, fontSize: size }}>
         {value}
       </div>
-      <div className="pb-[0.15em] leading-tight">
-        <div className="text-[15px]">{unit}</div>
-        <div className="whitespace-nowrap text-[13px]" style={{ color: MUTED }}>
-          {sub}
-        </div>
+      <div className="hm-hud-meta">
+        <div className="hm-hud-unit">{unit}</div>
+        <div className="hm-hud-sub">{sub}</div>
       </div>
     </div>
   )
@@ -1169,45 +1145,29 @@ export default function ContributionSkyline({
     { label: "Current streak", value: nf.format(stats.current.days), unit: stats.current.days === 1 ? "day" : "days", sub: range(stats.current.start, stats.current.end) },
   ]
   const showRow = showStats && !(is3d && corners)
-  const ease = "cubic-bezier(0.65, 0, 0.35, 1)"
   const levelNames = ["No " + plural, "Light", "Moderate", "Heavy", "Heaviest"]
 
   const hints = ["Hover a day for details · arrow keys to explore", "Drag to orbit · double-click to reset"]
-  const hint = hints[is3d && orbit ? 1 : 0]
+
+  const hudOn = showStats && corners
+  const orbitHint = is3d && orbit
 
   return (
-    <section
-      ref={rootRef}
-      className={"relative w-full rounded-xl border p-4 font-sans sm:p-5 " + className}
-      style={{
-        background: "transparent",
-        color: "#f7f8f8",
-        borderColor: "rgba(255, 255, 255, 0.07)",
-      }}
-    >
-      <header className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <h3 className="m-0 text-[15px] font-normal leading-snug">
+    <section ref={rootRef} className={"hm-root " + className}>
+      <header className="hm-header">
+        <h3 className="hm-title">
           {title ?? (
             <>
-              <span className="font-semibold tabular-nums">{nf.format(stats.total)}</span> {noun(stats.total)} in the last year
+              <span className="hm-title-num">{nf.format(stats.total)}</span> {noun(stats.total)} in the last year
             </>
           )}
         </h3>
         {showToggle && (
-          <div
-            role="group"
-            aria-label="Chart view"
-            className="relative inline-flex rounded-md border p-0.5"
-            style={{ borderColor: "var(--color-border, #e5e5e5)" }}
-          >
+          <div role="group" aria-label="Chart view" className="hm-toggle">
             <span
               aria-hidden="true"
-              className="absolute top-0.5 bottom-0.5 left-0.5 w-8 rounded transition-transform duration-500 motion-reduce:transition-none"
-              style={{
-                background: "var(--color-foreground, #171717)",
-                transform: is3d ? "translateX(100%)" : "translateX(0)",
-                transitionTimingFunction: ease,
-              }}
+              className="hm-toggle-thumb"
+              style={{ transform: is3d ? "translateX(32px)" : "translateX(0)" }}
             />
             {(["2d", "3d"] as const).map((v) => (
               <button
@@ -1217,11 +1177,7 @@ export default function ContributionSkyline({
                 aria-label={v === "2d" ? "Flat heat map" : "3D skyline"}
                 title={v === "2d" ? "Flat heat map" : "3D skyline"}
                 onClick={() => setView(v)}
-                className="relative z-10 grid h-7 w-8 cursor-pointer place-items-center rounded border-0 bg-transparent p-0 transition-colors duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none"
-                style={{
-                  color: view === v ? "var(--color-background, #ffffff)" : MUTED,
-                  outlineColor: "var(--color-foreground, #171717)",
-                }}
+                className={"hm-toggle-btn" + (view === v ? " is-active" : "")}
               >
                 {v === "2d" ? <GridIcon /> : <CubeIcon />}
               </button>
@@ -1230,13 +1186,9 @@ export default function ContributionSkyline({
         )}
       </header>
 
-      <div className="relative rounded-lg border" style={{ borderColor: "var(--color-border, #e5e5e5)" }}>
-        <div className="relative px-3 pt-3 sm:px-4 sm:pt-4">
-          <div
-            ref={stageRef}
-            className="relative w-full overflow-hidden rounded-md outline-offset-4 has-[:focus-visible]:outline-2"
-            style={{ height: 150, outlineColor: "var(--color-foreground, #171717)" }}
-          >
+      <div className="hm-frame">
+        <div className="hm-stage-pad">
+          <div ref={stageRef} className="hm-stage" style={{ height: 150 }}>
             <canvas
               ref={canvasRef}
               tabIndex={0}
@@ -1245,21 +1197,20 @@ export default function ContributionSkyline({
                 nf.format(stats.total) + " " + noun(stats.total) + " between " + range(stats.first, stats.last, true) +
                 ", shown as a " + (is3d ? "3D skyline" : "heat map") + ". Use the arrow keys to read individual days."
               }
-              className="absolute top-0 left-0 block outline-none"
-              style={{ maxWidth: "none", touchAction: is3d && orbit ? "pan-y" : "auto" }}
+              className="hm-canvas"
+              style={{ touchAction: is3d && orbit ? "pan-y" : "auto" }}
             />
 
-            {showStats && corners && (
+            {hudOn && (
               <>
                 <div
                   aria-hidden={!is3d}
-                  className="pointer-events-none absolute top-1 right-1 flex flex-col items-end gap-5 transition-[opacity,transform] motion-reduce:transition-none"
+                  className="hm-hud hm-hud--tr"
                   style={{
                     opacity: is3d ? 1 : 0,
                     transform: is3d ? "translateY(0)" : "translateY(-10px)",
                     transitionDuration: is3d ? "600ms" : "300ms",
                     transitionDelay: is3d ? Math.round(duration * 0.55) + "ms" : "0ms",
-                    transitionTimingFunction: ease,
                   }}
                 >
                   <Stat {...statBlocks[0]} accent={theme.accent} size={bigSize} align="end" />
@@ -1267,13 +1218,12 @@ export default function ContributionSkyline({
                 </div>
                 <div
                   aria-hidden={!is3d}
-                  className="pointer-events-none absolute bottom-1 left-1 flex flex-col items-start gap-5 transition-[opacity,transform] motion-reduce:transition-none"
+                  className="hm-hud hm-hud--bl"
                   style={{
                     opacity: is3d ? 1 : 0,
                     transform: is3d ? "translateY(0)" : "translateY(10px)",
                     transitionDuration: is3d ? "600ms" : "300ms",
                     transitionDelay: is3d ? Math.round(duration * 0.65) + "ms" : "0ms",
-                    transitionTimingFunction: ease,
                   }}
                 >
                   <Stat {...statBlocks[2]} accent={theme.accent} size={bigSize} align="start" />
@@ -1281,56 +1231,38 @@ export default function ContributionSkyline({
                 </div>
               </>
             )}
-          </div>
 
-          <div
-            ref={tipRef}
-            role="tooltip"
-            aria-hidden={active < 0}
-            className="pointer-events-none absolute top-3 left-3 z-20 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[12px] leading-none shadow-lg transition-opacity duration-150 sm:top-4 sm:left-4 motion-reduce:transition-none"
-            style={{
-              opacity: active >= 0 ? 1 : 0,
-              background: "var(--color-foreground, #171717)",
-              color: "var(--color-background, #ffffff)",
-            }}
-          >
-            {active >= 0 && model.cells[active] ? (
-              <>
-                <strong className="font-semibold">
-                  {model.cells[active].count ? nf.format(model.cells[active].count) + " " + noun(model.cells[active].count) : "No " + plural}
-                </strong>
-                <span className="opacity-75"> on {dfy.format(dayMs(model.cells[active].date))}</span>
-              </>
-            ) : (
-              " "
-            )}
-            <span
-              aria-hidden="true"
-              className="absolute top-full h-0 w-0"
-              style={{
-                left: "var(--arrow, 50%)",
-                marginLeft: -5,
-                borderLeft: "5px solid transparent",
-                borderRight: "5px solid transparent",
-                borderTop: "5px solid var(--color-foreground, #171717)",
-              }}
-            />
+            <div className="hm-orbit-hint" aria-hidden={!orbitHint} style={{ opacity: orbitHint ? 1 : 0 }}>
+              {hints[1]}
+            </div>
           </div>
+        </div>
+
+        <div ref={tipRef} role="tooltip" aria-hidden={active < 0} className="hm-tooltip" style={{ opacity: active >= 0 ? 1 : 0 }}>
+          {active >= 0 && model.cells[active] ? (
+            <>
+              <strong className="hm-tooltip-strong">
+                {model.cells[active].count ? nf.format(model.cells[active].count) + " " + noun(model.cells[active].count) : "No " + plural}
+              </strong>
+              <span className="hm-tooltip-dim"> on {dfy.format(dayMs(model.cells[active].date))}</span>
+            </>
+          ) : (
+            " "
+          )}
         </div>
 
         {showStats && (
           <div
             aria-hidden={!showRow}
-            className="grid transition-[grid-template-rows,opacity] motion-reduce:transition-none"
+            className="hm-stats-collapse"
             style={{
               gridTemplateRows: showRow ? "1fr" : "0fr",
               opacity: showRow ? 1 : 0,
               transitionDuration: duration + "ms",
-              transitionTimingFunction: ease,
             }}
           >
-            <div className="min-h-0 overflow-hidden">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-4 px-3 pt-4 pb-1 sm:px-4 md:grid-cols-4">
+            <div className="hm-stats-clip">
+              <div className="hm-stats-row">
                 {statBlocks.map((b) => (
                   <Stat key={b.label} {...b} accent={theme.accent} size={28} align="stack" />
                 ))}
@@ -1339,26 +1271,17 @@ export default function ContributionSkyline({
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 px-3 pt-3 pb-3 text-[12px] sm:px-4" style={{ color: MUTED }}>
+        <div className="hm-footer">
           {footer === undefined ? (
-            <span className="relative grid flex-1">
-              {hints.map((h) => (
-                <span
-                  key={h}
-                  aria-hidden={h !== hint}
-                  className="[grid-area:1/1] transition-opacity duration-500 motion-reduce:transition-none"
-                  style={{ opacity: h === hint ? 1 : 0 }}
-                >
-                  {h}
-                </span>
-              ))}
+            <span className="hm-hint" style={{ opacity: orbitHint ? 0 : 1 }}>
+              {hints[0]}
             </span>
           ) : (
-            <span className="flex-1">{footer}</span>
+            <span className="hm-hint-custom">{footer}</span>
           )}
           {showLegend && (
-            <div className="flex items-center gap-1.5" onMouseLeave={() => setLegendLevel(-1)}>
-              <span className="mr-0.5">Less</span>
+            <div className="hm-legend" onMouseLeave={() => setLegendLevel(-1)}>
+              <span className="hm-legend-edge">Less</span>
               {theme.swatches.map((c, i) => (
                 <button
                   key={i}
@@ -1370,21 +1293,17 @@ export default function ContributionSkyline({
                   onFocus={() => setLegendLevel(i)}
                   onBlur={() => setLegendLevel(-1)}
                   onClick={() => setLegendLevel((l) => (l === i ? -1 : i))}
-                  className="h-[11px] w-[11px] cursor-pointer rounded-[2px] border-0 p-0 transition-[background-color,transform] duration-500 hover:scale-125 focus-visible:outline-2 focus-visible:outline-offset-1 motion-reduce:transition-none"
-                  style={{
-                    background: c,
-                    outlineColor: "var(--color-foreground, #171717)",
-                    boxShadow: "inset 0 0 0 1px rgba(127,127,127,0.12)",
-                  }}
+                  className="hm-swatch"
+                  style={{ background: c }}
                 />
               ))}
-              <span className="ml-0.5">More</span>
+              <span className="hm-legend-edge">More</span>
             </div>
           )}
         </div>
       </div>
 
-      <p aria-live="polite" className="sr-only">
+      <p aria-live="polite" className="hm-sr-only">
         {announce}
       </p>
     </section>
