@@ -67,5 +67,36 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 | AST Winnowing / MOSS for plagiarism | Invariant to variable renaming, whitespace, and comments | ✓ Good |
 | HAProxy Layer 7 reverse proxy | Robust WebSocket upgrade handling and round-robin load distribution | ✓ Good |
 
+## Current Milestone: v2.1 LeetCode-Grade Multi-Page Architecture & Refero Linear Midnight Platform
+
+**Goal:** Transform Cloud-Judge V2 into a multi-page, high-density competitive programming platform adhering to the Refero Linear Midnight precision palette, complete with react-router-dom page routes, 3-pane IDE workspace with watchdog, full-page developer profile, and live contests hub.
+
+**Target features:**
+- Refero Linear Midnight precision palette: Bedrock Void (#08090a), Carbon (#0f1011), Obsidian (#161718), hairline borders (#23252a), Smoke (#383b3f), Acid Lime (#e4f222) exclusively for primary submit action, Inter -0.022em tracking.
+- Minimalist Linear-styled landing page (`/`) with hero, live micro-sandbox runner teaser, and benchmark telemetry.
+- Authentication cards (`/auth/login`, `/auth/signup`) in Carbon styling with session state and guest sign-in.
+- Problem catalog (`/problems`) with search, topic tags, acceptance rates, and difficulty badges.
+- Dedicated workspace IDE (`/problems/:slug`) with 3 panes, LeetCode-style solution stubs, 10s watchdog, and side-by-side diffing.
+- Developer profile (`/u/:username`) with contest rating graphs, solved breakdown rings, and 21st.dev 3D contribution skyline on Obsidian canvas with fixed tooltip positioning.
+- Contests hub (`/contests`) with live countdowns and full-page Redis Sorted Set leaderboards.
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-10-03 after v2.0 milestone*
+*Last updated: 2026-10-03 starting v2.1 milestone*
+
