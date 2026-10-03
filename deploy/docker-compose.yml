@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  haproxy:
+    image: haproxy:2.8-alpine
+    container_name: cloud_judge_haproxy
+    restart: always
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    ports:
+      - "8080:80"
+      - "8404:8404"
+    depends_on:
+      - gateway_1
+      - gateway_2
+    networks:
+      - cloud_judge_net
+
+  gateway_1:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+    container_name: cloud_judge_gateway_1
+    restart: always
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - USE_IN_MEMORY_CONTEST=false
+    expose:
+      - "8000"
+    depends_on:
+      - redis
+    networks:
+      - cloud_judge_net
+
+  gateway_2:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.gateway
+    container_name: cloud_judge_gateway_2
+    restart: always
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - REDIS_URL=redis://redis:6379/0
+      - USE_IN_MEMORY_CONTEST=false
+    expose:
+      - "8000"
+    depends_on:
+      - redis
+    networks:
+      - cloud_judge_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: cloud_judge_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - cloud_judge_net
+
+  worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.worker
+    container_name: cloud_judge_worker
+    restart: always
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+    networks:
+      - cloud_judge_net
+
+networks:
+  cloud_judge_net:
+    driver: bridge
+
+volumes:
+  redis_data:

@@ -29,8 +29,21 @@ app = create_production_app()
 
 
 def run():
+    import os
     import uvicorn
-    uvicorn.run("packages.gateway.src.main:app", host="0.0.0.0", port=8000, reload=True)
+
+    host = os.getenv("HOST", "0.0.0.0")
+    port = int(os.getenv("PORT", "8000"))
+    workers = int(os.getenv("WORKERS", "1"))
+    reload = os.getenv("RELOAD", "false").lower() == "true"
+
+    uvicorn.run(
+        "packages.gateway.src.main:app",
+        host=host,
+        port=port,
+        workers=workers if not reload else 1,
+        reload=reload,
+    )
 
 
 if __name__ == "__main__":
