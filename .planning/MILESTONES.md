@@ -1,5 +1,22 @@
 # Milestones
 
+## v2.1 LeetCode-Grade Multi-Page Architecture & Refero Linear Midnight Platform (Shipped: 2026-10-04)
+
+**Phases completed:** 5 phases, 10 plans, 0 tasks
+
+**Key accomplishments:**
+- Precision Refero Linear Midnight design system with Bedrock Void, Carbon, Obsidian, and hairline Graphite tokens, typography capped at ≤ 590 weights, and zero purple/violet gradients.
+- Client-side routing with react-router-dom and unified LinearHeaderNav with live gateway latency indicator and guest/user status.
+- Minimalist hero landing page with live benchmark telemetry (<15ms cold start, 256MB cap, 1 vCPU, air-gapped network) and interactive micro-sandbox runner teaser.
+- Centered Carbon authentication views with guest login bypass and session persistence via AuthContext.
+- High-density LeetCode problem catalog at /problems with 12 classic problems, sub-50ms reactive search, difficulty pills (Pulse Green, Amber, Coral Red), and topic taxonomy strip.
+- Distraction-free 3-pane Monaco IDE workspace at /problems/:slug with LeetCode class Solution stubs across C++20, Python 3.12, Java 21, and Acid Lime primary submit action.
+- Side-by-side testcase diff viewer with token mismatch highlights and 10-second client execution watchdog preventing hung evaluation states.
+- Full-page developer profile at /u/:username with 21st.dev 3D isometric skyline, contest rating progression chart, and circular solved breakdown ring.
+- Full-page contests hub at /contests with active/upcoming live countdown clocks, persistent registration toggle, and real-time Redis Sorted Set leaderboards with ICPC penalties.
+
+---
+
 ## v2.0 Commercial Launch & Complete Platform (Shipped: 2026-10-03)
 
 **Phases completed:** 7 phases, 20 plans, 18 tasks

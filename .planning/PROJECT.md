@@ -29,6 +29,14 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 - ✓ Post-contest plagiarism detection engine using AST-based Winnowing / MOSS algorithm — v2.0
 - ✓ Developer analytics including 21st.dev 3D isometric contribution activity skyline heatmap and tumbling cube loader — v2.0
 - ✓ High-throughput Layer 7 reverse proxy and load balancing using HAProxy — v2.0
+- ✓ Refero Linear Midnight precision palette (Void, Carbon, Obsidian, Graphite, Acid Lime strictly for primary submit) and Inter ≤ 590 typography — v2.1
+- ✓ Multi-page routing via react-router-dom and unified LinearHeaderNav with live latency indicator and session status — v2.1
+- ✓ Minimalist hero landing page with real-time benchmark telemetry and interactive micro-sandbox code runner teaser — v2.1
+- ✓ Centered Carbon auth cards with form validation, guest login bypass, and persistent AuthContext — v2.1
+- ✓ High-density LeetCode problem catalog at /problems with sub-50ms reactive search, difficulty pills, and topic taxonomy — v2.1
+- ✓ Distraction-free 3-pane Monaco IDE workspace at /problems/:slug with LeetCode class Solution stubs, VS Code Dark Modern aesthetic, side-by-side diffing, and 10-second client execution watchdog — v2.1
+- ✓ Full-page developer profile at /u/:username with contest rating progression, circular solved breakdown ring, and 21st.dev 3D skyline heatmap — v2.1
+- ✓ Contests hub at /contests with active/upcoming live countdown clocks, persistent registration, and real-time Redis Sorted Set leaderboards with ICPC penalties — v2.1
 
 ### Active (Next Milestone Candidates)
 
@@ -44,9 +52,8 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 
 ## Context
 
-- Shipped Milestone v2.0 as a complete commercial competitive programming platform.
-- Total 7 phases, 20 plans, 102 passing backend tests, and production Vite frontend bundle.
-- Architecture: Decoupled FastAPI gateway, Redis queue broker, worker daemons, and HAProxy Layer 7 reverse proxy.
+- Shipped Milestone v2.0: Core engine, sandboxing, FastAPI gateway, Redis queue, Stripe/Razorpay subscriptions, Gemini 2.5 Flash assistant, plagiarism detection, and HAProxy reverse proxy.
+- Shipped Milestone v2.1: LeetCode-grade multi-page architecture, Refero Linear Midnight design system, high-density catalog, 3-pane IDE workspace, developer profile with 3D skyline, and live contests hub across 5 phases, 10 plans, 100% verified.
 
 ## Constraints
 
@@ -66,12 +73,15 @@ Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing p
 | Redis Sorted Sets for contest leaderboards | O(log(N)) ranking updates and real-time range queries for live contests | ✓ Good |
 | AST Winnowing / MOSS for plagiarism | Invariant to variable renaming, whitespace, and comments | ✓ Good |
 | HAProxy Layer 7 reverse proxy | Robust WebSocket upgrade handling and round-robin load distribution | ✓ Good |
+| React Router DOM client routing | Frictionless client transitions and persistent state across multi-page views | ✓ Good |
+| Standard LeetCode class Solution stubs | Familiar industry-standard ergonomics for competitive programmers | ✓ Good |
+| 10-second client execution watchdog | Prevents UI hanging or frozen submit states on dropped WebSocket connections | ✓ Good |
+| VS Code Dark Modern + Linear Midnight theme | High legibility and precise token syntax matching developer tooling | ✓ Good |
+| LocalStorage backed guest state persistence | Instant, non-blocking responsiveness for guest exploration without mandatory auth | ✓ Good |
 
-## Current Milestone: v2.1 LeetCode-Grade Multi-Page Architecture & Refero Linear Midnight Platform
+## Shipped Milestone: v2.1 LeetCode-Grade Multi-Page Architecture & Refero Linear Midnight Platform (Shipped 2026-10-04)
 
-**Goal:** Transform Cloud-Judge V2 into a multi-page, high-density competitive programming platform adhering to the Refero Linear Midnight precision palette, complete with react-router-dom page routes, 3-pane IDE workspace with watchdog, full-page developer profile, and live contests hub.
-
-**Target features:**
+**Accomplished:**
 - Refero Linear Midnight precision palette: Bedrock Void (#08090a), Carbon (#0f1011), Obsidian (#161718), hairline borders (#23252a), Smoke (#383b3f), Acid Lime (#e4f222) exclusively for primary submit action, Inter -0.022em tracking.
 - Minimalist Linear-styled landing page (`/`) with hero, live micro-sandbox runner teaser, and benchmark telemetry.
 - Authentication cards (`/auth/login`, `/auth/signup`) in Carbon styling with session state and guest sign-in.
@@ -98,5 +108,5 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-03 starting v2.1 milestone*
+*Last updated: 2026-10-04 after v2.1 milestone*
 
