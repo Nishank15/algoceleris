@@ -81,3 +81,44 @@ class WebSocketConnectionManager:
             pass
         finally:
             await self.disconnect(submission_id, websocket)
+
+    async def stream_contest_leaderboard(
+        self,
+        contest_id: str,
+        websocket: WebSocket,
+        broker: QueueBroker,
+        leaderboard_engine,
+    ) -> None:
+        """Stream real-time contest leaderboard updates and initial snapshot."""
+        conn_key = f"contest:{contest_id}:leaderboard"
+        await self.connect(conn_key, websocket)
+
+        try:
+            # 1. Send initial leaderboard snapshot
+            if leaderboard_engine:
+                current_board = leaderboard_engine.get_leaderboard(contest_id)
+                await websocket.send_json(
+                    {
+                        "event_type": "leaderboard_snapshot",
+                        "contest_id": contest_id,
+                        "data": [
+                            entry.model_dump() if hasattr(entry, "model_dump") else entry
+                            for entry in current_board
+                        ],
+                    }
+                )
+
+            # 2. Subscribe to broker leaderboard channel
+            channel = f"contest:{contest_id}:leaderboard"
+            async for event in broker.listen_channel(channel):
+                await websocket.send_json(event)
+
+        except WebSocketDisconnect:
+            pass
+        except asyncio.CancelledError:
+            pass
+        except Exception:
+            pass
+        finally:
+            await self.disconnect(conn_key, websocket)
+

@@ -9,6 +9,7 @@ from .models import (
 )
 from .scoring import ICPCScoringEngine
 from .store import ContestStore, InMemoryContestStore, RedisContestStore, get_contest_store
+from .leaderboard import LeaderboardEngine, LeaderboardEntry, get_leaderboard_engine
 from .router import create_contests_router
 
 __all__ = [
@@ -25,5 +26,8 @@ __all__ = [
     "RedisContestStore",
     "get_contest_store",
     "create_contests_router",
+    "LeaderboardEngine",
+    "LeaderboardEntry",
+    "get_leaderboard_engine",
 ]
 

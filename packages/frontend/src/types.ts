@@ -122,4 +122,40 @@ export interface AIDebugResponse {
   code_diff: string;
 }
 
+export interface ProblemScoreInfo {
+  problem_id: string;
+  solved: boolean;
+  rejected_attempts: number;
+  penalty_minutes: number;
+  solved_at?: number | null;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  user_id: string;
+  solved_count: number;
+  total_penalty_minutes: number;
+  problem_scores: Record<string, ProblemScoreInfo>;
+  score_composite: number;
+}
+
+export interface ContestProblem {
+  id: string;
+  letter_code: string;
+  title: string;
+  difficulty: string;
+  points: number;
+}
+
+export interface ContestDetails {
+  id: string;
+  title: string;
+  description: string;
+  start_time: number;
+  end_time: number;
+  duration_minutes: number;
+  status: 'UPCOMING' | 'ACTIVE' | 'ENDED';
+  problems: ContestProblem[];
+}
+
 

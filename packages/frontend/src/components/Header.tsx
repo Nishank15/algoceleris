@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles } from 'lucide-react';
+import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy } from 'lucide-react';
 import { Language, Problem, SubscriptionTier } from '../types';
 
 interface HeaderProps {
@@ -15,6 +15,7 @@ interface HeaderProps {
   isRunning: boolean;
   currentTier: SubscriptionTier;
   onOpenPricingModal: () => void;
+  onOpenLeaderboard?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   isRunning,
   currentTier,
   onOpenPricingModal,
+  onOpenLeaderboard,
 }) => {
   return (
     <header className="header-nav">
@@ -61,6 +63,18 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-right">
+        {/* Contest Leaderboard Button */}
+        {onOpenLeaderboard && (
+          <button
+            className="btn btn-secondary"
+            onClick={onOpenLeaderboard}
+            title="View Live Contest Leaderboard"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <Trophy size={14} className="trophy-glow-icon" />
+            <span>Leaderboard</span>
+          </button>
+        )}
         {/* Pro Badge or Upgrade to Pro Action */}
         {currentTier === 'pro' ? (
           <div

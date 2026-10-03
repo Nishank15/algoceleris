@@ -4,6 +4,8 @@ import {
   StreamEvent,
   AIDebugRequest,
   AIDebugResponse,
+  LeaderboardEntry,
+  ContestDetails,
 } from '../types';
 
 const API_BASE_URL =
@@ -229,6 +231,74 @@ export async function requestAIDebug(
   }
 
   return response.json();
+}
+
+export async function listContests(): Promise<ContestDetails[]> {
+  const url = `${API_BASE_URL}/api/v1/contests`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch contests (${response.status})`);
+  }
+  return response.json();
+}
+
+export async function getContest(contestId: string): Promise<ContestDetails> {
+  const url = `${API_BASE_URL}/api/v1/contests/${contestId}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch contest (${response.status})`);
+  }
+  return response.json();
+}
+
+export async function getContestLeaderboard(contestId: string): Promise<LeaderboardEntry[]> {
+  const url = `${API_BASE_URL}/api/v1/contests/${contestId}/leaderboard`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch contest leaderboard (${response.status})`);
+  }
+  return response.json();
+}
+
+export function subscribeContestLeaderboard(
+  contestId: string,
+  onSnapshot: (entries: LeaderboardEntry[]) => void,
+  onUpdate?: (delta: any) => void,
+  onError?: (error: Event) => void
+): () => void {
+  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsHost =
+    window.location.port === '3000' ? 'localhost:8000' : window.location.host;
+  const wsUrl = `${wsProtocol}//${wsHost}/ws/contests/${contestId}/leaderboard`;
+
+  const socket = new WebSocket(wsUrl);
+
+  socket.onmessage = (event) => {
+    try {
+      const parsed = JSON.parse(event.data);
+      if (parsed.event_type === 'leaderboard_snapshot' && Array.isArray(parsed.data)) {
+        onSnapshot(parsed.data);
+      } else if (parsed.event_type === 'leaderboard_update') {
+        if (onUpdate) onUpdate(parsed);
+      }
+    } catch (err) {
+      console.error('Failed to parse contest leaderboard WebSocket frame:', err);
+    }
+  };
+
+  socket.onerror = (err) => {
+    console.warn('Contest Leaderboard WebSocket error:', err);
+    if (onError) onError(err);
+  };
+
+  return () => {
+    if (
+      socket.readyState === WebSocket.OPEN ||
+      socket.readyState === WebSocket.CONNECTING
+    ) {
+      socket.close();
+    }
+  };
 }
 
 

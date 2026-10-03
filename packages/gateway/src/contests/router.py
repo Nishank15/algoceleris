@@ -5,6 +5,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException, status
 
 from ..queue import QueueBroker, get_queue_broker
+from .leaderboard import LeaderboardEngine, LeaderboardEntry, get_leaderboard_engine
 from .models import (
     Contest,
     ContestStatus,
@@ -19,10 +20,12 @@ from .store import ContestStore, get_contest_store
 def create_contests_router(
     store: Optional[ContestStore] = None,
     broker: Optional[QueueBroker] = None,
+    leaderboard: Optional[LeaderboardEngine] = None,
 ) -> APIRouter:
     router = APIRouter(prefix="/contests", tags=["Contest Engine"])
     active_store = store or get_contest_store()
     active_broker = broker or get_queue_broker()
+    active_leaderboard = leaderboard or get_leaderboard_engine(active_store)
 
     @router.get("", response_model=List[Contest], summary="List all timed competitive programming contests")
     def list_contests() -> List[Contest]:
@@ -52,7 +55,9 @@ def create_contests_router(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Contest '{contest_id}' not found",
             )
-        return active_store.register_participant(contest_id, user_id)
+        score = active_store.register_participant(contest_id, user_id)
+        active_leaderboard.record_score(contest_id, score)
+        return score
 
     @router.get(
         "/{contest_id}/participant/{user_id}",
@@ -64,7 +69,22 @@ def create_contests_router(
         if not score:
             # Auto-register if not yet registered
             score = active_store.register_participant(contest_id, user_id)
+            active_leaderboard.record_score(contest_id, score)
         return score
+
+    @router.get(
+        "/{contest_id}/leaderboard",
+        response_model=List[LeaderboardEntry],
+        summary="Retrieve live ranked contest leaderboard",
+    )
+    def get_contest_leaderboard(contest_id: str, limit: int = 100) -> List[LeaderboardEntry]:
+        contest = active_store.get_contest(contest_id)
+        if not contest:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Contest '{contest_id}' not found",
+            )
+        return active_leaderboard.get_leaderboard(contest_id, limit=limit)
 
     @router.post(
         "/{contest_id}/submit",
@@ -124,6 +144,7 @@ def create_contests_router(
         )
 
         active_store.update_participant_score(updated_participant)
+        new_rank = active_leaderboard.record_score(contest_id, updated_participant)
 
         # Also publish submission event to queue/pubsub if broker available
         active_broker.publish(
@@ -137,6 +158,20 @@ def create_contests_router(
                 "solved_count": updated_participant.solved_count,
                 "total_penalty_minutes": updated_participant.total_penalty_minutes,
                 "submitted_at": now,
+            },
+        )
+
+        # Broadcast live leaderboard delta update
+        active_broker.publish(
+            f"contest:{contest_id}:leaderboard",
+            {
+                "event_type": "leaderboard_update",
+                "contest_id": contest_id,
+                "user_id": request.user_id,
+                "rank": new_rank,
+                "solved_count": updated_participant.solved_count,
+                "total_penalty_minutes": updated_participant.total_penalty_minutes,
+                "timestamp": now,
             },
         )
 

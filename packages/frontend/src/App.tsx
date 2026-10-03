@@ -9,6 +9,7 @@ import { TestConsole } from './components/TestConsole';
 import { ZenModeBanner } from './components/ZenModeBanner';
 import { PricingModal } from './components/PricingModal';
 import { AIDebugModal } from './components/AIDebugModal';
+import { ContestLeaderboardModal } from './components/ContestLeaderboardModal';
 import {
   Language,
   SubmissionStatus,
@@ -34,6 +35,9 @@ export const App: React.FC = () => {
   const [userTier, setUserTier] = useState<SubscriptionTier>('free');
   const [isPricingModalOpen, setIsPricingModalOpen] = useState<boolean>(false);
   const [isUpgrading, setIsUpgrading] = useState<boolean>(false);
+
+  // Contest Leaderboard state
+  const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
 
   // Multi-language code buffer
   const [codeBuffers, setCodeBuffers] = useState<Record<Language, string>>(
@@ -352,6 +356,7 @@ export const App: React.FC = () => {
         isRunning={isRunning}
         currentTier={userTier}
         onOpenPricingModal={handleOpenPricingModal}
+        onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
       />
 
       <ResizableLayout
@@ -399,6 +404,11 @@ export const App: React.FC = () => {
         debugResponse={aiDebugResponse}
         isLoading={isAIDebugLoading}
         onApplyFix={handleApplyAIFix}
+      />
+
+      <ContestLeaderboardModal
+        isOpen={isLeaderboardModalOpen}
+        onClose={() => setIsLeaderboardModalOpen(false)}
       />
     </div>
   );
