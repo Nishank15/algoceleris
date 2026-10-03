@@ -8,11 +8,11 @@ last_activity: 2026-10-03
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 2
+  total_plans: 4
   completed_plans: 2
-  percent: 0
-current_phase: 8
-current_phase_name: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure
+  percent: 50
+current_phase: 9
+current_phase_name: Linear Landing Page, Live Telemetry Teaser & Carbon Auth
 ---
 
 # Project State
@@ -22,14 +22,14 @@ current_phase_name: Refero Linear Midnight Design System & Multi-Page Routing In
 See: .planning/PROJECT.md (updated 2026-10-03)
 
 **Core value:** Secure, ultra-low-latency, real-time multi-language code evaluation sandboxing paired with a frictionless developer experience and contest integrity.
-**Current focus:** Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure
+**Current focus:** Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth
 
 ## Current Position
 
-Phase: Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure
-Plan: Ready to execute (08-01, 08-02)
-Status: Phase 8 complete — ready to plan Phase 9
-Last activity: 2026-10-03 — Phase 8 planned (2 plans across 2 waves)
+Phase: Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth
+Plan: Ready to execute (09-01, 09-02)
+Status: Planned
+Last activity: 2026-10-03 — Phase 9 planned (2 plans across 2 waves)
 
 ## Performance Metrics
 
@@ -92,4 +92,4 @@ Resume file: None
 
 ## Operator Next Steps
 
-- Plan Phase 9 with `/gsd-plan-phase 9`
+- Execute Phase 9 with `/gsd-execute-phase 9`

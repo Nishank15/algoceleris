@@ -50,6 +50,14 @@ Plans:
   3. User can navigate to `/auth/login` and `/auth/signup` and interact with centered Carbon cards with input validation and session persistence.
   4. One-click "Continue as Guest" allows instant exploration without registration barriers.
 
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [ ] 09-01: AuthContext provider, session state persistence, and centered Carbon auth cards
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 09-02: Minimalist Linear landing page, benchmark telemetry grid, and live micro-sandbox runner teaser
+
 ### Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy
 
 **Goal**: Build a high-density, searchable LeetCode-style problem catalog with topic filtering, difficulty badges, and solved status indicators.
