@@ -70,6 +70,14 @@ Plans:
   3. Users can filter by difficulty pills colored with Pulse Green (#27a644) for Easy, Amber (#f59e0b) for Medium, and Coral Red (#eb5757) for Hard.
   4. Instant search query filters problem rows with sub-50ms responsiveness.
 
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [ ] 10-01: Problem taxonomy schema, acceptance rates, and expanded competitive problem dataset
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 10-02: High-density LeetCode catalog UI with sub-50ms search, difficulty pills, and topic filters
+
 ### Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog
 
 **Goal**: Construct the dedicated 3-pane Monaco IDE workspace for `/problems/:slug` featuring starter solution stubs, 10-second client execution watchdog, side-by-side diffing, and Acid Lime submit action.
