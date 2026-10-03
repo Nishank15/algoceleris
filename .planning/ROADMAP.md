@@ -10,10 +10,10 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 - Integer phases (8, 9, 10, 11, 12): Planned milestone work
 - Decimal phases: Urgent insertions
 
-- [x] **Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure** - Core precision design tokens (Void/Carbon/Obsidian/Graphite/Acid Lime), Inter typography rules, react-router-dom multi-page architecture, and unified Linear top navigation bar.
-- [x] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login.
-- [ ] **Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy** - High-density problem catalog with search, topic tags (Array, DP, Trees, Graph), acceptance rates, and difficulty badges (Pulse Green, Amber, Coral Red).
-- [ ] **Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog** - 3-pane Monaco IDE workspace at `/problems/:slug`, standard `class Solution` stubs, 10-second client execution watchdog, side-by-side testcase diffing, and Acid Lime submit action.
+- [x] **Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure** - Core precision design tokens (Void/Carbon/Obsidian/Graphite/Acid Lime), Inter typography rules, react-router-dom multi-page architecture, and unified Linear top navigation bar. (completed 2026-10-03)
+- [x] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login. (completed 2026-10-03)
+- [x] **Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy** - High-density problem catalog with search, topic tags (Array, DP, Trees, Graph), acceptance rates, and difficulty badges (Pulse Green, Amber, Coral Red). (completed 2026-10-03)
+- [x] **Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog** - 3-pane Monaco IDE workspace at `/problems/:slug`, standard `class Solution` stubs, 10-second client execution watchdog, side-by-side testcase diffing, and Acid Lime submit action. (completed 2026-10-03)
 - [x] **Phase 12: Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards** - Dedicated `/u/:username` developer profile with contest rating chart, solved breakdown ring, 21st.dev 3D isometric skyline, and full-page `/contests` hub with Redis live leaderboards. (completed 2026-10-04)
 
 ## Phase Details

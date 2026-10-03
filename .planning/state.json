@@ -16,12 +16,12 @@
     {
       "number": "10",
       "name": "High-Density LeetCode Problem Catalog & Topic Taxonomy",
-      "status": "in_progress"
+      "status": "complete"
     },
     {
       "number": "11",
       "name": "Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog",
-      "status": "pending"
+      "status": "complete"
     },
     {
       "number": "12",
@@ -30,9 +30,9 @@
     }
   ],
   "next": {
-    "command": "/gsd-progress --next",
-    "label": "Advance to the next step (plan phase 10)",
-    "reason": "Phase 10 of 5 — needs a plan"
+    "command": "/gsd-new-milestone",
+    "label": "Start a new milestone",
+    "reason": "All phases complete — start a new milestone"
   },
-  "updated_at": "2026-10-03T19:33:23.292Z"
+  "updated_at": "2026-10-03T19:42:44.252Z"
 }
