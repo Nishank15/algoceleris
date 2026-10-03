@@ -19,13 +19,13 @@ Requirements for Milestone v2.1. Each maps to roadmap phases.
 
 ### Landing Page & Telemetry Teaser
 
-- [ ] **LAND-01**: Minimalist Linear-styled hero landing page (`/`) featuring platform value proposition, architectural highlights, and real-time benchmark telemetry indicators (sandbox startup latency, CPU quota, memory boundary).
-- [ ] **LAND-02**: Interactive micro-sandbox runner teaser on the landing page allowing visitors to execute sample code directly with instant live evaluation feedback.
+- [x] **LAND-01**: Minimalist Linear-styled hero landing page (`/`) featuring platform value proposition, architectural highlights, and real-time benchmark telemetry indicators (sandbox startup latency, CPU quota, memory boundary).
+- [x] **LAND-02**: Interactive micro-sandbox runner teaser on the landing page allowing visitors to execute sample code directly with instant live evaluation feedback.
 
 ### Authentication & Session Management
 
-- [ ] **AUTH-01**: Centered Carbon-styled authentication card views for `/auth/login` and `/auth/signup` with form validation, guest sign-in bypass, and session state persistence.
-- [ ] **AUTH-02**: Auth state provider managing current user session, guest credentials, and protecting authenticated actions across all routes.
+- [x] **AUTH-01**: Centered Carbon-styled authentication card views for `/auth/login` and `/auth/signup` with form validation, guest sign-in bypass, and session state persistence.
+- [x] **AUTH-02**: Auth state provider managing current user session, guest credentials, and protecting authenticated actions across all routes.
 
 ### Problem Catalog & Filtering
 
@@ -78,10 +78,10 @@ Which phases cover which requirements. Filled during roadmap creation.
 | DS-02 | Phase 8 | Complete |
 | NAV-01 | Phase 8 | Complete |
 | NAV-02 | Phase 8 | Complete |
-| LAND-01 | Phase 9 | Pending |
-| LAND-02 | Phase 9 | Pending |
-| AUTH-01 | Phase 9 | Pending |
-| AUTH-02 | Phase 9 | Pending |
+| LAND-01 | Phase 9 | Complete |
+| LAND-02 | Phase 9 | Complete |
+| AUTH-01 | Phase 9 | Complete |
+| AUTH-02 | Phase 9 | Complete |
 | CAT-01 | Phase 10 | Pending |
 | CAT-02 | Phase 10 | Pending |
 | IDE-01 | Phase 11 | Pending |

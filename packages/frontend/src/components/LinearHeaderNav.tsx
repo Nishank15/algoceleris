@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-import { Terminal } from 'lucide-react';
-
-interface LinearHeaderNavProps {
-  username?: string | null;
-}
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Terminal, LogOut } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 /** Unified top navigation: routes, live latency indicator, user/guest status. */
-export const LinearHeaderNav: React.FC<LinearHeaderNavProps> = ({ username }) => {
+export const LinearHeaderNav: React.FC = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [latency, setLatency] = useState<number | null>(null);
 
   useEffect(() => {
@@ -31,6 +30,11 @@ export const LinearHeaderNav: React.FC<LinearHeaderNavProps> = ({ username }) =>
 
   const linkClass = ({ isActive }: { isActive: boolean }) => `nav-link${isActive ? ' active' : ''}`;
 
+  const handleSignOut = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <nav className="linear-nav" aria-label="Primary">
       <div className="linear-nav-left">
@@ -46,16 +50,28 @@ export const LinearHeaderNav: React.FC<LinearHeaderNavProps> = ({ username }) =>
           <span className={`latency-dot ${latency === null ? 'offline' : 'online'}`} />
           {latency === null ? 'offline' : `${latency}ms`}
         </span>
-        {username ? (
-          <Link to={`/u/${username}`} className="nav-user" id="nav-user">
-            <span className="nav-avatar">{username.charAt(0).toUpperCase()}</span>
-            {username}
-          </Link>
+
+        {user && !user.isGuest ? (
+          <div className="nav-user-cluster">
+            <Link to={`/u/${user.username}`} className="nav-user" id="nav-user">
+              <span className="nav-avatar">{user.username.charAt(0).toUpperCase()}</span>
+              <span>{user.username}</span>
+            </Link>
+            {user.tier === 'pro' && <span className="pro-badge-mini">PRO</span>}
+            <button
+              onClick={handleSignOut}
+              className="nav-logout-btn"
+              title="Sign out"
+              id="nav-logout"
+            >
+              <LogOut size={13} />
+            </button>
+          </div>
         ) : (
-          <>
+          <div className="nav-guest-cluster">
             <span className="guest-pill">Guest</span>
             <Link to="/auth/login" className="nav-signin" id="nav-signin">Sign in</Link>
-          </>
+          </div>
         )}
       </div>
     </nav>

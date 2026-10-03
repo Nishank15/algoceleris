@@ -11,7 +11,7 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 - Decimal phases: Urgent insertions
 
 - [x] **Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure** - Core precision design tokens (Void/Carbon/Obsidian/Graphite/Acid Lime), Inter typography rules, react-router-dom multi-page architecture, and unified Linear top navigation bar.
-- [ ] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login.
+- [x] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login.
 - [ ] **Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy** - High-density problem catalog with search, topic tags (Array, DP, Trees, Graph), acceptance rates, and difficulty badges (Pulse Green, Amber, Coral Red).
 - [ ] **Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog** - 3-pane Monaco IDE workspace at `/problems/:slug`, standard `class Solution` stubs, 10-second client execution watchdog, side-by-side testcase diffing, and Acid Lime submit action.
 - [ ] **Phase 12: Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards** - Dedicated `/u/:username` developer profile with contest rating chart, solved breakdown ring, 21st.dev 3D isometric skyline, and full-page `/contests` hub with Redis live leaderboards.
@@ -54,9 +54,9 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 09-01: AuthContext provider, session state persistence, and centered Carbon auth cards
+- [x] 09-01: AuthContext provider, session state persistence, and centered Carbon auth cards
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 09-02: Minimalist Linear landing page, benchmark telemetry grid, and live micro-sandbox runner teaser
+- [x] 09-02: Minimalist Linear landing page, benchmark telemetry grid, and live micro-sandbox runner teaser
 
 ### Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy
 

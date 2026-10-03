@@ -11,7 +11,7 @@ import {
 } from '../types';
 
 const getApiBaseUrl = (useFallback = false) => {
-  if (typeof window !== 'undefined' && window.location.port === '3000') {
+  if (typeof window !== 'undefined' && (window.location.port === '3000' || window.location.port === '5173')) {
     return useFallback ? 'http://localhost:8000' : 'http://localhost:8080';
   }
   return '';
@@ -80,7 +80,8 @@ export function subscribeSubmissionStream(
 ): () => void {
   const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const getWsHost = (fallback = false) => {
-    return window.location.port === '3000' ? (fallback ? 'localhost:8000' : 'localhost:8080') : window.location.host;
+    const isLocalDev = window.location.port === '3000' || window.location.port === '5173';
+    return isLocalDev ? (fallback ? 'localhost:8000' : 'localhost:8080') : window.location.host;
   };
 
   let socket: WebSocket | null = null;

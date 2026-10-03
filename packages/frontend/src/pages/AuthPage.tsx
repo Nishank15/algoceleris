@@ -1,26 +1,192 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Terminal, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface AuthPageProps {
   mode: 'login' | 'signup';
 }
 
-export const AuthPage: React.FC<AuthPageProps> = ({ mode }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
   const navigate = useNavigate();
-  const isLogin = mode === 'login';
+  const location = useLocation();
+  const { login, signup, loginAsGuest } = useAuth();
+
+  const isLogin = initialMode === 'login';
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Query parameter redirect support e.g. /auth/login?redirect=/problems
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTarget = searchParams.get('redirect') || '/problems';
+
+  const validate = (): boolean => {
+    setError(null);
+    if (!isLogin && username.trim().length < 3) {
+      setError('Username must be at least 3 characters.');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError('Please enter a valid email address.');
+      return false;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setIsSubmitting(true);
+    try {
+      if (isLogin) {
+        await login(email.trim(), password);
+      } else {
+        await signup(username.trim(), email.trim(), password);
+      }
+      navigate(redirectTarget);
+    } catch (err: any) {
+      setError(err?.message || 'Authentication failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGuestSignIn = () => {
+    loginAsGuest();
+    navigate(redirectTarget);
+  };
+
   return (
     <main className="page page-center">
-      <section className="carbon-card" aria-labelledby="auth-title">
-        <h1 id="auth-title" className="card-title">{isLogin ? 'Sign in' : 'Create account'}</h1>
-        <form className="card-form" onSubmit={(e) => { e.preventDefault(); navigate('/problems'); }}>
-          {!isLogin && <input className="field" id="auth-username" placeholder="Username" autoComplete="username" />}
-          <input className="field" id="auth-email" type="email" placeholder="Email" autoComplete="email" />
-          <input className="field" id="auth-password" type="password" placeholder="Password" autoComplete={isLogin ? 'current-password' : 'new-password'} />
-          <button className="btn btn-secondary" id="auth-submit" type="submit">{isLogin ? 'Sign in' : 'Sign up'}</button>
+      <section className="carbon-card auth-carbon-card" aria-labelledby="auth-title">
+        <div className="auth-card-header">
+          <div className="auth-brand-glyph">
+            <Terminal size={18} />
+          </div>
+          <h1 id="auth-title" className="card-title">
+            {isLogin ? 'Welcome back' : 'Create an account'}
+          </h1>
+          <p className="card-sub">
+            {isLogin
+              ? 'Enter your credentials to access your judge workspace.'
+              : 'Join Cloud-Judge to track submissions and contest ratings.'}
+          </p>
+        </div>
+
+        {/* Tab Switcher */}
+        <div className="auth-tab-switch">
+          <Link
+            to="/auth/login"
+            className={`auth-tab-btn ${isLogin ? 'active' : ''}`}
+            id="tab-signin"
+          >
+            Sign in
+          </Link>
+          <Link
+            to="/auth/signup"
+            className={`auth-tab-btn ${!isLogin ? 'active' : ''}`}
+            id="tab-signup"
+          >
+            Sign up
+          </Link>
+        </div>
+
+        {error && (
+          <div className="auth-error-banner" role="alert">
+            <AlertCircle size={14} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form className="card-form" onSubmit={handleSubmit} noValidate>
+          {!isLogin && (
+            <div className="form-field-group">
+              <label htmlFor="auth-username" className="field-label">Username</label>
+              <input
+                className="field"
+                id="auth-username"
+                type="text"
+                placeholder="developer_handle"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
+                required
+              />
+            </div>
+          )}
+
+          <div className="form-field-group">
+            <label htmlFor="auth-email" className="field-label">Email address</label>
+            <input
+              className="field"
+              id="auth-email"
+              type="email"
+              placeholder="you@domain.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+          </div>
+
+          <div className="form-field-group">
+            <label htmlFor="auth-password" className="field-label">Password</label>
+            <input
+              className="field"
+              id="auth-password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
+              required
+            />
+          </div>
+
+          <button
+            className="btn btn-primary auth-submit-btn"
+            id="auth-submit"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Authenticating...' : isLogin ? 'Sign in' : 'Create account'}
+          </button>
         </form>
-        <button className="btn btn-secondary" id="auth-guest" onClick={() => navigate('/problems')}>Continue as guest</button>
+
+        <div className="auth-divider">
+          <span className="auth-divider-line" />
+          <span className="auth-divider-text">or</span>
+          <span className="auth-divider-line" />
+        </div>
+
+        <button
+          type="button"
+          className="btn btn-secondary auth-guest-btn"
+          id="auth-guest"
+          onClick={handleGuestSignIn}
+        >
+          Continue as guest
+        </button>
+
         <p className="card-foot">
-          {isLogin ? <>No account? <Link to="/auth/signup">Sign up</Link></> : <>Have an account? <Link to="/auth/login">Sign in</Link></>}
+          {isLogin ? (
+            <>
+              Don't have an account? <Link to="/auth/signup">Sign up</Link>
+            </>
+          ) : (
+            <>
+              Already have an account? <Link to="/auth/login">Sign in</Link>
+            </>
+          )}
         </p>
       </section>
     </main>

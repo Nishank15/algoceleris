@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { LinearHeaderNav } from './components/LinearHeaderNav';
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
@@ -9,9 +10,10 @@ import { ProfilePage } from './pages/ProfilePage';
 import { ContestsPage } from './pages/ContestsPage';
 
 export const App: React.FC = () => (
-  <BrowserRouter>
-    <div className="app-container">
-      <LinearHeaderNav />
+  <AuthProvider>
+    <BrowserRouter>
+      <div className="app-container">
+        <LinearHeaderNav />
       <div className="app-content">
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -26,6 +28,7 @@ export const App: React.FC = () => (
       </div>
     </div>
   </BrowserRouter>
+  </AuthProvider>
 );
 
 export default App;
