@@ -20,10 +20,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 }) => {
   const handleBeforeMount = useCallback((monaco: Monaco) => {
     monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
+    monaco.editor.defineTheme('vscode-dark-modern', LINEAR_MIDNIGHT_THEME);
   }, []);
 
   const handleMount: OnMount = useCallback((editor, monaco) => {
     monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
+    monaco.editor.defineTheme('vscode-dark-modern', LINEAR_MIDNIGHT_THEME);
     monaco.editor.setTheme(LINEAR_MIDNIGHT_THEME_NAME);
     editor.focus();
 
@@ -55,18 +57,32 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         options={{
           readOnly,
           contextmenu: !contestMode,
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 14,
+          fontFamily:
+            "'JetBrains Mono', 'SF Mono', Menlo, Monaco, 'Fira Code', 'Cascadia Code', Consolas, monospace",
+          fontSize: 13.5,
           lineHeight: 22,
-          tabSize: 4,
-          insertSpaces: true,
+          fontLigatures: true,
+          letterSpacing: 0.2,
+          renderLineHighlight: 'line',
+          renderLineHighlightOnlyWhenFocus: true,
+          cursorBlinking: 'smooth',
+          cursorSmoothCaretAnimation: 'on',
+          cursorWidth: 2,
+          cursorStyle: 'line',
+          roundedSelection: true,
+          selectOnLineNumbers: true,
+          matchBrackets: 'always',
+          autoClosingBrackets: 'always',
+          autoClosingQuotes: 'always',
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           automaticLayout: true,
           smoothScrolling: true,
-          cursorBlinking: 'smooth',
-          cursorSmoothCaretAnimation: 'on',
-          renderLineHighlight: 'all',
+          tabSize: 4,
+          insertSpaces: true,
+          lineNumbers: 'on',
+          lineNumbersMinChars: 3,
+          bracketPairColorization: { enabled: true },
           scrollbar: {
             vertical: 'visible',
             horizontal: 'visible',
@@ -75,8 +91,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             useShadows: false,
           },
           padding: {
-            top: 14,
-            bottom: 14,
+            top: 12,
+            bottom: 12,
           },
         }}
       />

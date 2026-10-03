@@ -295,7 +295,20 @@ html, body, #root {
 .pane-editor {
   border-bottom: 1px solid var(--border-subtle);
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* Monaco Editor Container Font Smoothing */
+.monaco-editor,
+.monaco-editor .overflow-guard,
+.monaco-editor .view-lines,
+.monaco-editor .margin,
+.monaco-editor .lines-content {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 
 .pane-console {
   background: var(--bg-surface);
