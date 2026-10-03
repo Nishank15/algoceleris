@@ -233,16 +233,6 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
             </div>
           </div>
         </div>
-
-        {/* Modal Footer */}
-        <div className="modal-footer">
-          <span className="footer-notice">
-            Telemetry metrics refresh automatically after each sandboxed evaluation
-          </span>
-          <button className="btn btn-secondary" onClick={onClose}>
-            Close
-          </button>
-        </div>
       </div>
     </div>
   );

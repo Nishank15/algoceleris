@@ -118,11 +118,6 @@ export const ContestLeaderboardModal: React.FC<ContestLeaderboardModalProps> = (
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="leaderboard-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Close Button */}
-        <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
-          <X size={18} />
-        </button>
-
         {/* Modal Header */}
         <div className="leaderboard-header">
           <div className="leaderboard-title-group">
@@ -138,8 +133,8 @@ export const ContestLeaderboardModal: React.FC<ContestLeaderboardModalProps> = (
             </p>
           </div>
 
-          {/* Right Header Status Bar */}
-          <div className="leaderboard-status-bar">
+          {/* Right Header Status Bar & Close */}
+          <div className="leaderboard-header-actions">
             <div className={`live-pulse-badge ${isLiveConnected ? 'connected' : 'offline'}`}>
               <Radio size={13} className={isLiveConnected ? 'pulse-anim' : ''} />
               <span>{isLiveConnected ? 'Live O(log N) Stream' : 'Live Connected'}</span>
@@ -153,6 +148,15 @@ export const ContestLeaderboardModal: React.FC<ContestLeaderboardModalProps> = (
             >
               <RefreshCw size={13} className={isLoading ? 'spin-anim' : ''} />
               <span>Refresh</span>
+            </button>
+
+            <button
+              className="leaderboard-close-btn"
+              onClick={onClose}
+              aria-label="Close modal"
+              title="Close modal (Esc)"
+            >
+              <X size={18} />
             </button>
           </div>
         </div>

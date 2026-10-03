@@ -63,25 +63,7 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
 
   const getStatusBadge = () => {
     if (isRunning) {
-      const activeLabel =
-        currentEvent?.event_type === 'compiling'
-          ? 'COMPILING SOLUTION...'
-          : currentEvent?.event_type === 'test_case_start'
-          ? `RUNNING TEST CASE ${currentEvent.data?.index ?? 1}/${currentEvent.data?.total ?? sampleCases.length}...`
-          : 'EVALUATING IN SANDBOX...';
-
-      return (
-        <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            color: 'var(--color-running)',
-          }}
-        >
-          <IsometricCubeLoader size="sm" label={activeLabel} />
-        </span>
-      );
+      return null;
     }
 
     if (!submissionStatus && !submissionReport && !errorDiagnostics) {
@@ -466,13 +448,7 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
               <div className="iso-evaluating-card">
                 <IsometricCubeLoader
                   size="lg"
-                  label={
-                    currentEvent?.event_type === 'compiling'
-                      ? 'Compiling source code with cgroups isolation...'
-                      : currentEvent?.event_type === 'test_case_start'
-                      ? `Running sandboxed test case ${currentEvent.data?.index ?? 1}/${currentEvent.data?.total ?? sampleCases.length}...`
-                      : 'Sandboxed evaluation in progress...'
-                  }
+                  label="Evaluating in sandbox..."
                 />
               </div>
             )}

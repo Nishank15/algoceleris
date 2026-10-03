@@ -64,6 +64,11 @@ html, body, #root {
 }
 
 /* Custom Scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #23252a transparent;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -74,12 +79,16 @@ html, body, #root {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-full);
+  background: #23252a;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: #383b3f;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Layout Containers */
@@ -350,12 +359,11 @@ html, body, #root {
 
 .zen-banner {
   position: absolute;
-  top: 16px;
-  right: 24px;
-  background: rgba(15, 18, 26, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--border-active);
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f1011;
+  border: 1px solid #23252a;
   padding: 6px 14px;
   border-radius: var(--radius-full);
   display: flex;
@@ -363,16 +371,16 @@ html, body, #root {
   gap: 8px;
   font-size: 0.8rem;
   color: var(--text-secondary);
-  z-index: 30;
-  box-shadow: none;
+  z-index: 60;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .zen-banner:hover {
-  background: rgba(22, 27, 38, 0.95);
+  background: #161718;
   color: var(--text-primary);
-  border-color: var(--accent-hover);
+  border-color: #383b3f;
 }
 
 .zen-banner kbd {
@@ -1229,7 +1237,7 @@ html, body, #root {
 .leaderboard-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 16px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border-divider);
@@ -1272,11 +1280,34 @@ html, body, #root {
   color: var(--text-secondary);
 }
 
+.leaderboard-header-actions,
 .leaderboard-status-bar {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
-  margin-top: 4px;
+}
+
+.leaderboard-close-btn {
+  position: static;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.leaderboard-close-btn:hover {
+  background: var(--bg-surface-overlay);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .live-pulse-badge {
@@ -1854,16 +1885,10 @@ html, body, #root {
 }
 
 .boxes .box > .face {
-  --face-bg: #4b55a5;
-  --top: #717bb8;
-  --right: #8a8f98;
-  --front: #4b55a5;
-  --back: #252840;
   position: absolute;
   width: 100%;
   height: 100%;
-  background: var(--face-bg);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
   top: auto;
   right: auto;
   bottom: auto;
@@ -1873,7 +1898,7 @@ html, body, #root {
 .boxes .box > .face.face-top {
   top: 0;
   left: 0;
-  background: var(--top);
+  background: #ffffff;
   transform: rotateX(90deg);
   transform-origin: 50% 0%;
 }
@@ -1881,7 +1906,7 @@ html, body, #root {
 .boxes .box > .face.face-front {
   left: 0;
   top: 0;
-  background: var(--front);
+  background: #d1d5db;
   transform: rotateY(270deg);
   transform-origin: 0% 50%;
 }
@@ -1889,7 +1914,7 @@ html, body, #root {
 .boxes .box > .face.face-right {
   right: 0;
   top: 0;
-  background: var(--right);
+  background: #9ca3af;
   transform: rotateY(-270deg);
   transform-origin: 100% 50%;
 }
@@ -1897,7 +1922,7 @@ html, body, #root {
 .boxes .box > .face.face-back {
   bottom: 0;
   left: 0;
-  background: var(--back);
+  background: #6b7280;
   transform: rotateX(-90deg);
   transform-origin: 50% 100%;
 }
@@ -1944,18 +1969,23 @@ html, body, #root {
   }
 }
 
+.iso-loader-stage {
+  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.65));
+}
+
 .iso-loader-label {
   font-family: var(--font-mono);
   font-weight: 500;
   letter-spacing: 0.02em;
-  color: #c7d2fe;
+  color: #737373;
+  text-align: center;
 }
 
 .iso-evaluating-card {
-  padding: 36px 20px;
-  background: var(--bg-surface-elevated);
-  border: 1px solid #383b3f;
-  border-radius: var(--radius-md);
+  padding: 48px 24px;
+  background: #08090a;
+  border: 1px solid #23252a;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;

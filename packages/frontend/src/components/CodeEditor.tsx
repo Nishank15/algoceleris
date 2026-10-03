@@ -23,6 +23,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, []);
 
   const handleMount: OnMount = useCallback((editor, monaco) => {
+    monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
     monaco.editor.setTheme(LINEAR_MIDNIGHT_THEME_NAME);
     editor.focus();
 
