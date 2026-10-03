@@ -81,20 +81,25 @@ class RateLimiter:
 
         return "anonymous"
 
-    async def __call__(self, request: Request, response: Response) -> RateLimitResult:
+    async def __call__(
+        self,
+        request: Request,
+        response: Response,
+        user_id: Optional[str] = None,
+    ) -> RateLimitResult:
         limiter = self._get_limiter(request)
         sub_store = self._get_subscription_store(request)
-        user_id = self._resolve_user_id(request)
+        resolved_user_id = user_id or self._resolve_user_id(request)
 
         # Check user tier
-        sub = sub_store.get_subscription(user_id)
+        sub = sub_store.get_subscription(resolved_user_id)
         if sub and sub.status == "active":
             tier = sub.tier.value if hasattr(sub.tier, "value") else str(sub.tier)
         else:
             tier = "free"
 
         config = get_tier_rate_limit_config(self.action, tier)
-        bucket_key = f"ratelimit:{self.action}:{user_id}"
+        bucket_key = f"ratelimit:{self.action}:{resolved_user_id}"
 
         result = limiter.consume(
             key=bucket_key,

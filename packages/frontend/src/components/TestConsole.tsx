@@ -9,6 +9,7 @@ import {
   Cpu,
   AlertTriangle,
   Loader2,
+  Sparkles,
 } from 'lucide-react';
 import {
   ProblemTestCase,
@@ -29,7 +30,10 @@ interface TestConsoleProps {
   submissionReport: SubmissionReport | null;
   isRunning: boolean;
   errorDiagnostics: string | null;
+  onTriggerAIDebug?: () => void;
+  isAIDebugLoading?: boolean;
 }
+
 
 export const TestConsole: React.FC<TestConsoleProps> = ({
   sampleCases,
@@ -42,6 +46,8 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
   submissionReport,
   isRunning,
   errorDiagnostics,
+  onTriggerAIDebug,
+  isAIDebugLoading,
 }) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState<number>(0);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(0);
@@ -243,6 +249,40 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                   </span>
                 </div>
               )}
+
+              {/* AI Debug Button Trigger */}
+              {!isRunning &&
+                onTriggerAIDebug &&
+                (errorDiagnostics ||
+                  currentEvent?.event_type === 'compilation_failed' ||
+                  (submissionReport && submissionReport.verdict !== 'ACCEPTED')) && (
+                  <button
+                    className="ai-debug-btn"
+                    onClick={onTriggerAIDebug}
+                    disabled={isAIDebugLoading}
+                    style={{
+                      marginLeft: 'auto',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '5px 12px',
+                      borderRadius: '6px',
+                      background:
+                        'linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(99, 102, 241, 0.28))',
+                      border: '1px solid rgba(139, 92, 246, 0.45)',
+                      color: '#c084fc',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.02em',
+                      boxShadow: '0 0 12px rgba(139, 92, 246, 0.2)',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Sparkles size={13} />
+                    <span>{isAIDebugLoading ? 'AI Analyzing...' : 'AI Debug'}</span>
+                  </button>
+                )}
             </div>
 
             {/* Compilation Diagnostics */}

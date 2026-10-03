@@ -1,4 +1,10 @@
-import { SubmissionRequest, SubmissionResponse, StreamEvent } from '../types';
+import {
+  SubmissionRequest,
+  SubmissionResponse,
+  StreamEvent,
+  AIDebugRequest,
+  AIDebugResponse,
+} from '../types';
 
 const API_BASE_URL =
   typeof window !== 'undefined' && window.location.port === '3000'
@@ -186,6 +192,40 @@ export async function verifyRazorpayPayment(payload: {
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Razorpay signature verification failed: ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function requestAIDebug(
+  req: AIDebugRequest
+): Promise<AIDebugResponse> {
+  const url = `${API_BASE_URL}/api/v1/ai/debug`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-User-ID': req.user_id,
+    },
+    body: JSON.stringify(req),
+  });
+
+  if (!response.ok) {
+    let errPayload: any = null;
+    try {
+      errPayload = await response.json();
+    } catch {
+      const text = await response.text();
+      errPayload = { detail: text };
+    }
+    const error: any = new Error(
+      errPayload?.detail?.message ||
+        errPayload?.detail ||
+        `AI Debug request failed (${response.status})`
+    );
+    error.status = response.status;
+    error.payload = errPayload;
+    throw error;
   }
 
   return response.json();

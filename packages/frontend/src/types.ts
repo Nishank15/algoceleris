@@ -99,3 +99,27 @@ export interface EntitlementState {
   rate_limit_per_minute: number;
 }
 
+export interface AIDebugRequest {
+  user_id: string;
+  language: string;
+  source_code: string;
+  problem_title: string;
+  problem_description: string;
+  failing_test_cases?: Array<{
+    id?: number;
+    input?: string;
+    expected?: string;
+    actual?: string;
+  }>;
+  error_diagnostics?: string | null;
+}
+
+export interface AIDebugResponse {
+  root_cause: string;
+  complexity_analysis: string;
+  fix_explanation: string;
+  fixed_code: string;
+  code_diff: string;
+}
+
+
