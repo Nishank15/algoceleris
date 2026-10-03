@@ -74,21 +74,21 @@ Which phases cover which requirements. Filled during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | TBD | Pending |
-| DS-02 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| LAND-01 | TBD | Pending |
-| LAND-02 | TBD | Pending |
-| AUTH-01 | TBD | Pending |
-| AUTH-02 | TBD | Pending |
-| CAT-01 | TBD | Pending |
-| CAT-02 | TBD | Pending |
-| IDE-01 | TBD | Pending |
-| IDE-02 | TBD | Pending |
-| IDE-03 | TBD | Pending |
-| IDE-04 | TBD | Pending |
-| PROF-01 | TBD | Pending |
-| PROF-02 | TBD | Pending |
-| CONT-01 | TBD | Pending |
-| CONT-02 | TBD | Pending |
+| DS-01 | Phase 8 | Pending |
+| DS-02 | Phase 8 | Pending |
+| NAV-01 | Phase 8 | Pending |
+| NAV-02 | Phase 8 | Pending |
+| LAND-01 | Phase 9 | Pending |
+| LAND-02 | Phase 9 | Pending |
+| AUTH-01 | Phase 9 | Pending |
+| AUTH-02 | Phase 9 | Pending |
+| CAT-01 | Phase 10 | Pending |
+| CAT-02 | Phase 10 | Pending |
+| IDE-01 | Phase 11 | Pending |
+| IDE-02 | Phase 11 | Pending |
+| IDE-03 | Phase 11 | Pending |
+| IDE-04 | Phase 11 | Pending |
+| PROF-01 | Phase 12 | Pending |
+| PROF-02 | Phase 12 | Pending |
+| CONT-01 | Phase 12 | Pending |
+| CONT-02 | Phase 12 | Pending |
