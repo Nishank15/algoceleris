@@ -10,6 +10,8 @@ import { ZenModeBanner } from './components/ZenModeBanner';
 import { PricingModal } from './components/PricingModal';
 import { AIDebugModal } from './components/AIDebugModal';
 import { ContestLeaderboardModal } from './components/ContestLeaderboardModal';
+import { ProctoringWarningModal } from './components/ProctoringWarningModal';
+import { useContestProctoring } from './hooks/useContestProctoring';
 import {
   Language,
   SubmissionStatus,
@@ -38,6 +40,33 @@ export const App: React.FC = () => {
 
   // Contest Leaderboard state
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
+
+  // Contest Mode & Proctoring State
+  const [isContestMode, setIsContestMode] = useState<boolean>(false);
+
+  const {
+    strikeCount,
+    isFlagged,
+    isWarningModalOpen,
+    lastViolation,
+    requestFullscreen,
+    exitFullscreen,
+    dismissWarning,
+  } = useContestProctoring({
+    enabled: isContestMode,
+    contestId: 'weekly-contest-1',
+    userId: 'competitor-1',
+  });
+
+  const handleToggleContestMode = useCallback(() => {
+    if (!isContestMode) {
+      setIsContestMode(true);
+      requestFullscreen();
+    } else {
+      setIsContestMode(false);
+      exitFullscreen();
+    }
+  }, [isContestMode, requestFullscreen, exitFullscreen]);
 
   // Multi-language code buffer
   const [codeBuffers, setCodeBuffers] = useState<Record<Language, string>>(
@@ -357,6 +386,9 @@ export const App: React.FC = () => {
         currentTier={userTier}
         onOpenPricingModal={handleOpenPricingModal}
         onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
+        isContestMode={isContestMode}
+        strikeCount={strikeCount}
+        onToggleContestMode={handleToggleContestMode}
       />
 
       <ResizableLayout
@@ -367,6 +399,7 @@ export const App: React.FC = () => {
             language={activeLanguage}
             value={currentCode}
             onChange={handleCodeChange}
+            contestMode={isContestMode}
           />
         }
         consolePane={
@@ -409,6 +442,16 @@ export const App: React.FC = () => {
       <ContestLeaderboardModal
         isOpen={isLeaderboardModalOpen}
         onClose={() => setIsLeaderboardModalOpen(false)}
+      />
+
+      <ProctoringWarningModal
+        isOpen={isWarningModalOpen}
+        strikeCount={strikeCount}
+        isFlagged={isFlagged}
+        violationType={lastViolation?.type}
+        violationDetail={lastViolation?.detail}
+        onResumeFullscreen={requestFullscreen}
+        onDismiss={dismissWarning}
       />
     </div>
   );

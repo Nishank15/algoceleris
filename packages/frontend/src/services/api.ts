@@ -6,6 +6,8 @@ import {
   AIDebugResponse,
   LeaderboardEntry,
   ContestDetails,
+  ProctoringEvent,
+  ProctoringAuditReport,
 } from '../types';
 
 const API_BASE_URL =
@@ -300,5 +302,39 @@ export function subscribeContestLeaderboard(
     }
   };
 }
+
+export async function logProctoringEvent(
+  contestId: string,
+  event: ProctoringEvent
+): Promise<{ status: string; event_id: string; strike_count: number; is_flagged: boolean }> {
+  const url = `${API_BASE_URL}/api/v1/contests/${contestId}/proctor/event`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(event),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to log proctoring event (${response.status}): ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function getProctoringAudit(
+  contestId: string,
+  userId: string
+): Promise<ProctoringAuditReport> {
+  const url = `${API_BASE_URL}/api/v1/contests/${contestId}/proctor/audit/${userId}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch proctoring audit (${response.status})`);
+  }
+  return response.json();
+}
+
 
 

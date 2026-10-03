@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy } from 'lucide-react';
+import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy, Shield } from 'lucide-react';
 import { Language, Problem, SubscriptionTier } from '../types';
 
 interface HeaderProps {
@@ -16,6 +16,9 @@ interface HeaderProps {
   currentTier: SubscriptionTier;
   onOpenPricingModal: () => void;
   onOpenLeaderboard?: () => void;
+  isContestMode?: boolean;
+  strikeCount?: number;
+  onToggleContestMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -32,6 +35,9 @@ export const Header: React.FC<HeaderProps> = ({
   currentTier,
   onOpenPricingModal,
   onOpenLeaderboard,
+  isContestMode = false,
+  strikeCount = 0,
+  onToggleContestMode,
 }) => {
   return (
     <header className="header-nav">
@@ -74,6 +80,38 @@ export const Header: React.FC<HeaderProps> = ({
             <Trophy size={14} className="trophy-glow-icon" />
             <span>Leaderboard</span>
           </button>
+        )}
+
+        {/* Contest Mode Toggle / Indicator */}
+        {onToggleContestMode && (
+          isContestMode ? (
+            <div className="contest-mode-badge" title="Contest Mode Active with Fullscreen and Proctoring Enforced">
+              <span className="contest-dot-active" />
+              <span>CONTEST MODE</span>
+              {strikeCount > 0 && (
+                <span style={{ opacity: 0.9, fontSize: '0.72rem', color: strikeCount >= 3 ? '#ef4444' : '#f59e0b' }}>
+                  ({strikeCount}/3 Strikes)
+                </span>
+              )}
+              <button
+                className="btn btn-contest-exit"
+                onClick={onToggleContestMode}
+                title="Exit Contest Mode"
+              >
+                Exit
+              </button>
+            </div>
+          ) : (
+            <button
+              className="btn btn-contest-enter"
+              onClick={onToggleContestMode}
+              title="Enter Proctored Contest Mode (Enforces Fullscreen & Anti-Cheat)"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Shield size={14} />
+              <span>Contest Mode</span>
+            </button>
+          )
         )}
         {/* Pro Badge or Upgrade to Pro Action */}
         {currentTier === 'pro' ? (

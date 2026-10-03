@@ -8,9 +8,11 @@ from .ai import GeminiDebugAssistant, create_ai_router, get_ai_assistant
 from .contests import (
     ContestStore,
     LeaderboardEngine,
+    ProctoringStore,
     create_contests_router,
     get_contest_store,
     get_leaderboard_engine,
+    get_proctoring_store,
 )
 from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
 from .queue import QueueBroker, get_queue_broker
@@ -92,6 +94,7 @@ def create_app(
     ai_assistant: Optional[GeminiDebugAssistant] = None,
     contest_store: Optional[ContestStore] = None,
     leaderboard_engine: Optional[LeaderboardEngine] = None,
+    proctoring_store: Optional[ProctoringStore] = None,
 ) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
@@ -105,6 +108,7 @@ def create_app(
     active_assistant = ai_assistant or get_ai_assistant()
     active_contest_store = contest_store or get_contest_store()
     active_leaderboard = leaderboard_engine or get_leaderboard_engine(active_contest_store)
+    active_proctoring = proctoring_store or get_proctoring_store()
 
     ws_manager = WebSocketConnectionManager()
     app.state.broker = active_broker
@@ -113,6 +117,7 @@ def create_app(
     app.state.ai_assistant = active_assistant
     app.state.contest_store = active_contest_store
     app.state.leaderboard_engine = active_leaderboard
+    app.state.proctoring_store = active_proctoring
     app.state.ws_manager = ws_manager
 
     api_router = create_router(active_broker, rate_limiter=active_limiter)
@@ -126,6 +131,7 @@ def create_app(
         store=active_contest_store,
         broker=active_broker,
         leaderboard=active_leaderboard,
+        proctoring=active_proctoring,
     )
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
@@ -151,6 +157,7 @@ def create_app(
             "ai_assistant": active_assistant.__class__.__name__,
             "contest_store": active_contest_store.__class__.__name__,
             "leaderboard_engine": active_leaderboard.__class__.__name__,
+            "proctoring_store": active_proctoring.__class__.__name__,
         }
 
     return app

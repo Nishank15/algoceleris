@@ -8,6 +8,7 @@ interface CodeEditorProps {
   value: string;
   onChange: (val: string) => void;
   readOnly?: boolean;
+  contestMode?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -15,6 +16,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   value,
   onChange,
   readOnly = false,
+  contestMode = false,
 }) => {
   const handleBeforeMount = useCallback((monaco: Monaco) => {
     monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
@@ -23,7 +25,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const handleMount: OnMount = useCallback((editor, monaco) => {
     monaco.editor.setTheme(LINEAR_MIDNIGHT_THEME_NAME);
     editor.focus();
-  }, []);
+
+    if (contestMode) {
+      const domNode = editor.getDomNode();
+      if (domNode) {
+        domNode.addEventListener('paste', (e) => e.preventDefault(), true);
+        domNode.addEventListener('copy', (e) => e.preventDefault(), true);
+        domNode.addEventListener('cut', (e) => e.preventDefault(), true);
+        domNode.addEventListener('contextmenu', (e) => e.preventDefault(), true);
+      }
+    }
+  }, [contestMode]);
 
   // Map internal language identifiers to Monaco language IDs
   const monacoLanguage = language === 'cpp' ? 'cpp' : language === 'python' ? 'python' : 'java';
@@ -41,6 +53,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         onMount={handleMount}
         options={{
           readOnly,
+          contextmenu: !contestMode,
           fontFamily: "'JetBrains Mono', monospace",
           fontSize: 14,
           lineHeight: 22,

@@ -13,6 +13,7 @@ from .models import (
     ContestSubmissionResponse,
     ParticipantScore,
 )
+from .proctoring import ProctoringEvent, ProctoringStore, get_proctoring_store
 from .scoring import ICPCScoringEngine
 from .store import ContestStore, get_contest_store
 
@@ -21,11 +22,13 @@ def create_contests_router(
     store: Optional[ContestStore] = None,
     broker: Optional[QueueBroker] = None,
     leaderboard: Optional[LeaderboardEngine] = None,
+    proctoring: Optional[ProctoringStore] = None,
 ) -> APIRouter:
     router = APIRouter(prefix="/contests", tags=["Contest Engine"])
     active_store = store or get_contest_store()
     active_broker = broker or get_queue_broker()
     active_leaderboard = leaderboard or get_leaderboard_engine(active_store)
+    active_proctoring = proctoring or get_proctoring_store()
 
     @router.get("", response_model=List[Contest], summary="List all timed competitive programming contests")
     def list_contests() -> List[Contest]:
@@ -188,5 +191,65 @@ def create_contests_router(
             total_penalty_minutes=updated_participant.total_penalty_minutes,
             penalty_delta=penalty_delta,
         )
+
+    @router.post(
+        "/{contest_id}/proctor/event",
+        summary="Log proctoring violation event (fullscreen exit, tab blur, clipboard, context menu)",
+    )
+    def log_proctor_event(
+        contest_id: str,
+        event: ProctoringEvent,
+    ):
+        contest = active_store.get_contest(contest_id)
+        if not contest:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Contest '{contest_id}' not found",
+            )
+
+        event.contest_id = contest_id
+        strike_count = active_proctoring.log_event(event)
+
+        # Broadcast event to contest events channel
+        active_broker.publish(
+            f"contest:{contest_id}:events",
+            {
+                "event_type": "proctoring_violation",
+                "contest_id": contest_id,
+                "user_id": event.user_id,
+                "violation": event.event_type.value,
+                "strike_count": strike_count,
+                "timestamp": event.timestamp,
+            },
+        )
+
+        return {
+            "status": "recorded",
+            "event_id": event.event_id,
+            "strike_count": strike_count,
+            "is_flagged": strike_count >= 3,
+        }
+
+    @router.get(
+        "/{contest_id}/proctor/audit/{user_id}",
+        summary="Retrieve proctoring audit log and violation history for participant",
+    )
+    def get_proctor_audit(contest_id: str, user_id: str):
+        contest = active_store.get_contest(contest_id)
+        if not contest:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Contest '{contest_id}' not found",
+            )
+
+        strikes = active_proctoring.get_participant_strikes(contest_id, user_id)
+        events = active_proctoring.get_events(contest_id, user_id)
+        return {
+            "contest_id": contest_id,
+            "user_id": user_id,
+            "strike_count": strikes,
+            "is_flagged": strikes >= 3,
+            "events": [e.model_dump() for e in events],
+        }
 
     return router

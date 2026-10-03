@@ -158,4 +158,29 @@ export interface ContestDetails {
   problems: ContestProblem[];
 }
 
+export type ProctoringEventType =
+  | 'FULLSCREEN_EXIT'
+  | 'TAB_BLUR'
+  | 'CLIPBOARD_COPY'
+  | 'CLIPBOARD_PASTE'
+  | 'CONTEXT_MENU';
+
+export interface ProctoringEvent {
+  event_id?: string;
+  contest_id: string;
+  user_id: string;
+  event_type: ProctoringEventType;
+  timestamp?: number;
+  strike_count?: number;
+  details?: string | null;
+}
+
+export interface ProctoringAuditReport {
+  contest_id: string;
+  user_id: string;
+  strike_count: number;
+  is_flagged: boolean;
+  events: ProctoringEvent[];
+}
+
 
