@@ -151,9 +151,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 07-01: AST-based Winnowing / MOSS plagiarism detection daemon with pairwise submission similarity scoring
-- [ ] 07-02: 3D Isometric contribution heatmap and custom isometric cube loader components
-- [ ] 07-03: HAProxy Layer 7 reverse proxy configuration, WebSocket proxying, and multi-instance gateway load balancing
+- [x] 07-01: AST-based Winnowing / MOSS plagiarism detection daemon with pairwise submission similarity scoring
+- [x] 07-02: 3D Isometric contribution heatmap and custom isometric cube loader components
+- [x] 07-03: HAProxy Layer 7 reverse proxy configuration, WebSocket proxying, and multi-instance gateway load balancing
 
 ## Progress
 
@@ -164,8 +164,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 |-------|----------------|--------|-----------|
 | 1. Isolated Sandbox & Multi-Language Runner | 3/3 | Complete | 2026-10-02 |
 | 2. Asynchronous Queue & Real-Time Streaming | 3/3 | Complete | 2026-10-02 |
-| 3. Midnight Dark Linear IDE Frontend | 0/3 | Not started | - |
-| 4. Commercial Subscriptions & Dual Payment Gateways | 0/3 | Not started | - |
-| 5. AI Code Assistant & Token-Bucket Rate Limiter | 0/2 | Not started | - |
-| 6. Real-time Contest Engine & Proctoring | 0/3 | Not started | - |
-| 7. Plagiarism Engine, 3D Isometric Analytics & HAProxy Ingress | 0/3 | Not started | - |
+| 3. Midnight Dark Linear IDE Frontend | 3/3 | Complete | 2026-10-03 |
+| 4. Commercial Subscriptions & Dual Payment Gateways | 3/3 | Complete | 2026-10-03 |
+| 5. AI Code Assistant & Token-Bucket Rate Limiter | 2/2 | Complete | 2026-10-03 |
+| 6. Real-time Contest Engine & Proctoring | 3/3 | Complete | 2026-10-03 |
+| 7. Plagiarism Engine, 3D Isometric Analytics & HAProxy Ingress | 3/3 | Complete | 2026-10-03 |
