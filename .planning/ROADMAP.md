@@ -92,9 +92,9 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 11-01: Problem-specific LeetCode class Solution starter templates and 10-second client execution watchdog
+- [x] 11-01: Problem-specific LeetCode class Solution starter templates and 10-second client execution watchdog
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 11-02: Side-by-side testcase diff viewer with token mismatch highlights and Acid Lime streaming submit button
+- [x] 11-02: Side-by-side testcase diff viewer with token mismatch highlights and Acid Lime streaming submit button
 
 ### Phase 12: Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards
 

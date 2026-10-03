@@ -32,7 +32,11 @@ interface TestConsoleProps {
   errorDiagnostics: string | null;
   onTriggerAIDebug?: () => void;
   isAIDebugLoading?: boolean;
+  onRetry?: () => void;
 }
+
+const isWatchdogError = (msg: string | null) =>
+  !!msg && msg.startsWith('Execution Watchdog');
 
 
 export const TestConsole: React.FC<TestConsoleProps> = ({
@@ -48,9 +52,11 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
   errorDiagnostics,
   onTriggerAIDebug,
   isAIDebugLoading,
+  onRetry,
 }) => {
   const [selectedCaseIndex, setSelectedCaseIndex] = useState<number>(0);
   const [selectedResultIndex, setSelectedResultIndex] = useState<number>(0);
+  const [diffMode, setDiffMode] = useState<'diff' | 'raw'>('diff');
 
   // Extract latest status details from stream events or final report
   const currentEvent = streamEvents[streamEvents.length - 1];
@@ -87,6 +93,7 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
     }
 
     if (errorDiagnostics) {
+      const isWatchdog = isWatchdogError(errorDiagnostics);
       const isSystemError = errorDiagnostics.includes('Judge Service');
       return (
         <span
@@ -98,7 +105,13 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
           }}
         >
           <XCircle size={16} />
-          <span>{isSystemError ? 'SYSTEM ERROR' : 'COMPILATION ERROR'}</span>
+          <span>
+            {isWatchdog
+              ? 'WATCHDOG TIMEOUT'
+              : isSystemError
+              ? 'SYSTEM ERROR'
+              : 'COMPILATION ERROR'}
+          </span>
         </span>
       );
     }
@@ -284,12 +297,12 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                       gap: '6px',
                       padding: '5px 12px',
                       borderRadius: '6px',
-                      background: 'rgba(94, 106, 210, 0.15)',
-                      border: '1px solid rgba(94, 106, 210, 0.4)',
+                      background: 'var(--bg-surface-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       color: '#f7f8f8',
                       cursor: 'pointer',
                       fontSize: '11px',
-                      fontWeight: 600,
+                      fontWeight: 590,
                       letterSpacing: '0.02em',
                       boxShadow: 'none',
                       transition: 'all 0.15s ease',
@@ -301,10 +314,35 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                 )}
             </div>
 
+            {/* Watchdog timeout alert */}
+            {isWatchdogError(errorDiagnostics) && (
+              <div className="watchdog-alert-card" role="alert">
+                <AlertTriangle size={18} className="watchdog-alert-icon" />
+                <div className="watchdog-alert-body">
+                  <div className="watchdog-alert-title">Execution watchdog triggered</div>
+                  <p className="watchdog-alert-text">{errorDiagnostics}</p>
+                  <ul className="watchdog-alert-hints">
+                    <li>Check for infinite loops or blocking reads on stdin.</li>
+                    <li>Verify the gateway, Redis queue and worker are running.</li>
+                  </ul>
+                </div>
+                {onRetry && (
+                  <button
+                    type="button"
+                    className="watchdog-retry-btn"
+                    onClick={onRetry}
+                  >
+                    Retry Evaluation
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Compilation Diagnostics */}
-            {(errorDiagnostics ||
-              currentEvent?.event_type === 'compilation_failed' ||
-              submissionReport?.compile_output) && (
+            {!isWatchdogError(errorDiagnostics) &&
+              (errorDiagnostics ||
+                currentEvent?.event_type === 'compilation_failed' ||
+                submissionReport?.compile_output) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span className="sample-sublabel" style={{ color: '#fda4af' }}>
                   {errorDiagnostics && errorDiagnostics.includes('Judge Service') ? 'System Diagnostics' : 'Compiler Output & Diagnostics'}
@@ -356,20 +394,48 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                       }}
                     >
                       {/* Diff Viewer for Wrong Answer */}
-                      {submissionReport.test_case_results[selectedResultIndex]
-                        .verdict === 'WRONG_ANSWER' &&
-                        sampleCases[selectedResultIndex] && (
-                          <DiffViewer
-                            expected={
-                              sampleCases[selectedResultIndex].expected_output
-                            }
-                            actual={
-                              submissionReport.test_case_results[
-                                selectedResultIndex
-                              ].stdout
-                            }
-                          />
-                        )}
+                      {(() => {
+                        const result =
+                          submissionReport.test_case_results[selectedResultIndex];
+                        const matchedCase = sampleCases.find(
+                          (tc) => tc.id === result.test_case_id
+                        );
+                        const isMismatch =
+                          result.verdict === 'WRONG_ANSWER' ||
+                          (!!matchedCase &&
+                            result.verdict !== 'ACCEPTED' &&
+                            result.stdout.trim() !==
+                              matchedCase.expected_output.trim());
+                        if (!matchedCase || !isMismatch) return null;
+                        return (
+                          <>
+                            <div className="diff-mode-toggle" role="group" aria-label="Output view mode">
+                              <button
+                                type="button"
+                                className={`diff-mode-btn ${diffMode === 'diff' ? 'active' : ''}`}
+                                onClick={() => setDiffMode('diff')}
+                              >
+                                Side-by-Side Diff
+                              </button>
+                              <button
+                                type="button"
+                                className={`diff-mode-btn ${diffMode === 'raw' ? 'active' : ''}`}
+                                onClick={() => setDiffMode('raw')}
+                              >
+                                Raw Output
+                              </button>
+                            </div>
+                            {diffMode === 'diff' ? (
+                              <DiffViewer
+                                expected={matchedCase.expected_output}
+                                actual={result.stdout}
+                              />
+                            ) : (
+                              <pre className="code-block">{result.stdout || '(no output)'}</pre>
+                            )}
+                          </>
+                        );
+                      })()}
 
                       {/* Stderr if any */}
                       {submissionReport.test_case_results[selectedResultIndex]

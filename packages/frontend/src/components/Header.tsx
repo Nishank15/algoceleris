@@ -1,5 +1,6 @@
 import React from 'react';
-import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy, Shield, BarChart2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Play, Send, Maximize2, Minimize2, Sparkles, Trophy, Shield, BarChart2, ChevronRight } from 'lucide-react';
 import { Language, Problem, SubscriptionTier } from '../types';
 
 interface HeaderProps {
@@ -20,6 +21,7 @@ interface HeaderProps {
   isContestMode?: boolean;
   strikeCount?: number;
   onToggleContestMode?: () => void;
+  submitLabel?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -40,20 +42,17 @@ export const Header: React.FC<HeaderProps> = ({
   isContestMode = false,
   strikeCount = 0,
   onToggleContestMode,
+  submitLabel,
 }) => {
   return (
     <header className="header-nav">
       <div className="header-left">
-        <div className="brand-badge" title="Cloud-Judge V2 Online Judge">
-          <Terminal className="logo-icon" />
-          <span>CLOUD-JUDGE</span>
-          <span className="version-pill">V2</span>
-        </div>
-
-        <div className="nav-divider" />
+        <nav className="workspace-breadcrumb" aria-label="Breadcrumb">
+          <Link to="/problems" className="workspace-breadcrumb-link">Problems</Link>
+          <ChevronRight size={12} className="workspace-breadcrumb-sep" />
+        </nav>
 
         <div className="problem-breadcrumb">
-          <span>Problem:</span>
           <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
             <select
               value={activeProblemId}
@@ -191,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Submit solution to online judge"
         >
           <Send size={14} />
-          <span>{isRunning ? 'Judging...' : 'Submit Solution'}</span>
+          <span>{submitLabel ?? (isRunning ? 'Judging...' : 'Submit Solution')}</span>
         </button>
       </div>
     </header>

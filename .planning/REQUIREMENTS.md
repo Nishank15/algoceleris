@@ -34,10 +34,10 @@ Requirements for Milestone v2.1. Each maps to roadmap phases.
 
 ### Distraction-Free IDE Workspace
 
-- [ ] **IDE-01**: Dedicated 3-pane Monaco IDE workspace at `/problems/:slug` loading problem description, starter solution stubs (standard LeetCode `class Solution`), and testcase console.
-- [ ] **IDE-02**: 10-second client-side execution watchdog that automatically intercepts and alerts if judging responses hang, preventing locked UI states.
-- [ ] **IDE-03**: Side-by-side testcase output and expected result diffing view with visual mismatch highlighting.
-- [ ] **IDE-04**: Primary execution action styled with high-contrast Acid Lime (#e4f222) Submit button with real-time test evaluation streaming.
+- [x] **IDE-01**: Dedicated 3-pane Monaco IDE workspace at `/problems/:slug` loading problem description, starter solution stubs (standard LeetCode `class Solution`), and testcase console.
+- [x] **IDE-02**: 10-second client-side execution watchdog that automatically intercepts and alerts if judging responses hang, preventing locked UI states.
+- [x] **IDE-03**: Side-by-side testcase output and expected result diffing view with visual mismatch highlighting.
+- [x] **IDE-04**: Primary execution action styled with high-contrast Acid Lime (#e4f222) Submit button with real-time test evaluation streaming.
 
 ### Developer Profile & 3D Skyline
 
@@ -84,10 +84,10 @@ Which phases cover which requirements. Filled during roadmap creation.
 | AUTH-02 | Phase 9 | Complete |
 | CAT-01 | Phase 10 | Complete |
 | CAT-02 | Phase 10 | Complete |
-| IDE-01 | Phase 11 | Pending |
-| IDE-02 | Phase 11 | Pending |
-| IDE-03 | Phase 11 | Pending |
-| IDE-04 | Phase 11 | Pending |
+| IDE-01 | Phase 11 | Complete |
+| IDE-02 | Phase 11 | Complete |
+| IDE-03 | Phase 11 | Complete |
+| IDE-04 | Phase 11 | Complete |
 | PROF-01 | Phase 12 | Pending |
 | PROF-02 | Phase 12 | Pending |
 | CONT-01 | Phase 12 | Pending |

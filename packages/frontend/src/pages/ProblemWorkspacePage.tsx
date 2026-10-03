@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PROBLEMS } from '../constants/problems';
-import { STARTER_TEMPLATES } from '../constants/templates';
+import { getStarterTemplates } from '../constants/templates';
+import { markProblemSolved, markProblemAttempted } from '../services/problemService';
 import { Header } from '../components/Header';
 import { ResizableLayout } from '../components/ResizableLayout';
 import { ProblemPane } from '../components/ProblemPane';
@@ -29,6 +30,10 @@ import {
   requestAIDebug,
 } from '../services/api';
 
+/** Client-side execution watchdog: max wait for a terminal verdict. */
+const WATCHDOG_TIMEOUT_MS = 10_000;
+const WATCHDOG_MESSAGE =
+  'Execution Watchdog: Sandbox evaluation timed out after 10.0s without receiving a terminal verdict. The judge worker or queue may be congested. Please retry.';
 
 export const ProblemWorkspacePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -76,10 +81,29 @@ export const ProblemWorkspacePage: React.FC = () => {
     }
   }, [isContestMode, requestFullscreen, exitFullscreen]);
 
-  // Multi-language code buffer
-  const [codeBuffers, setCodeBuffers] = useState<Record<Language, string>>(
-    () => ({ ...STARTER_TEMPLATES })
-  );
+  // Per-problem, multi-language code buffers (lazily seeded with LeetCode class Solution stubs)
+  const [codeBuffers, setCodeBuffers] = useState<
+    Record<string, Record<Language, string>>
+  >({});
+
+  // Watchdog + stream lifecycle refs
+  const watchdogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+
+  const clearWatchdog = useCallback(() => {
+    if (watchdogTimerRef.current) {
+      clearTimeout(watchdogTimerRef.current);
+      watchdogTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearWatchdog();
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
+    };
+  }, [clearWatchdog]);
 
   const [isZenMode, setIsZenMode] = useState<boolean>(false);
   const [activeConsoleTab, setActiveConsoleTab] = useState<
@@ -109,17 +133,23 @@ export const ProblemWorkspacePage: React.FC = () => {
     return problems.find((p) => p.id === activeProblemId) || problems[0];
   }, [problems, activeProblemId]);
 
-  // Code editor value for active language
-  const currentCode = codeBuffers[activeLanguage];
+  // Code editor value for active problem + language
+  const currentCode = (
+    codeBuffers[activeProblem.id] ?? getStarterTemplates(activeProblem.id)
+  )[activeLanguage];
 
   const handleCodeChange = useCallback(
     (newCode: string) => {
+      const pid = activeProblem.id;
       setCodeBuffers((prev) => ({
         ...prev,
-        [activeLanguage]: newCode,
+        [pid]: {
+          ...(prev[pid] ?? getStarterTemplates(pid)),
+          [activeLanguage]: newCode,
+        },
       }));
     },
-    [activeLanguage]
+    [activeLanguage, activeProblem.id]
   );
 
   // Switch language
@@ -147,12 +177,40 @@ export const ProblemWorkspacePage: React.FC = () => {
   // Execute Submission Helper
   const executeSubmission = useCallback(
     async (isSampleRun: boolean) => {
+      // Tear down any prior stream/watchdog before starting a new evaluation
+      clearWatchdog();
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
+
       setIsRunning(true);
       setActiveConsoleTab('output');
       setStreamEvents([]);
       setSubmissionStatus('QUEUED');
       setSubmissionReport(null);
       setErrorDiagnostics(null);
+
+      const isCustomRun = activeConsoleTab === 'custom' && !!customInput.trim();
+      const problemId = activeProblem.id;
+
+      // Arm the 10s watchdog: guarantees the UI can never stay locked
+      watchdogTimerRef.current = setTimeout(() => {
+        watchdogTimerRef.current = null;
+        unsubscribeRef.current?.();
+        unsubscribeRef.current = null;
+        setIsRunning(false);
+        setSubmissionStatus('FAILED');
+        setErrorDiagnostics(WATCHDOG_MESSAGE);
+        setSubmissionReport(null);
+      }, WATCHDOG_TIMEOUT_MS);
+
+      const recordOutcome = (verdict: string) => {
+        if (isCustomRun) return;
+        if (verdict === 'ACCEPTED' && !isSampleRun) {
+          markProblemSolved(problemId);
+        } else if (verdict !== 'ACCEPTED') {
+          markProblemAttempted(problemId);
+        }
+      };
 
       // Prepare test cases
       let testCasesToRun = isSampleRun
@@ -198,10 +256,13 @@ export const ProblemWorkspacePage: React.FC = () => {
             } else if (ev.event_type === 'test_case_start') {
               setSubmissionStatus('RUNNING');
             } else if (ev.event_type === 'compilation_failed') {
+              clearWatchdog();
               setSubmissionStatus('FAILED');
               setErrorDiagnostics(ev.data?.diagnostics || 'Compilation failed');
               setIsRunning(false);
+              markProblemAttempted(problemId);
             } else if (ev.event_type === 'completed') {
+              clearWatchdog();
               setSubmissionStatus('COMPLETED');
               setIsRunning(false);
 
@@ -210,6 +271,7 @@ export const ProblemWorkspacePage: React.FC = () => {
                 .then((subData) => {
                   if (subData?.report) {
                     setSubmissionReport(subData.report);
+                    recordOutcome(subData.report.verdict);
                   }
                 })
                 .catch((err) => {
@@ -218,29 +280,33 @@ export const ProblemWorkspacePage: React.FC = () => {
             }
           },
           () => {
+            // Stream closed: if watchdog is still armed it keeps guarding the verdict
             setIsRunning(false);
           },
           (err) => {
             console.warn('WebSocket stream error, polling status...', err);
-            // Polling fallback if WebSocket drops
+            // Polling fallback if WebSocket drops (watchdog still guards total wait)
             setTimeout(async () => {
               try {
                 const subData = await getSubmission(subId);
                 if (subData?.report) {
+                  clearWatchdog();
                   setSubmissionReport(subData.report);
                   setSubmissionStatus('COMPLETED');
+                  recordOutcome(subData.report.verdict);
                 }
               } catch (pollErr) {
                 console.error('Polling error:', pollErr);
               } finally {
-                setIsRunning(false);
+                if (!watchdogTimerRef.current) setIsRunning(false);
               }
             }, 1000);
           }
         );
 
-        return () => unsubscribe();
+        unsubscribeRef.current = unsubscribe;
       } catch (err: any) {
+        clearWatchdog();
         console.error('Submission request failed:', err);
         setSubmissionStatus('FAILED');
         setErrorDiagnostics(err.message || 'Judge Service Unavailable (Ensure Docker daemon and gateway are running)');
@@ -254,6 +320,7 @@ export const ProblemWorkspacePage: React.FC = () => {
       currentCode,
       activeConsoleTab,
       customInput,
+      clearWatchdog,
     ]
   );
 
@@ -371,6 +438,20 @@ export const ProblemWorkspacePage: React.FC = () => {
     [handleCodeChange]
   );
 
+  const submitLabel = useMemo(() => {
+    if (!isRunning) return 'Submit Solution';
+    const latest = streamEvents[streamEvents.length - 1];
+    if (latest?.event_type === 'compiling') return 'Compiling...';
+    if (latest?.event_type === 'test_case_start') {
+      const idx = latest.data?.index ?? 1;
+      const total =
+        latest.data?.total ??
+        activeProblem.sampleCases.length + (activeProblem.hiddenCases?.length || 0);
+      return `Evaluating ${idx}/${total}...`;
+    }
+    return 'Evaluating...';
+  }, [isRunning, streamEvents, activeProblem]);
+
   return (
     <div className="workspace-container">
       <Header
@@ -384,6 +465,7 @@ export const ProblemWorkspacePage: React.FC = () => {
         onRunSamples={handleRunSamples}
         onSubmit={handleSubmit}
         isRunning={isRunning}
+        submitLabel={submitLabel}
         currentTier={userTier}
         onOpenPricingModal={handleOpenPricingModal}
         onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
@@ -418,6 +500,7 @@ export const ProblemWorkspacePage: React.FC = () => {
             errorDiagnostics={errorDiagnostics}
             onTriggerAIDebug={handleTriggerAIDebug}
             isAIDebugLoading={isAIDebugLoading}
+            onRetry={handleSubmit}
           />
         }
       />

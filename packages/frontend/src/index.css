@@ -3538,3 +3538,170 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   background: var(--bg-surface-overlay);
   border-color: var(--border-active);
 }
+
+/* ==========================================================================
+   Phase 11: Distraction-Free Monaco IDE Workspace & Testcase Diffing (IDE-01..04)
+   ========================================================================== */
+
+.workspace-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workspace-breadcrumb-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.workspace-breadcrumb-link:hover {
+  color: var(--text-primary);
+}
+
+.workspace-breadcrumb-sep {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.diff-summary-badge {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(235, 87, 87, 0.15);
+  color: #fda4af;
+  margin-left: auto;
+  letter-spacing: 0.01em;
+}
+
+.diff-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.diff-copy-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 3px;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-copy-btn:hover {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+}
+
+.diff-token-mismatch {
+  background: rgba(235, 87, 87, 0.38);
+  border-radius: 2px;
+  padding: 0 3px;
+  color: #ffffff;
+  font-weight: 590;
+}
+
+.diff-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.diff-mode-btn {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.diff-mode-btn:hover {
+  color: var(--text-primary);
+}
+
+.diff-mode-btn.active {
+  background: var(--bg-surface-overlay);
+  color: var(--text-primary);
+  border-color: var(--border-active);
+  font-weight: 590;
+}
+
+.watchdog-alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: rgba(235, 87, 87, 0.08);
+  border: 1px solid rgba(235, 87, 87, 0.35);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin: 8px 0;
+}
+
+.watchdog-alert-icon {
+  color: #eb5757;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.watchdog-alert-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.watchdog-alert-title {
+  color: #fda4af;
+  font-size: 0.85rem;
+  font-weight: 590;
+  letter-spacing: -0.01em;
+}
+
+.watchdog-alert-text {
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.watchdog-alert-hints {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.watchdog-retry-btn {
+  align-self: center;
+  background: var(--bg-surface-elevated);
+  border: 1px solid rgba(235, 87, 87, 0.4);
+  color: #fda4af;
+  font-size: 0.78rem;
+  font-weight: 590;
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.watchdog-retry-btn:hover {
+  background: rgba(235, 87, 87, 0.18);
+  color: #ffffff;
+  border-color: #eb5757;
+}
