@@ -11,6 +11,7 @@ import { PricingModal } from './components/PricingModal';
 import { AIDebugModal } from './components/AIDebugModal';
 import { ContestLeaderboardModal } from './components/ContestLeaderboardModal';
 import { ProctoringWarningModal } from './components/ProctoringWarningModal';
+import { DeveloperAnalyticsModal } from './components/DeveloperAnalyticsModal';
 import { useContestProctoring } from './hooks/useContestProctoring';
 import {
   Language,
@@ -40,6 +41,9 @@ export const App: React.FC = () => {
 
   // Contest Leaderboard state
   const [isLeaderboardModalOpen, setIsLeaderboardModalOpen] = useState<boolean>(false);
+
+  // Developer Analytics state
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState<boolean>(false);
 
   // Contest Mode & Proctoring State
   const [isContestMode, setIsContestMode] = useState<boolean>(false);
@@ -386,6 +390,7 @@ export const App: React.FC = () => {
         currentTier={userTier}
         onOpenPricingModal={handleOpenPricingModal}
         onOpenLeaderboard={() => setIsLeaderboardModalOpen(true)}
+        onOpenAnalytics={() => setIsAnalyticsModalOpen(true)}
         isContestMode={isContestMode}
         strikeCount={strikeCount}
         onToggleContestMode={handleToggleContestMode}
@@ -442,6 +447,11 @@ export const App: React.FC = () => {
       <ContestLeaderboardModal
         isOpen={isLeaderboardModalOpen}
         onClose={() => setIsLeaderboardModalOpen(false)}
+      />
+
+      <DeveloperAnalyticsModal
+        isOpen={isAnalyticsModalOpen}
+        onClose={() => setIsAnalyticsModalOpen(false)}
       />
 
       <ProctoringWarningModal

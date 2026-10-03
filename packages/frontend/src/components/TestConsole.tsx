@@ -8,7 +8,6 @@ import {
   Clock,
   Cpu,
   AlertTriangle,
-  Loader2,
   Sparkles,
 } from 'lucide-react';
 import {
@@ -18,6 +17,7 @@ import {
   StreamEvent,
 } from '../types';
 import { DiffViewer } from './DiffViewer';
+import { IsometricCubeLoader } from './IsometricCubeLoader';
 
 interface TestConsoleProps {
   sampleCases: ProblemTestCase[];
@@ -57,23 +57,23 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
 
   const getStatusBadge = () => {
     if (isRunning) {
+      const activeLabel =
+        currentEvent?.event_type === 'compiling'
+          ? 'COMPILING SOLUTION...'
+          : currentEvent?.event_type === 'test_case_start'
+          ? `RUNNING TEST CASE ${currentEvent.data?.index ?? 1}/${currentEvent.data?.total ?? sampleCases.length}...`
+          : 'EVALUATING IN SANDBOX...';
+
       return (
         <span
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '8px',
             color: 'var(--color-running)',
           }}
         >
-          <Loader2 size={16} className="spin" />
-          <span>
-            {currentEvent?.event_type === 'compiling'
-              ? 'COMPILING SOLUTION...'
-              : currentEvent?.event_type === 'test_case_start'
-              ? `RUNNING TEST CASE ${currentEvent.data?.index ?? 1}/${currentEvent.data?.total ?? sampleCases.length}...`
-              : 'EVALUATING IN SANDBOX...'}
-          </span>
+          <IsometricCubeLoader size="sm" label={activeLabel} />
         </span>
       );
     }
@@ -378,6 +378,22 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                   )}
                 </>
               )}
+
+            {/* Sandboxed Evaluating State */}
+            {isRunning && !submissionReport && !errorDiagnostics && (
+              <div className="iso-evaluating-card">
+                <IsometricCubeLoader
+                  size="lg"
+                  label={
+                    currentEvent?.event_type === 'compiling'
+                      ? 'Compiling source code with cgroups isolation...'
+                      : currentEvent?.event_type === 'test_case_start'
+                      ? `Running sandboxed test case ${currentEvent.data?.index ?? 1}/${currentEvent.data?.total ?? sampleCases.length}...`
+                      : 'Sandboxed evaluation in progress...'
+                  }
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

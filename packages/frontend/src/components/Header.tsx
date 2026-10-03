@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy, Shield } from 'lucide-react';
+import { Play, Send, Maximize2, Minimize2, Terminal, Sparkles, Trophy, Shield, BarChart2 } from 'lucide-react';
 import { Language, Problem, SubscriptionTier } from '../types';
 
 interface HeaderProps {
@@ -16,6 +16,7 @@ interface HeaderProps {
   currentTier: SubscriptionTier;
   onOpenPricingModal: () => void;
   onOpenLeaderboard?: () => void;
+  onOpenAnalytics?: () => void;
   isContestMode?: boolean;
   strikeCount?: number;
   onToggleContestMode?: () => void;
@@ -35,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentTier,
   onOpenPricingModal,
   onOpenLeaderboard,
+  onOpenAnalytics,
   isContestMode = false,
   strikeCount = 0,
   onToggleContestMode,
@@ -79,6 +81,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Trophy size={14} className="trophy-glow-icon" />
             <span>Leaderboard</span>
+          </button>
+        )}
+
+        {/* Analytics Action Button */}
+        {onOpenAnalytics && (
+          <button
+            className="btn btn-secondary"
+            onClick={onOpenAnalytics}
+            title="View 3D Isometric Developer Analytics & Journey"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <BarChart2 size={14} className="accent-icon" />
+            <span>Analytics</span>
           </button>
         )}
 

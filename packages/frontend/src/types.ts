@@ -183,4 +183,25 @@ export interface ProctoringAuditReport {
   events: ProctoringEvent[];
 }
 
+export interface ActivityDay {
+  date: string;
+  count: number;
+  accepted: number;
+  level: 0 | 1 | 2 | 3 | 4;
+}
+
+export interface UserAnalytics {
+  total_submissions: number;
+  accepted_count: number;
+  acceptance_rate: number;
+  streak_days: number;
+  solved_easy: number;
+  solved_medium: number;
+  solved_hard: number;
+  total_easy: number;
+  total_medium: number;
+  total_hard: number;
+  history: ActivityDay[];
+}
+
 
