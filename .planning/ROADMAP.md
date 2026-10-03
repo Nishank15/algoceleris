@@ -107,3 +107,9 @@ Plans:
   2. 21st.dev 3D isometric contribution skyline is mounted on an Obsidian canvas with GitHub green level pillars and fixed tooltip positioning.
   3. `/contests` displays active, upcoming, and past contests with live countdown timers and registration buttons.
   4. Full-page contest leaderboard displays real-time Redis Sorted Set rankings with instant updates, ICPC penalties, and live polling.
+
+Plans:
+**Wave 1**
+- [ ] 12-01: Full-page developer profile with user card, circular difficulty ring, rating chart, and 3D skyline
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 12-02: Contests hub with active/upcoming/past cards, countdown timers, registration, and full-page leaderboard
