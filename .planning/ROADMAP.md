@@ -30,6 +30,14 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
   3. Client-side routing with `react-router-dom` seamlessly mounts routes for `/`, `/auth/login`, `/auth/signup`, `/problems`, `/problems/:slug`, `/u/:username`, and `/contests`.
   4. Unified top navigation bar renders route navigation, real-time system ping/latency indicator, and active user/guest avatar.
 
+**Plans**: 2 plans
+
+Plans:
+**Wave 1**
+- [ ] 08-01: Refero Linear Midnight precision palette, Inter typography constraints, and CSS token architecture
+**Wave 2** *(blocked on Wave 1 completion)*
+- [ ] 08-02: React Router DOM multi-page routing infrastructure, unified LinearHeaderNav, and route shells
+
 ### Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth
 
 **Goal**: Deliver a minimalist Linear-styled landing page with live micro-sandbox runner teaser and centered Carbon authentication cards with guest sign-in.
