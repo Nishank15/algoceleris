@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   X,
   BarChart3,
@@ -22,6 +22,13 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
   onClose,
   analytics,
 }) => {
+  const heatmapData = useMemo(() => {
+    if (!analytics?.history || analytics.history.length === 0) return undefined;
+    return analytics.history.map((d) => ({
+      date: d.date,
+      count: d.count,
+    }));
+  }, [analytics?.history]);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -187,10 +194,10 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
           {/* 3D Isometric Heatmap Section */}
           <div className="heatmap-section-container">
             <IsometricHeatmap
-              history={analytics?.history}
-              totalSubmissions={totalSubmissions}
-              acceptedCount={acceptedCount}
-              streakDays={streakDays}
+              data={heatmapData}
+              palette="grape"
+              defaultView="3d"
+              unit="submission"
             />
           </div>
 

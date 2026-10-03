@@ -1764,61 +1764,184 @@ html, body, #root {
 }
 
 /* ==========================================================================
-   3D Isometric Cube Loader (ANL-02)
+   3D Isometric Cube Tumbling Loader (21st.dev / ANL-02)
    ========================================================================== */
 
 .iso-loader-container {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.iso-cube-wrapper {
-  position: relative;
-  display: inline-flex;
+.iso-loader-inline {
+  flex-direction: row;
+}
+
+.iso-loader-stacked {
+  flex-direction: column;
+  gap: 20px;
+}
+
+.iso-loader-stage {
+  display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 800px;
 }
 
-.iso-cube-svg {
+.iso-scale-sm {
+  transform: scale(0.48);
+  width: 44px;
+  height: 32px;
+}
+
+.iso-scale-md {
+  transform: scale(0.75);
+  width: 72px;
+  height: 52px;
+}
+
+.iso-scale-lg {
+  transform: scale(1.05);
+  width: 100px;
+  height: 72px;
+}
+
+.boxes {
+  --size: 32px;
+  --duration: 800ms;
+  height: calc(var(--size) * 2);
+  width: calc(var(--size) * 3);
+  position: relative;
+  transform-style: preserve-3d;
+  transform-origin: 50% 50%;
+  margin-top: calc(var(--size) * 1.5 * -1);
+  transform: rotateX(60deg) rotateZ(45deg) rotateY(0deg) translateZ(0px);
+}
+
+.boxes .box {
+  width: var(--size);
+  height: var(--size);
+  top: 0;
+  left: 0;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.boxes .box.box-1 {
+  transform: translate(100%, 0);
+  animation: box1 var(--duration) linear infinite;
+}
+
+.boxes .box.box-2 {
+  transform: translate(0, 100%);
+  animation: box2 var(--duration) linear infinite;
+}
+
+.boxes .box.box-3 {
+  transform: translate(100%, 100%);
+  animation: box3 var(--duration) linear infinite;
+}
+
+.boxes .box.box-4 {
+  transform: translate(200%, 0);
+  animation: box4 var(--duration) linear infinite;
+}
+
+.boxes .box > .face {
+  --face-bg: #4f46e5;
+  --top: #a5b4fc;
+  --right: #6366f1;
+  --front: #4f46e5;
+  --back: #312e81;
+  position: absolute;
   width: 100%;
   height: 100%;
-  overflow: visible;
+  background: var(--face-bg);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
 }
 
-.iso-cube-body {
-  animation: isoCubeFloat 2.2s infinite ease-in-out;
-  transform-origin: 50px 52px;
+.boxes .box > .face.face-top {
+  top: 0;
+  left: 0;
+  background: var(--top);
+  transform: rotateX(90deg);
+  transform-origin: 50% 0%;
 }
 
-.iso-cube-shadow {
-  animation: isoShadowPulse 2.2s infinite ease-in-out;
-  transform-origin: 50px 98px;
+.boxes .box > .face.face-front {
+  left: 0;
+  top: 0;
+  background: var(--front);
+  transform: rotateY(270deg);
+  transform-origin: 0% 50%;
 }
 
-@keyframes isoCubeFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+.boxes .box > .face.face-right {
+  right: 0;
+  top: 0;
+  background: var(--right);
+  transform: rotateY(-270deg);
+  transform-origin: 100% 50%;
+}
+
+.boxes .box > .face.face-back {
+  bottom: 0;
+  left: 0;
+  background: var(--back);
+  transform: rotateX(-90deg);
+  transform-origin: 50% 100%;
+}
+
+@keyframes box1 {
+  0%, 50% {
+    transform: translate(100%, 0);
+  }
+  100% {
+    transform: translate(200%, 0);
+  }
+}
+
+@keyframes box2 {
+  0% {
+    transform: translate(0, 100%);
   }
   50% {
-    transform: translateY(-8px) rotate(1deg);
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(100%, 0);
   }
 }
 
-@keyframes isoShadowPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.8;
+@keyframes box3 {
+  0%, 50% {
+    transform: translate(100%, 100%);
+  }
+  100% {
+    transform: translate(0, 100%);
+  }
+}
+
+@keyframes box4 {
+  0% {
+    transform: translate(200%, 0);
   }
   50% {
-    transform: scale(0.68);
-    opacity: 0.35;
+    transform: translate(200%, 100%);
+  }
+  100% {
+    transform: translate(100%, 100%);
   }
 }
 
 .iso-loader-label {
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.02em;
   color: #c7d2fe;
 }
