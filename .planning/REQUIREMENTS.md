@@ -41,13 +41,13 @@ Requirements for Milestone v2.1. Each maps to roadmap phases.
 
 ### Developer Profile & 3D Skyline
 
-- [ ] **PROF-01**: Full-page developer profile at `/u/:username` featuring user metadata, contest rating history chart, and circular solved difficulty breakdown ring.
-- [ ] **PROF-02**: 21st.dev 3D isometric contribution skyline rendered in GitHub green levels on an Obsidian canvas with rock-solid fixed tooltip positioning and submission count inspectability.
+- [x] **PROF-01**: Full-page developer profile at `/u/:username` featuring user metadata, contest rating history chart, and circular solved difficulty breakdown ring.
+- [x] **PROF-02**: 21st.dev 3D isometric contribution skyline rendered in GitHub green levels on an Obsidian canvas with rock-solid fixed tooltip positioning and submission count inspectability.
 
 ### Contests Hub & Live Leaderboard
 
-- [ ] **CONT-01**: Contests hub at `/contests` displaying active, upcoming, and past contests with live countdown clocks and registration status.
-- [ ] **CONT-02**: Full-page contest leaderboard powered by real-time Redis Sorted Set scores with instant rank recalculation, penalty breakdowns, and live polling.
+- [x] **CONT-01**: Contests hub at `/contests` displaying active, upcoming, and past contests with live countdown clocks and registration status.
+- [x] **CONT-02**: Full-page contest leaderboard powered by real-time Redis Sorted Set scores with instant rank recalculation, penalty breakdowns, and live polling.
 
 ## Future Requirements (v2.2+)
 
@@ -88,7 +88,7 @@ Which phases cover which requirements. Filled during roadmap creation.
 | IDE-02 | Phase 11 | Complete |
 | IDE-03 | Phase 11 | Complete |
 | IDE-04 | Phase 11 | Complete |
-| PROF-01 | Phase 12 | Pending |
-| PROF-02 | Phase 12 | Pending |
-| CONT-01 | Phase 12 | Pending |
-| CONT-02 | Phase 12 | Pending |
+| PROF-01 | Phase 12 | Complete |
+| PROF-02 | Phase 12 | Complete |
+| CONT-01 | Phase 12 | Complete |
+| CONT-02 | Phase 12 | Complete |

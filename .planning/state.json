@@ -1,12 +1,38 @@
 {
   "contract": "1.0.0",
   "flavor": "core",
-  "milestone": "v2.1",
-  "phases": [],
+  "milestone": "v2.1 — LeetCode-Grade Multi-Page Architecture & Refero Linear Midnight Platform",
+  "phases": [
+    {
+      "number": "8",
+      "name": "Refero Linear Midnight Design System & Multi-Page Routing Infrastructure",
+      "status": "complete"
+    },
+    {
+      "number": "9",
+      "name": "Linear Landing Page, Live Telemetry Teaser & Carbon Auth",
+      "status": "complete"
+    },
+    {
+      "number": "10",
+      "name": "High-Density LeetCode Problem Catalog & Topic Taxonomy",
+      "status": "in_progress"
+    },
+    {
+      "number": "11",
+      "name": "Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog",
+      "status": "pending"
+    },
+    {
+      "number": "12",
+      "name": "Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards",
+      "status": "complete"
+    }
+  ],
   "next": {
-    "command": "/gsd-discuss-phase",
-    "label": "Discuss the first phase",
-    "reason": "Project initialized — plan your first phase"
+    "command": "/gsd-progress --next",
+    "label": "Advance to the next step (plan phase 10)",
+    "reason": "Phase 10 of 5 — needs a plan"
   },
-  "updated_at": "2026-10-03T10:25:10.863Z"
+  "updated_at": "2026-10-03T19:33:23.292Z"
 }

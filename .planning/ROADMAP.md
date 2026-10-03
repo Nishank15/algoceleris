@@ -14,7 +14,7 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 - [x] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login.
 - [ ] **Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy** - High-density problem catalog with search, topic tags (Array, DP, Trees, Graph), acceptance rates, and difficulty badges (Pulse Green, Amber, Coral Red).
 - [ ] **Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog** - 3-pane Monaco IDE workspace at `/problems/:slug`, standard `class Solution` stubs, 10-second client execution watchdog, side-by-side testcase diffing, and Acid Lime submit action.
-- [ ] **Phase 12: Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards** - Dedicated `/u/:username` developer profile with contest rating chart, solved breakdown ring, 21st.dev 3D isometric skyline, and full-page `/contests` hub with Redis live leaderboards.
+- [x] **Phase 12: Developer Profile with 3D Skyline & Contests Hub with Live Leaderboards** - Dedicated `/u/:username` developer profile with contest rating chart, solved breakdown ring, 21st.dev 3D isometric skyline, and full-page `/contests` hub with Redis live leaderboards. (completed 2026-10-04)
 
 ## Phase Details
 
@@ -35,6 +35,7 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 Plans:
 **Wave 1**
 - [x] 08-01: Refero Linear Midnight precision palette, Inter typography constraints, and CSS token architecture
+
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 08-02: React Router DOM multi-page routing infrastructure, unified LinearHeaderNav, and route shells
 
@@ -55,6 +56,7 @@ Plans:
 Plans:
 **Wave 1**
 - [x] 09-01: AuthContext provider, session state persistence, and centered Carbon auth cards
+
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 09-02: Minimalist Linear landing page, benchmark telemetry grid, and live micro-sandbox runner teaser
 
@@ -75,6 +77,7 @@ Plans:
 Plans:
 **Wave 1**
 - [x] 10-01: Problem taxonomy schema, acceptance rates, and expanded competitive problem dataset
+
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 10-02: High-density LeetCode catalog UI with sub-50ms search, difficulty pills, and topic filters
 
@@ -93,6 +96,7 @@ Plans:
 Plans:
 **Wave 1**
 - [x] 11-01: Problem-specific LeetCode class Solution starter templates and 10-second client execution watchdog
+
 **Wave 2** *(blocked on Wave 1 completion)*
 - [x] 11-02: Side-by-side testcase diff viewer with token mismatch highlights and Acid Lime streaming submit button
 
@@ -110,6 +114,7 @@ Plans:
 
 Plans:
 **Wave 1**
-- [ ] 12-01: Full-page developer profile with user card, circular difficulty ring, rating chart, and 3D skyline
+- [x] 12-01: Full-page developer profile with user card, circular difficulty ring, rating chart, and 3D skyline
+
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 12-02: Contests hub with active/upcoming/past cards, countdown timers, registration, and full-page leaderboard
+- [x] 12-02: Contests hub with active/upcoming/past cards, countdown timers, registration, and full-page leaderboard
