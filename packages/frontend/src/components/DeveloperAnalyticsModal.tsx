@@ -128,11 +128,11 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
             <div className="analytics-card">
               <div className="card-top">
                 <span className="card-label">Global Standing</span>
-                <Trophy size={16} className="card-icon text-purple" />
+                <Trophy size={16} className="card-icon text-slate-blue" />
               </div>
               <div className="card-value">1,842</div>
               <div className="card-footer">
-                <span className="badge-purple">Top 4.2%</span>
+                <span className="badge-slate-blue">Top 4.2%</span>
               </div>
             </div>
           </div>
@@ -192,10 +192,10 @@ export const DeveloperAnalyticsModal: React.FC<DeveloperAnalyticsModalProps> = (
           </div>
 
           {/* 3D Isometric Heatmap Section */}
-          <div className="heatmap-section-container">
+          <div className="heatmap-section-container" style={{ background: '#0f1011', border: '1px solid rgba(255, 255, 255, 0.07)', borderRadius: '12px' }}>
             <IsometricHeatmap
               data={heatmapData}
-              palette="grape"
+              palette="github"
               defaultView="3d"
               unit="submission"
             />

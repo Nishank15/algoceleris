@@ -244,7 +244,7 @@ export const PALETTES: Record<PaletteName, { light: string[]; dark: string[] }> 
   halloween: { light: ["#ffee4a", "#ffc501", "#fe9600", "#b33c00"], dark: ["#631c03", "#bd561d", "#fa7a18", "#fddf68"] },
   ocean: { light: ["#b8e3f5", "#6ec3eb", "#2a8fd1", "#0b4f8a"], dark: ["#0c2d4a", "#12508a", "#2a88d8", "#7cc7ff"] },
   ember: { light: ["#fde2c4", "#fbad6e", "#f06b3a", "#b3261e"], dark: ["#4a1a10", "#8f2f16", "#e0572a", "#ffa46b"] },
-  grape: { light: ["#e4d4fb", "#b794f4", "#805ad5", "#44337a"], dark: ["#2d1f4f", "#553c9a", "#8b5cf6", "#c4b5fd"] },
+  grape: { light: ["#e4d4fb", "#b794f4", "#805ad5", "#44337a"], dark: ["#2d1f4f", "#553c9a", "#27a644", "#c4b5fd"] },
   mono: { light: ["#d4d4d4", "#a3a3a3", "#525252", "#171717"], dark: ["#333333", "#5c5c5c", "#a3a3a3", "#fafafa"] },
 }
 
@@ -295,8 +295,8 @@ export interface ContributionSkylineProps {
   className?: string
 }
 
-const FG_FALLBACK: RGB = [23, 23, 23]
-const BG_FALLBACK: RGB = [255, 255, 255]
+const FG_FALLBACK: RGB = [247, 248, 248]
+const BG_FALLBACK: RGB = [9, 11, 16]
 
 // Any CSS colour → sRGB, by letting the browser paint it. Handles oklch, color-mix, names…
 let probe: CanvasRenderingContext2D | null = null
@@ -607,11 +607,11 @@ export default function ContributionSkyline({
       const cs = getComputedStyle(root)
       fg = toRGB(cs.color, FG_FALLBACK) ?? FG_FALLBACK
       const b = toRGB(cs.backgroundColor, null)
-      bg = b ?? (luminance(fg) > 0.5 ? [10, 10, 10] : BG_FALLBACK)
+      bg = b ?? (luminance(fg) > 0.5 ? [9, 11, 16] : BG_FALLBACK)
       isDark = luminance(bg) < 0.45
       font = "400 10px " + (cs.fontFamily || "sans-serif")
       const pal = resolvePalette(cfg.current.palette, isDark)
-      const empty = mixRGB(bg, fg, isDark ? 0.11 : 0.075)
+      const empty = toRGB("#14171f", BG_FALLBACK) ?? mixRGB(bg, fg, isDark ? 0.11 : 0.075)
       const all: RGB[] = [empty, ...pal.map((c) => toRGB(c, FG_FALLBACK) ?? FG_FALLBACK)]
       for (let k = 0; k < 5; k++) for (let ch = 0; ch < 3; ch++) colGoal[k * 3 + ch] = all[k][ch]
       if (!colReady || reduced) {
@@ -1180,9 +1180,9 @@ export default function ContributionSkyline({
       ref={rootRef}
       className={"relative w-full rounded-xl border p-4 font-sans sm:p-5 " + className}
       style={{
-        background: "var(--color-background, #ffffff)",
-        color: "var(--color-foreground, #171717)",
-        borderColor: "var(--color-border, #e5e5e5)",
+        background: "transparent",
+        color: "#f7f8f8",
+        borderColor: "rgba(255, 255, 255, 0.07)",
       }}
     >
       <header className="mb-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">

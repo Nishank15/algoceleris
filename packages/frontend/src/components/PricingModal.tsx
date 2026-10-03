@@ -174,7 +174,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({
               <div className="dual-checkout-buttons">
                 {/* Stripe Checkout */}
                 <button
-                  className="btn btn-primary stripe-checkout-btn"
+                  className="btn btn-secondary stripe-checkout-btn"
                   onClick={onUpgradeStripe}
                   disabled={isProcessing}
                 >

@@ -10,7 +10,7 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 - Integer phases (8, 9, 10, 11, 12): Planned milestone work
 - Decimal phases: Urgent insertions
 
-- [ ] **Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure** - Core precision design tokens (Void/Carbon/Obsidian/Graphite/Acid Lime), Inter typography rules, react-router-dom multi-page architecture, and unified Linear top navigation bar.
+- [x] **Phase 8: Refero Linear Midnight Design System & Multi-Page Routing Infrastructure** - Core precision design tokens (Void/Carbon/Obsidian/Graphite/Acid Lime), Inter typography rules, react-router-dom multi-page architecture, and unified Linear top navigation bar.
 - [ ] **Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth** - Minimalist hero landing page with real-time benchmark telemetry, live micro-sandbox code runner teaser, and centered Carbon auth cards with guest login.
 - [ ] **Phase 10: High-Density LeetCode Problem Catalog & Topic Taxonomy** - High-density problem catalog with search, topic tags (Array, DP, Trees, Graph), acceptance rates, and difficulty badges (Pulse Green, Amber, Coral Red).
 - [ ] **Phase 11: Distraction-Free 3-Pane Monaco IDE Workspace & Execution Watchdog** - 3-pane Monaco IDE workspace at `/problems/:slug`, standard `class Solution` stubs, 10-second client execution watchdog, side-by-side testcase diffing, and Acid Lime submit action.
@@ -34,9 +34,9 @@ Milestone v2.1 transforms Cloud-Judge V2 from a single-view prototype into a hig
 
 Plans:
 **Wave 1**
-- [ ] 08-01: Refero Linear Midnight precision palette, Inter typography constraints, and CSS token architecture
+- [x] 08-01: Refero Linear Midnight precision palette, Inter typography constraints, and CSS token architecture
 **Wave 2** *(blocked on Wave 1 completion)*
-- [ ] 08-02: React Router DOM multi-page routing infrastructure, unified LinearHeaderNav, and route shells
+- [x] 08-02: React Router DOM multi-page routing infrastructure, unified LinearHeaderNav, and route shells
 
 ### Phase 9: Linear Landing Page, Live Telemetry Teaser & Carbon Auth
 

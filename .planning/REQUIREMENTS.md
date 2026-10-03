@@ -9,13 +9,13 @@ Requirements for Milestone v2.1. Each maps to roadmap phases.
 
 ### Design System & Precision Palette
 
-- [ ] **DS-01**: Global CSS variables and design tokens implement the Refero Linear Midnight precision palette: Bedrock Void (#08090a), Carbon (#0f1011), Obsidian (#161718), hairline Graphite (#23252a) borders (0.5px/1px), Smoke (#383b3f) dividers, and Acid Lime (#e4f222) exclusively reserved for the primary submit action.
-- [ ] **DS-02**: Clean typography system enforcing Inter font, -0.022em tracking, font-weights capped at 590 (no 700+ bold), and complete eradication of purple, violet, blue gradients, and heavy drop shadows across all views.
+- [x] **DS-01**: Global CSS variables and design tokens implement the Refero Linear Midnight precision palette: Bedrock Void (#08090a), Carbon (#0f1011), Obsidian (#161718), hairline Graphite (#23252a) borders (0.5px/1px), Smoke (#383b3f) dividers, and Acid Lime (#e4f222) exclusively reserved for the primary submit action.
+- [x] **DS-02**: Clean typography system enforcing Inter font, -0.022em tracking, font-weights capped at 590 (no 700+ bold), and complete eradication of purple, violet, blue gradients, and heavy drop shadows across all views.
 
 ### Routing Infrastructure & Navigation
 
-- [ ] **NAV-01**: Multi-page client-side routing configured via `react-router-dom` supporting `/`, `/auth/login`, `/auth/signup`, `/problems`, `/problems/:slug`, `/u/:username`, and `/contests`.
-- [ ] **NAV-02**: Unified top navigation bar adhering to Linear Midnight aesthetic displaying route links, live system latency indicator, user profile avatar / guest status, and seamless view switching.
+- [x] **NAV-01**: Multi-page client-side routing configured via `react-router-dom` supporting `/`, `/auth/login`, `/auth/signup`, `/problems`, `/problems/:slug`, `/u/:username`, and `/contests`.
+- [x] **NAV-02**: Unified top navigation bar adhering to Linear Midnight aesthetic displaying route links, live system latency indicator, user profile avatar / guest status, and seamless view switching.
 
 ### Landing Page & Telemetry Teaser
 
@@ -74,10 +74,10 @@ Which phases cover which requirements. Filled during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DS-01 | Phase 8 | Pending |
-| DS-02 | Phase 8 | Pending |
-| NAV-01 | Phase 8 | Pending |
-| NAV-02 | Phase 8 | Pending |
+| DS-01 | Phase 8 | Complete |
+| DS-02 | Phase 8 | Complete |
+| NAV-01 | Phase 8 | Complete |
+| NAV-02 | Phase 8 | Complete |
 | LAND-01 | Phase 9 | Pending |
 | LAND-02 | Phase 9 | Pending |
 | AUTH-01 | Phase 9 | Pending |

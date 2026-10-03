@@ -86,7 +86,24 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
       );
     }
 
-    if (errorDiagnostics || currentEvent?.event_type === 'compilation_failed') {
+    if (errorDiagnostics) {
+      const isSystemError = errorDiagnostics.includes('Judge Service');
+      return (
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: 'var(--color-wrong-answer)',
+          }}
+        >
+          <XCircle size={16} />
+          <span>{isSystemError ? 'SYSTEM ERROR' : 'COMPILATION ERROR'}</span>
+        </span>
+      );
+    }
+
+    if (currentEvent?.event_type === 'compilation_failed') {
       return (
         <span
           style={{
@@ -267,15 +284,14 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
                       gap: '6px',
                       padding: '5px 12px',
                       borderRadius: '6px',
-                      background:
-                        'linear-gradient(135deg, rgba(124, 58, 237, 0.28), rgba(99, 102, 241, 0.28))',
-                      border: '1px solid rgba(139, 92, 246, 0.45)',
-                      color: '#c084fc',
+                      background: 'rgba(94, 106, 210, 0.15)',
+                      border: '1px solid rgba(94, 106, 210, 0.4)',
+                      color: '#f7f8f8',
                       cursor: 'pointer',
                       fontSize: '11px',
                       fontWeight: 600,
                       letterSpacing: '0.02em',
-                      boxShadow: '0 0 12px rgba(139, 92, 246, 0.2)',
+                      boxShadow: 'none',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -291,7 +307,7 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
               submissionReport?.compile_output) && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <span className="sample-sublabel" style={{ color: '#fda4af' }}>
-                  Compiler Output & Diagnostics
+                  {errorDiagnostics && errorDiagnostics.includes('Judge Service') ? 'System Diagnostics' : 'Compiler Output & Diagnostics'}
                 </span>
                 <pre className="diagnostics-box">
                   {errorDiagnostics ||

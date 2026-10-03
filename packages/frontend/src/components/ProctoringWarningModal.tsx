@@ -124,7 +124,7 @@ export const ProctoringWarningModal: React.FC<ProctoringWarningModalProps> = ({
 
         {/* Action Controls */}
         <div className="proctor-actions-row">
-          <button className="btn btn-primary resume-fullscreen-btn" onClick={onResumeFullscreen}>
+          <button className="btn btn-secondary resume-fullscreen-btn" onClick={onResumeFullscreen}>
             <Maximize2 size={16} />
             <span>Resume Fullscreen Mode</span>
           </button>

@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="contest-dot-active" />
               <span>CONTEST MODE</span>
               {strikeCount > 0 && (
-                <span style={{ opacity: 0.9, fontSize: '0.72rem', color: strikeCount >= 3 ? '#ef4444' : '#f59e0b' }}>
+                <span style={{ opacity: 0.9, fontSize: '0.72rem', color: strikeCount >= 3 ? '#eb5757' : '#f59e0b' }}>
                   ({strikeCount}/3 Strikes)
                 </span>
               )}

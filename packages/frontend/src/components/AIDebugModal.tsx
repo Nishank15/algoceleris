@@ -59,11 +59,11 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
       if (line.startsWith('+') && !line.startsWith('+++')) {
         bg = 'rgba(16, 185, 129, 0.12)';
         color = '#34d399';
-        borderLeft = '3px solid #10b981';
+        borderLeft = '3px solid #27a644';
       } else if (line.startsWith('-') && !line.startsWith('---')) {
         bg = 'rgba(239, 68, 68, 0.12)';
         color = '#f87171';
-        borderLeft = '3px solid #ef4444';
+        borderLeft = '3px solid #eb5757';
       } else if (line.startsWith('@@')) {
         bg = 'rgba(99, 102, 241, 0.1)';
         color = '#818cf8';
@@ -132,12 +132,12 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(99, 102, 241, 0.3))',
-                border: '1px solid rgba(139, 92, 246, 0.4)',
+                background: 'rgba(94, 106, 210, 0.15)',
+                border: '1px solid rgba(94, 106, 210, 0.4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#c084fc',
+                color: '#f7f8f8',
               }}
             >
               <Sparkles size={18} />
@@ -154,9 +154,9 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     letterSpacing: '0.05em',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    background: 'rgba(168, 85, 247, 0.15)',
-                    color: '#c084fc',
-                    border: '1px solid rgba(168, 85, 247, 0.3)',
+                    background: 'rgba(94, 106, 210, 0.15)',
+                    color: '#f7f8f8',
+                    border: '1px solid rgba(94, 106, 210, 0.3)',
                   }}
                 >
                   PRO ASSISTANT
@@ -211,8 +211,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                   width: '48px',
                   height: '48px',
                   borderRadius: '50%',
-                  border: '2px solid rgba(139, 92, 246, 0.2)',
-                  borderTopColor: '#a855f7',
+                  border: '2px solid rgba(94, 106, 210, 0.2)',
+                  borderTopColor: '#8a8f98',
                   animation: 'spin 1s linear infinite',
                 }}
               />
@@ -275,7 +275,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                       fontSize: '11px',
                       fontWeight: 700,
                       letterSpacing: '0.05em',
-                      color: '#818cf8',
+                      color: '#f7f8f8',
                       marginBottom: '6px',
                       textTransform: 'uppercase',
                     }}
@@ -415,8 +415,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 padding: '8px 18px',
                 borderRadius: '6px',
                 background: applied
-                  ? '#10b981'
-                  : 'linear-gradient(135deg, #7c3aed, #6366f1)',
+                  ? '#27a644'
+                  : '#8a8f98',
                 border: 'none',
                 color: '#ffffff',
                 cursor: applied ? 'default' : 'pointer',
@@ -424,7 +424,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 fontWeight: 600,
                 boxShadow: applied
                   ? '0 0 15px rgba(16, 185, 129, 0.4)'
-                  : '0 0 15px rgba(124, 58, 237, 0.35)',
+                  : 'none',
                 transition: 'all 0.2s ease',
               }}
             >

@@ -97,8 +97,8 @@ export const ProblemPane: React.FC<ProblemPaneProps> = ({ problem }) => {
                   >
                     {copiedIndex === idx ? (
                       <>
-                        <Check size={12} color="#10b981" />
-                        <span style={{ color: '#10b981' }}>Copied</span>
+                        <Check size={12} color="#27a644" />
+                        <span style={{ color: '#27a644' }}>Copied</span>
                       </>
                     ) : (
                       <>
