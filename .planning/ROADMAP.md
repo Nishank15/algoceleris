@@ -132,9 +132,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Contest lifecycle manager, problem bundling, and automated penalty scoring engine
-- [ ] 06-02: Live Redis Sorted Set leaderboard service with real-time score updates and rankings
-- [ ] 06-03: Browser proctoring module: fullscreen enforcement, exit-warning modal, and copy/paste protection
+- [x] 06-01: Contest lifecycle manager, problem bundling, and automated penalty scoring engine
+- [x] 06-02: Live Redis Sorted Set leaderboard service with real-time score updates and rankings
+- [x] 06-03: Browser proctoring module: fullscreen enforcement, exit-warning modal, and copy/paste protection
 
 ### Phase 7: Plagiarism Engine, 3D Isometric Analytics & HAProxy Ingress
 
