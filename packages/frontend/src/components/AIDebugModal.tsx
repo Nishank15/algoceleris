@@ -65,7 +65,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
         color = '#f87171';
         borderLeft = '3px solid #eb5757';
       } else if (line.startsWith('@@')) {
-        bg = 'rgba(99, 102, 241, 0.1)';
+        bg = 'rgba(255, 255, 255, 0.05)';
         color = '#818cf8';
       }
 
