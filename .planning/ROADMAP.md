@@ -114,8 +114,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01: Redis Token-Bucket rate limiting middleware and quota tracking per subscription tier
-- [ ] 05-02: Gemini 2.5 Flash integration with structured debugging prompt engineering and frontend diff viewer
+- [x] 05-01: Redis Token-Bucket rate limiting middleware and quota tracking per subscription tier
+- [x] 05-02: Gemini 2.5 Flash integration with structured debugging prompt engineering and frontend diff viewer
 
 ### Phase 6: Real-time Contest Engine & Proctoring
 
