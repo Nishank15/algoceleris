@@ -2,20 +2,28 @@ import time
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, FastAPI, HTTPException, status
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, status
 
 from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
 from .queue import QueueBroker, get_queue_broker
+from .ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
+from .subscriptions import SubscriptionStore, get_subscription_store
+from .subscriptions.router import create_subscriptions_router
 
 
-def create_router(broker: QueueBroker) -> APIRouter:
+def create_router(
+    broker: QueueBroker,
+    rate_limiter: Optional[TokenBucketLimiter] = None,
+) -> APIRouter:
     router = APIRouter(prefix="/api/v1")
+    submission_limiter = RateLimiter("submissions", limiter=rate_limiter)
 
     @router.post(
         "/submissions",
         response_model=SubmissionResponse,
         status_code=status.HTTP_202_ACCEPTED,
         summary="Submit code for sandboxed asynchronous evaluation",
+        dependencies=[Depends(submission_limiter)],
     )
     def submit_code(request: SubmissionRequest) -> SubmissionResponse:
         submission_id = f"sub-{uuid.uuid4().hex[:12]}"
@@ -68,13 +76,10 @@ def create_router(broker: QueueBroker) -> APIRouter:
     return router
 
 
-from .subscriptions import SubscriptionStore, get_subscription_store
-from .subscriptions.router import create_subscriptions_router
-
-
 def create_app(
     broker: Optional[QueueBroker] = None,
     subscription_store: Optional[SubscriptionStore] = None,
+    rate_limiter: Optional[TokenBucketLimiter] = None,
 ) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
@@ -84,11 +89,13 @@ def create_app(
     )
     active_broker = broker or get_queue_broker()
     active_sub_store = subscription_store or get_subscription_store()
+    active_limiter = rate_limiter or get_limiter()
 
     app.state.broker = active_broker
     app.state.subscription_store = active_sub_store
+    app.state.rate_limiter = active_limiter
 
-    api_router = create_router(active_broker)
+    api_router = create_router(active_broker, rate_limiter=active_limiter)
     sub_router = create_subscriptions_router(active_sub_store)
     api_router.include_router(sub_router)
 
@@ -100,6 +107,8 @@ def create_app(
             "status": "healthy",
             "broker": active_broker.__class__.__name__,
             "subscription_store": active_sub_store.__class__.__name__,
+            "rate_limiter": active_limiter.storage.__class__.__name__,
         }
 
     return app
+
