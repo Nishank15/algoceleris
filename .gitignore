@@ -12,3 +12,5 @@ build/
 *.egg-info/
 .env
 .env.local
+.planning/
+.agents/
