@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import { PROBLEMS } from '../constants/problems';
 import { getStarterTemplates } from '../constants/templates';
-import { markProblemSolved, markProblemAttempted } from '../services/problemService';
+import { markProblemSolved, markProblemAttempted, recordGuestSubmission } from '../services/problemService';
+import { useAuth } from '../context/AuthContext';
 import { Header } from '../components/Header';
 import { ResizableLayout } from '../components/ResizableLayout';
 import { ProblemPane } from '../components/ProblemPane';
@@ -42,6 +43,7 @@ export const ProblemWorkspacePage: React.FC = () => {
   const activeProblemId = slug || 'two-sum';
   const setActiveProblemId = useCallback((id: string) => navigate(`/problems/${id}`), [navigate]);
   const [activeLanguage, setActiveLanguage] = useState<Language>('cpp');
+  const { user } = useAuth();
 
   // Subscription state
   const [userTier, setUserTier] = useState<SubscriptionTier>('free');
@@ -203,12 +205,26 @@ export const ProblemWorkspacePage: React.FC = () => {
         setSubmissionReport(null);
       }, WATCHDOG_TIMEOUT_MS);
 
-      const recordOutcome = (verdict: string) => {
+      const recordOutcome = (verdict: string, report?: SubmissionReport | null) => {
         if (isCustomRun) return;
         if (verdict === 'ACCEPTED' && !isSampleRun) {
           markProblemSolved(problemId);
         } else if (verdict !== 'ACCEPTED') {
           markProblemAttempted(problemId);
+        }
+
+        if ((!user || user.isGuest) && !isSampleRun) {
+          recordGuestSubmission({
+            problem_slug: problemId,
+            language: activeLanguage,
+            code: currentCode,
+            verdict,
+            runtime_ms: report?.max_time_ms ?? 0,
+            memory_kb: report ? Math.round(report.max_memory_bytes / 1024) : 0,
+            testcases_passed: report?.test_cases_passed ?? 0,
+            total_testcases: report?.total_test_cases ?? 0,
+            created_at: new Date().toISOString(),
+          });
         }
       };
 
@@ -261,6 +277,7 @@ export const ProblemWorkspacePage: React.FC = () => {
               setErrorDiagnostics(ev.data?.diagnostics || 'Compilation failed');
               setIsRunning(false);
               markProblemAttempted(problemId);
+              recordOutcome('COMPILATION_ERROR', null);
             } else if (ev.event_type === 'completed') {
               clearWatchdog();
               setSubmissionStatus('COMPLETED');
@@ -271,7 +288,7 @@ export const ProblemWorkspacePage: React.FC = () => {
                 .then((subData) => {
                   if (subData?.report) {
                     setSubmissionReport(subData.report);
-                    recordOutcome(subData.report.verdict);
+                    recordOutcome(subData.report.verdict, subData.report);
                   }
                 })
                 .catch((err) => {
@@ -293,7 +310,7 @@ export const ProblemWorkspacePage: React.FC = () => {
                   clearWatchdog();
                   setSubmissionReport(subData.report);
                   setSubmissionStatus('COMPLETED');
-                  recordOutcome(subData.report.verdict);
+                  recordOutcome(subData.report.verdict, subData.report);
                 }
               } catch (pollErr) {
                 console.error('Polling error:', pollErr);
@@ -321,6 +338,7 @@ export const ProblemWorkspacePage: React.FC = () => {
       activeConsoleTab,
       customInput,
       clearWatchdog,
+      user,
     ]
   );
 

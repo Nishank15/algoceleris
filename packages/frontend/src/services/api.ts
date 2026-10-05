@@ -569,3 +569,89 @@ export async function authCheckAvailability(params: {
   const response = await fetchWithFallback(`/api/v1/auth/check-availability?${query.toString()}`);
   return response.json();
 }
+
+export interface DifficultyStats {
+  total: number;
+  solved: number;
+}
+
+export interface ContestRatingPoint {
+  contest_id: string;
+  contest_name: string;
+  rating: number;
+  rank?: number | null;
+  date: string;
+}
+
+export interface DailyContributionPoint {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+export interface ProfileStats {
+  difficulty_breakdown: Record<string, DifficultyStats>;
+  total_solved: number;
+  total_problems: number;
+  rating_history: ContestRatingPoint[];
+  current_rating: number;
+  percentile: number;
+  daily_contributions: DailyContributionPoint[];
+}
+
+export interface UserProfileResponse {
+  username: string;
+  account_type: 'free' | 'pro' | 'admin';
+  created_at: string;
+  avatar_url?: string | null;
+  college_name?: string | null;
+  stats: ProfileStats;
+}
+
+export interface GuestSubmissionItem {
+  problem_slug: string;
+  language: string;
+  code: string;
+  verdict: string;
+  runtime_ms?: number;
+  memory_kb?: number;
+  testcases_passed?: number;
+  total_testcases?: number;
+  created_at?: string;
+}
+
+export interface MigrateGuestResponse {
+  migrated_count: number;
+  message: string;
+}
+
+export async function getUserProfile(username: string): Promise<UserProfileResponse> {
+  const response = await fetchWithFallback(`/api/v1/users/${encodeURIComponent(username)}/profile`);
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(`User '${username}' not found`);
+    }
+    throw new Error(`Failed to load profile for '${username}'`);
+  }
+  return response.json();
+}
+
+export async function migrateGuestSubmissions(submissions: GuestSubmissionItem[]): Promise<MigrateGuestResponse> {
+  if (!submissions || submissions.length === 0) {
+    return { migrated_count: 0, message: 'No submissions to migrate' };
+  }
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetchWithFallback('/api/v1/users/submissions/migrate-guest', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ submissions }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to migrate guest submissions');
+  }
+  return response.json();
+}
+

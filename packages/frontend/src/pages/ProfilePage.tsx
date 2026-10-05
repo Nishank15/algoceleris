@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { PROBLEMS } from '../constants/problems';
 import { getAttemptedProblemIds, getSolvedProblemIds } from '../services/problemService';
-import { IsometricHeatmap, generateContributions } from '../components/IsometricHeatmap';
+import { IsometricHeatmap } from '../components/IsometricHeatmap';
+import { getUserProfile, UserProfileResponse } from '../services/api';
 import type { Difficulty } from '../types';
 
 const DIFF_COLORS: Record<Difficulty, string> = {
@@ -24,31 +25,6 @@ const hashString = (s: string): number => {
 const rankTitle = (rating: number): string =>
   rating >= 2400 ? 'Grandmaster' : rating >= 2000 ? 'Guardian' : rating >= 1600 ? 'Knight' : 'Challenger';
 
-const CONTEST_NAMES = [
-  'Weekly Contest 408',
-  'Biweekly Contest 134',
-  'Weekly Contest 409',
-  'Weekly Contest 410',
-  'Biweekly Contest 135',
-  'Weekly Contest 411',
-  'Weekly Contest 412',
-  'Biweekly Contest 138',
-];
-
-/** Deterministic rating history seeded by username. */
-const buildRatingHistory = (username: string) => {
-  let seed = hashString(username);
-  const rand = () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
-  let rating = 1450 + Math.floor(rand() * 200);
-  return CONTEST_NAMES.map((name) => {
-    rating += Math.round((rand() - 0.32) * 120);
-    return { name, rating };
-  });
-};
-
 const relativeTime = (hoursAgo: number): string =>
   hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.floor(hoursAgo / 24)}d ago`;
 
@@ -57,6 +33,11 @@ const LANGS = ['Python', 'C++', 'Java', 'TypeScript'];
 export const ProfilePage: React.FC = () => {
   const { username = 'developer' } = useParams<{ username: string }>();
   const { user } = useAuth();
+
+  const [profile, setProfile] = useState<UserProfileResponse | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [solved, setSolved] = useState<Set<string>>(() => getSolvedProblemIds());
   const [attempted, setAttempted] = useState<Set<string>>(() => getAttemptedProblemIds());
 
@@ -73,36 +54,30 @@ export const ProfilePage: React.FC = () => {
     };
   }, []);
 
-  const isSelf = user.username.toLowerCase() === username.toLowerCase();
-  const isPro = isSelf ? user.tier === 'pro' : hashString(username) % 3 === 0;
-  const h = hashString(username);
-
-  const breakdown = useMemo(() => {
-    const out = {
-      Easy: { total: 0, solved: 0 },
-      Medium: { total: 0, solved: 0 },
-      Hard: { total: 0, solved: 0 },
-    } as Record<Difficulty, { total: number; solved: number }>;
-    for (const p of PROBLEMS) {
-      out[p.difficulty].total += 1;
-      if (solved.has(p.id)) out[p.difficulty].solved += 1;
-    }
-    return out;
-  }, [solved]);
-
-  const totalSolved = breakdown.Easy.solved + breakdown.Medium.solved + breakdown.Hard.solved;
-  const totalProblems = PROBLEMS.length;
-
-  const history = useMemo(() => buildRatingHistory(username), [username]);
-  const currentRating = history[history.length - 1].rating;
-  const percentile = Math.max(0.4, 14 - (currentRating - 1200) / 90).toFixed(1);
-
-  const contributions = useMemo(
-    () => generateContributions(Date.UTC(2026, 9, 3), (h % 9000) + 1),
-    [h]
-  );
+  useEffect(() => {
+    let isMounted = true;
+    setIsLoading(true);
+    setError(null);
+    getUserProfile(username)
+      .then((data) => {
+        if (isMounted) {
+          setProfile(data);
+          setIsLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          setError(err.message || `User '${username}' not found`);
+          setIsLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [username]);
 
   const recent = useMemo(() => {
+    const h = hashString(username);
     const ids = [...Array.from(solved), ...Array.from(attempted).filter((id) => !solved.has(id))];
     return ids
       .map((id, i) => {
@@ -117,30 +92,80 @@ export const ProfilePage: React.FC = () => {
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
       .slice(0, 8);
-  }, [solved, attempted, h]);
+  }, [solved, attempted, username]);
+
+  if (isLoading) {
+    return (
+      <main className="profile-page-root">
+        <div className="profile-loading-state">
+          <p style={{ color: '#8a8f98', margin: 0 }}>Loading developer profile...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <main className="profile-page-root">
+        <div className="profile-error-state">
+          <h2>User not found</h2>
+          <p>{error || `The user @${username} does not exist.`}</p>
+          <Link to="/problems" className="contest-btn primary">
+            Back to Problems
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  const isSelf = user.username.toLowerCase() === profile.username.toLowerCase();
+  const isPro = profile.account_type === 'pro' || profile.account_type === 'admin';
+  const h = hashString(profile.username);
+
+  const breakdown = profile.stats.difficulty_breakdown || {
+    Easy: { total: 0, solved: 0 },
+    Medium: { total: 0, solved: 0 },
+    Hard: { total: 0, solved: 0 },
+  };
+
+  const totalSolved = profile.stats.total_solved;
+  const totalProblems = profile.stats.total_problems;
+
+  const history = profile.stats.rating_history || [];
+  const hasHistory = history.length > 0;
+  const currentRating = profile.stats.current_rating || 1500;
+  const percentile = (profile.stats.percentile ?? 50).toFixed(1);
+
+  const contributions = profile.stats.daily_contributions || [];
 
   // Rating chart geometry
   const CW = 560;
   const CH = 160;
   const pad = 14;
-  const ratings = history.map((x) => x.rating);
+  const ratings = hasHistory ? history.map((x) => x.rating) : [currentRating];
   const min = Math.min(...ratings) - 40;
   const max = Math.max(...ratings) + 40;
-  const pts = history.map((x, i) => {
-    const px = pad + (i / (history.length - 1)) * (CW - pad * 2);
-    const py = CH - pad - ((x.rating - min) / (max - min)) * (CH - pad * 2);
-    return [px, py] as const;
-  });
-  const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
-  const area = `${line} L${pts[pts.length - 1][0]},${CH} L${pts[0][0]},${CH} Z`;
+  const pts = hasHistory
+    ? history.map((x, i) => {
+        const px = history.length > 1 ? pad + (i / (history.length - 1)) * (CW - pad * 2) : CW / 2;
+        const py = CH - pad - ((x.rating - min) / Math.max(1, max - min)) * (CH - pad * 2);
+        return [px, py] as const;
+      })
+    : [];
+  const line = pts.length > 1
+    ? pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+    : '';
+  const area = pts.length > 1
+    ? `${line} L${pts[pts.length - 1][0]},${CH} L${pts[0][0]},${CH} Z`
+    : '';
 
   // Solved ring geometry
   const R = 52;
   const C = 2 * Math.PI * R;
   const frac = totalProblems ? totalSolved / totalProblems : 0;
 
-  const joined = 'Jan 2025';
-  const initials = username.slice(0, 2).toUpperCase();
+  const joined = new Date(profile.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  const initials = profile.username.slice(0, 2).toUpperCase();
 
   return (
     <main className="profile-page-root">
@@ -150,8 +175,18 @@ export const ProfilePage: React.FC = () => {
         </div>
         <div className="profile-hero-main">
           <div className="profile-name-row">
-            <h1 className="profile-username">{username}</h1>
-            <span className={`profile-tier-badge ${isPro ? 'pro' : 'free'}`}>{isPro ? 'Pro' : 'Free'}</span>
+            <h1 className="profile-username">{profile.username}</h1>
+            {isSelf && (
+              <span style={{ fontSize: '0.72rem', color: '#8a8f98', padding: '1px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }}>
+                You
+              </span>
+            )}
+            <span className={`profile-tier-badge ${isPro ? 'pro' : 'free'}`}>
+              {profile.account_type.toUpperCase()}
+            </span>
+            {profile.college_name && (
+              <span style={{ fontSize: '0.8rem', color: '#8a8f98' }}>· {profile.college_name}</span>
+            )}
           </div>
           <p className="profile-bio">
             Competitive programmer. Sharpening algorithms one accepted submission at a time.
@@ -164,12 +199,12 @@ export const ProfilePage: React.FC = () => {
             <dd>#{(1000 + (h % 9000)).toLocaleString()}</dd>
           </div>
           <div>
-            <dt>Acceptance</dt>
-            <dd>{(62 + (h % 300) / 10).toFixed(1)}%</dd>
+            <dt>Problems Solved</dt>
+            <dd>{totalSolved}</dd>
           </div>
           <div>
-            <dt>Current streak</dt>
-            <dd>{3 + (h % 20)} days</dd>
+            <dt>Contest Rating</dt>
+            <dd>{currentRating.toLocaleString()}</dd>
           </div>
         </dl>
       </section>
@@ -193,7 +228,7 @@ export const ProfilePage: React.FC = () => {
             </svg>
             <ul className="solved-breakdown">
               {(['Easy', 'Medium', 'Hard'] as Difficulty[]).map((d) => {
-                const b = breakdown[d];
+                const b = breakdown[d] || { total: 0, solved: 0 };
                 const pct = b.total ? (b.solved / b.total) * 100 : 0;
                 return (
                   <li key={d}>
@@ -215,24 +250,30 @@ export const ProfilePage: React.FC = () => {
           <h2 id="rating-title" className="profile-card-title">Contest rating</h2>
           <div className="rating-summary">
             <span className="rating-value">{currentRating.toLocaleString()}</span>
-            <span className="rating-meta">Top {percentile}% · {rankTitle(currentRating)}</span>
+            <span className="rating-meta">
+              {hasHistory ? `Top ${percentile}% · ${rankTitle(currentRating)}` : rankTitle(currentRating)}
+            </span>
           </div>
           <div className="rating-chart-container">
-            <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" role="img" aria-label="Contest rating history">
-              <defs>
-                <linearGradient id="rating-area" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#27a644" stopOpacity="0.28" />
-                  <stop offset="100%" stopColor="#27a644" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path d={area} fill="url(#rating-area)" />
-              <path d={line} className="rating-line" />
-              {pts.map(([x, y], i) => (
-                <circle key={i} cx={x} cy={y} r="3" className="rating-dot">
-                  <title>{`${history[i].name}: ${history[i].rating}`}</title>
-                </circle>
-              ))}
-            </svg>
+            {history.length > 1 ? (
+              <svg viewBox={`0 0 ${CW} ${CH}`} preserveAspectRatio="none" role="img" aria-label="Contest rating history">
+                <defs>
+                  <linearGradient id="rating-area" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#27a644" stopOpacity="0.28" />
+                    <stop offset="100%" stopColor="#27a644" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d={area} fill="url(#rating-area)" />
+                <path d={line} className="rating-line" />
+                {pts.map(([x, y], i) => (
+                  <circle key={i} cx={x} cy={y} r="3" className="rating-dot">
+                    <title>{`${history[i].contest_name}: ${history[i].rating}`}</title>
+                  </circle>
+                ))}
+              </svg>
+            ) : (
+              <div className="rating-empty-state">No contest rating history yet</div>
+            )}
           </div>
         </section>
       </div>

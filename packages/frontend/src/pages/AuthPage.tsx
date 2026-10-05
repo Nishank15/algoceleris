@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Terminal, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { authCheckAvailability } from '../services/api';
+import { authCheckAvailability, migrateGuestSubmissions } from '../services/api';
+import { getGuestSubmissions, clearGuestSubmissions } from '../services/problemService';
 
 interface AuthPageProps {
   mode: 'login' | 'signup';
@@ -19,23 +20,51 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<{ available?: boolean; message?: string } | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<{ available?: boolean; message?: string; checking?: boolean } | null>(null);
+  const [emailStatus, setEmailStatus] = useState<{ available?: boolean; message?: string; checking?: boolean } | null>(null);
 
+  // Debounced username availability check (150ms)
   useEffect(() => {
     if (isLogin || username.trim().length < 3) {
       setUsernameStatus(null);
       return;
     }
+    setUsernameStatus({ checking: true });
     const timer = setTimeout(async () => {
       try {
         const res = await authCheckAvailability({ username: username.trim() });
-        setUsernameStatus({ available: res.available, message: res.message });
+        setUsernameStatus({
+          available: res.available,
+          message: res.available ? 'Username available' : 'Username already taken',
+        });
       } catch {
-        // ignore network error during debounced check
+        setUsernameStatus(null);
       }
-    }, 250);
+    }, 150);
     return () => clearTimeout(timer);
   }, [username, isLogin]);
+
+  // Debounced email availability check (150ms)
+  useEffect(() => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (isLogin || !emailRegex.test(email.trim())) {
+      setEmailStatus(null);
+      return;
+    }
+    setEmailStatus({ checking: true });
+    const timer = setTimeout(async () => {
+      try {
+        const res = await authCheckAvailability({ email: email.trim() });
+        setEmailStatus({
+          available: res.available,
+          message: res.available ? 'Email available' : 'Email already registered',
+        });
+      } catch {
+        setEmailStatus(null);
+      }
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [email, isLogin]);
 
   // Query parameter redirect support e.g. /auth/login?redirect=/problems
   const searchParams = new URLSearchParams(location.search);
@@ -69,6 +98,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
         await login(email.trim(), password);
       } else {
         await signup(username.trim(), email.trim(), password);
+        // UX-02: Automatic guest submission migration
+        const guestSubs = getGuestSubmissions();
+        if (guestSubs.length > 0) {
+          try {
+            await migrateGuestSubmissions(guestSubs);
+            clearGuestSubmissions();
+          } catch (migrateErr) {
+            console.warn('Guest history migration failed:', migrateErr);
+          }
+        }
       }
       navigate(redirectTarget);
     } catch (err: any) {
@@ -139,19 +178,30 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
                 autoComplete="username"
                 required
               />
-              {usernameStatus && (
+              {!isLogin && usernameStatus && (
                 <div
-                  style={{
-                    fontSize: '11px',
-                    marginTop: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    color: usernameStatus.available ? 'var(--color-success, #22c55e)' : 'var(--color-danger, #ef4444)',
-                  }}
+                  className={`auth-field-badge ${
+                    usernameStatus.checking
+                      ? 'auth-badge-checking'
+                      : usernameStatus.available
+                      ? 'auth-badge-available'
+                      : 'auth-badge-taken'
+                  }`}
+                  id="username-availability-badge"
                 >
-                  {usernameStatus.available ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
-                  <span>{usernameStatus.message}</span>
+                  {usernameStatus.checking ? (
+                    <span>Checking availability...</span>
+                  ) : usernameStatus.available ? (
+                    <>
+                      <CheckCircle2 size={13} />
+                      <span>{usernameStatus.message || 'Available'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={13} />
+                      <span>{usernameStatus.message || 'Already taken'}</span>
+                    </>
+                  )}
                 </div>
               )}
             </div>
@@ -169,6 +219,32 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
               autoComplete="email"
               required
             />
+            {!isLogin && emailStatus && (
+              <div
+                className={`auth-field-badge ${
+                  emailStatus.checking
+                    ? 'auth-badge-checking'
+                    : emailStatus.available
+                    ? 'auth-badge-available'
+                    : 'auth-badge-taken'
+                }`}
+                id="email-availability-badge"
+              >
+                {emailStatus.checking ? (
+                  <span>Checking availability...</span>
+                ) : emailStatus.available ? (
+                  <>
+                    <CheckCircle2 size={13} />
+                    <span>{emailStatus.message || 'Available'}</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle size={13} />
+                    <span>{emailStatus.message || 'Already registered'}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="form-field-group">

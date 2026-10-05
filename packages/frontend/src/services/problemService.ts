@@ -1,7 +1,40 @@
 import { Problem, Difficulty } from '../types';
+import { GuestSubmissionItem } from './api';
 
 const SOLVED_STORAGE_KEY = 'cloud_judge_solved_problems';
 const ATTEMPTED_STORAGE_KEY = 'cloud_judge_attempted_problems';
+const GUEST_SUBMISSIONS_STORAGE_KEY = 'cloud_judge_guest_submissions';
+
+export function getGuestSubmissions(): GuestSubmissionItem[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(GUEST_SUBMISSIONS_STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export function recordGuestSubmission(item: GuestSubmissionItem): void {
+  if (typeof window === 'undefined') return;
+  const current = getGuestSubmissions();
+  const updated = [item, ...current].slice(0, 50);
+  try {
+    localStorage.setItem(GUEST_SUBMISSIONS_STORAGE_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.warn('Failed to store guest submission in localStorage:', err);
+  }
+}
+
+export function clearGuestSubmissions(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(GUEST_SUBMISSIONS_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 export function getSolvedProblemIds(): Set<string> {
   if (typeof window === 'undefined') return new Set();

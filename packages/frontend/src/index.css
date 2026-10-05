@@ -2628,6 +2628,49 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   justify-content: center;
 }
 
+/* Auth Availability Badges (UX-01) */
+.auth-field-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-top: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  line-height: 1.4;
+  animation: authBadgeFadeIn 0.15s ease-out;
+}
+
+@keyframes authBadgeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-badge-available {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #10b981;
+}
+
+.auth-badge-taken {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+}
+
+.auth-badge-checking {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
 /* Nav Clusters */
 .nav-user-cluster {
   display: flex;
@@ -3782,6 +3825,10 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
 .rating-chart-container svg { width: 100%; height: 160px; display: block; }
 .rating-chart-container .rating-line { fill: none; stroke: #27a644; stroke-width: 2; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 6px rgba(39,166,68,0.45)); }
 .rating-chart-container .rating-dot { fill: #0f1011; stroke: #27a644; stroke-width: 1.5; }
+.rating-empty-state { display: flex; align-items: center; justify-content: center; height: 140px; color: #8a8f98; font-size: 0.88rem; border: 1px dashed #23252a; border-radius: 8px; }
+.profile-loading-state, .profile-error-state { max-width: 540px; margin: 80px auto; text-align: center; background: #0f1011; border: 1px solid #23252a; border-radius: 12px; padding: 40px 24px; }
+.profile-error-state h2 { font-size: 1.3rem; color: #f7f8f8; margin: 0 0 8px; }
+.profile-error-state p { color: #8a8f98; margin: 0 0 20px; font-size: 0.9rem; }
 /* Skyline: fixed bounding container (rule 1); toggle pill border/radius (rule 2) */
 .skyline-shell { position: relative; overflow: hidden; background: #0b0c0e; border: 1px solid #23252a; border-radius: 12px; padding: 24px;
   --color-foreground: #f7f8f8; --color-background: #0b0c0e; --color-border: #23252a; --color-muted-foreground: #8a8f98; }
