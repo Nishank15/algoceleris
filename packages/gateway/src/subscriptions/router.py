@@ -1,7 +1,13 @@
 import json
+import logging
 from typing import Optional
-from fastapi import APIRouter, Header, HTTPException, Request, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..database import get_db
+from .db_sync import sync_razorpay_payment_to_db, sync_stripe_event_to_db
+
+logger = logging.getLogger("cloudjudge.subscriptions.router")
 from .models import (
     EntitlementResponse,
     RazorpayOrderRequest,
@@ -65,6 +71,7 @@ def create_subscriptions_router(
     async def stripe_webhook(
         request: Request,
         stripe_signature: Optional[str] = Header(None, alias="Stripe-Signature"),
+        db: AsyncSession = Depends(get_db),
     ):
         """Processes cryptographic webhook from Stripe to provision/cancel Pro subscriptions."""
         body = await request.body()
@@ -90,7 +97,12 @@ def create_subscriptions_router(
             )
 
         result = service_stripe.handle_webhook_event(event, store)
-        return {"received": True, "result": result}
+        db_sync = None
+        try:
+            db_sync = await sync_stripe_event_to_db(db, event, store=store)
+        except Exception as e:
+            logger.warning(f"Failed to sync Stripe webhook event to DB: {e}")
+        return {"received": True, "result": result, "db_sync": db_sync}
 
     # --- Razorpay Endpoints ---
     @router.post(
@@ -118,7 +130,10 @@ def create_subscriptions_router(
         response_model=RazorpayVerifyResponse,
         summary="Verify cryptographic HMAC signature and provision Pro entitlement",
     )
-    def verify_razorpay_payment(req: RazorpayVerifyRequest) -> RazorpayVerifyResponse:
+    async def verify_razorpay_payment(
+        req: RazorpayVerifyRequest,
+        db: AsyncSession = Depends(get_db),
+    ) -> RazorpayVerifyResponse:
         """Verifies HMAC-SHA256 signature of razorpay_order_id | razorpay_payment_id."""
         is_valid = service_razorpay.verify_payment_signature(
             order_id=req.razorpay_order_id,
@@ -137,6 +152,17 @@ def create_subscriptions_router(
             payment_id=req.razorpay_payment_id,
             store=store,
         )
+        try:
+            await sync_razorpay_payment_to_db(
+                db=db,
+                user_id=req.user_id,
+                order_id=req.razorpay_order_id,
+                payment_id=req.razorpay_payment_id,
+                store=store,
+            )
+        except Exception as e:
+            logger.warning(f"Failed to sync Razorpay payment to DB: {e}")
+
         return RazorpayVerifyResponse(
             status="verified",
             user_id=req.user_id,
@@ -151,6 +177,7 @@ def create_subscriptions_router(
     async def razorpay_webhook(
         request: Request,
         x_razorpay_signature: Optional[str] = Header(None, alias="X-Razorpay-Signature"),
+        db: AsyncSession = Depends(get_db),
     ):
         """Processes cryptographic webhook from Razorpay."""
         body = await request.body()
@@ -176,6 +203,7 @@ def create_subscriptions_router(
             )
 
         # Fulfill payment if payment.captured event
+        db_sync = None
         if event.get("event") == "payment.captured":
             payment_entity = event.get("payload", {}).get("payment", {}).get("entity", {})
             user_id = payment_entity.get("notes", {}).get("user_id")
@@ -183,7 +211,17 @@ def create_subscriptions_router(
             payment_id = payment_entity.get("id", "")
             if user_id:
                 service_razorpay.fulfill_payment(user_id, order_id, payment_id, store)
+                try:
+                    db_sync = await sync_razorpay_payment_to_db(
+                        db=db,
+                        user_id=user_id,
+                        order_id=order_id,
+                        payment_id=payment_id,
+                        store=store,
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to sync Razorpay webhook to DB: {e}")
 
-        return {"received": True, "event": event.get("event")}
+        return {"received": True, "event": event.get("event"), "db_sync": db_sync}
 
     return router
