@@ -18,14 +18,14 @@ def get_tier_rate_limit_config(action: str, tier: str) -> RateLimitConfig:
     normalized_tier = tier.lower()
 
     if action == "submissions":
-        if normalized_tier == "pro":
+        if normalized_tier in {"pro", "admin"}:
             # 100 requests per minute
             return RateLimitConfig(capacity=100, refill_rate_per_sec=100.0 / 60.0)
         # Free tier: 5 requests per minute
         return RateLimitConfig(capacity=5, refill_rate_per_sec=5.0 / 60.0)
 
     if action == "ai_debug":
-        if normalized_tier == "pro":
+        if normalized_tier in {"pro", "admin"}:
             # 10 debug requests per minute
             return RateLimitConfig(capacity=10, refill_rate_per_sec=10.0 / 60.0)
         # Free tier: 0 requests (entitlement check also blocks free tier)
@@ -86,19 +86,23 @@ class RateLimiter:
         request: Request,
         response: Response,
         user_id: Optional[str] = None,
+        tier: Optional[str] = None,
     ) -> RateLimitResult:
         limiter = self._get_limiter(request)
         sub_store = self._get_subscription_store(request)
         resolved_user_id = user_id or self._resolve_user_id(request)
 
         # Check user tier
-        sub = sub_store.get_subscription(resolved_user_id)
-        if sub and sub.status == "active":
-            tier = sub.tier.value if hasattr(sub.tier, "value") else str(sub.tier)
+        if tier is not None:
+            resolved_tier = tier
         else:
-            tier = "free"
+            sub = sub_store.get_subscription(resolved_user_id)
+            if sub and sub.status == "active":
+                resolved_tier = sub.tier.value if hasattr(sub.tier, "value") else str(sub.tier)
+            else:
+                resolved_tier = "free"
 
-        config = get_tier_rate_limit_config(self.action, tier)
+        config = get_tier_rate_limit_config(self.action, resolved_tier)
         bucket_key = f"ratelimit:{self.action}:{resolved_user_id}"
 
         result = limiter.consume(

@@ -72,6 +72,91 @@ async def run_seed_bloom(
     return count
 
 
+async def run_set_role(
+    email: Optional[str] = None,
+    username: Optional[str] = None,
+    role: str = "pro",
+    db_url: Optional[str] = None,
+    redis_url: Optional[str] = None,
+) -> bool:
+    """Elevate or demote user account type and synchronize subscription store."""
+    from datetime import datetime, timezone
+    from sqlalchemy import func
+
+    target_role = role.strip().lower()
+    if target_role not in {"free", "pro", "admin"}:
+        raise ValueError(
+            f"Invalid role '{role}'. Allowed roles: free, pro, admin"
+        )
+
+    if not email and not username:
+        logger.error("Either --email or --username must be provided.")
+        return False
+
+    engine = get_async_engine(db_url)
+    session_factory = get_session_factory(engine=engine)
+
+    try:
+        async with session_factory() as session:
+            stmt = select(User)
+            if email:
+                stmt = stmt.where(func.lower(User.email) == email.strip().lower())
+            else:
+                stmt = stmt.where(func.lower(User.username) == username.strip().lower())
+
+            result = await session.execute(stmt)
+            user = result.scalars().first()
+
+            if not user:
+                ident = email if email else username
+                logger.error(f"User with identifier '{ident}' not found in database.")
+                return False
+
+            old_role = user.account_type
+            user.account_type = target_role
+            user.updated_at = datetime.now(timezone.utc)
+            await session.commit()
+
+            # Synchronize SubscriptionStore
+            try:
+                from .subscriptions.models import (
+                    PaymentProvider,
+                    SubscriptionRecord,
+                    SubscriptionTier,
+                )
+                from .subscriptions.store import get_subscription_store
+
+                sub_store = get_subscription_store(redis_url=redis_url)
+                target_tier = (
+                    SubscriptionTier.PRO
+                    if target_role in ("pro", "admin")
+                    else SubscriptionTier.FREE
+                )
+                target_status = (
+                    "active" if target_role in ("pro", "admin") else "canceled"
+                )
+                sub_store.set_subscription(
+                    str(user.id),
+                    SubscriptionRecord(
+                        user_id=str(user.id),
+                        tier=target_tier,
+                        provider=PaymentProvider.NONE,
+                        status=target_status,
+                    ),
+                )
+            except Exception as e:
+                logger.warning(f"Could not synchronize subscription store: {e}")
+
+            logger.info(
+                f"Successfully updated user '{user.username}' ({user.email}) "
+                f"role from '{old_role}' to '{target_role}'."
+            )
+            return True
+    finally:
+        if db_url is None or ":memory:" not in db_url:
+            await close_db_engine(db_url)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="CloudJudge V2 CLI Administration Tool",
@@ -93,6 +178,28 @@ def main() -> None:
         help="Database connection URL (default: DATABASE_URL env)",
     )
 
+    # set-role subcommand
+    role_parser = subparsers.add_parser(
+        "set-role",
+        help="Update user account role (free, pro, admin)",
+    )
+    role_parser.add_argument("--email", help="Target user email address")
+    role_parser.add_argument("--username", help="Target user username")
+    role_parser.add_argument(
+        "--role",
+        required=True,
+        choices=["free", "pro", "admin"],
+        help="Target role (free, pro, admin)",
+    )
+    role_parser.add_argument(
+        "--db-url",
+        help="Database connection URL (default: DATABASE_URL env)",
+    )
+    role_parser.add_argument(
+        "--redis-url",
+        help="Redis connection URL (default: REDIS_URL env)",
+    )
+
     args = parser.parse_args()
 
     if args.subcommand == "seed-bloom":
@@ -102,6 +209,18 @@ def main() -> None:
                 db_url=args.db_url,
             )
         )
+    elif args.subcommand == "set-role":
+        success = asyncio.run(
+            run_set_role(
+                email=args.email,
+                username=args.username,
+                role=args.role,
+                db_url=args.db_url,
+                redis_url=args.redis_url,
+            )
+        )
+        if not success:
+            sys.exit(1)
 
 
 if __name__ == "__main__":

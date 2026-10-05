@@ -2,6 +2,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
+from ..auth.rbac import get_optional_current_user
+from ..models.entities import User
 from ..ratelimit.bucket import TokenBucketLimiter, get_limiter
 from ..ratelimit.middleware import RateLimiter
 from ..subscriptions.models import SubscriptionTier
@@ -36,26 +38,53 @@ def create_ai_router(
         request: AIDebugRequest,
         http_req: Request,
         http_res: Response,
+        current_user: Optional[User] = Depends(get_optional_current_user),
     ) -> AIDebugResponse:
-        # 1. Entitlement check: Pro tier required for AI debugging
-        entitlements = active_store.get_entitlements(request.user_id)
-        if not entitlements.can_use_ai_assistant:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "error": "pro_tier_required",
-                    "message": "Pro subscription required for AI Code Assistant",
-                    "upgrade_url": "/pricing",
-                    "current_tier": (
-                        entitlements.tier.value
-                        if hasattr(entitlements.tier, "value")
-                        else str(entitlements.tier)
-                    ),
-                },
+        # 1. Entitlement check: Pro or Admin tier required
+        if current_user is not None:
+            if current_user.account_type.lower() not in {"pro", "admin"}:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "error": "pro_tier_required",
+                        "message": "Pro subscription required for AI Code Assistant",
+                        "upgrade_url": "/pricing",
+                        "current_tier": current_user.account_type,
+                    },
+                )
+            effective_user_id = str(current_user.id)
+            effective_tier = current_user.account_type
+        else:
+            # Fallback for unauthenticated/legacy client passing user_id in payload
+            entitlements = active_store.get_entitlements(request.user_id)
+            if not entitlements.can_use_ai_assistant:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail={
+                        "error": "pro_tier_required",
+                        "message": "Pro subscription required for AI Code Assistant",
+                        "upgrade_url": "/pricing",
+                        "current_tier": (
+                            entitlements.tier.value
+                            if hasattr(entitlements.tier, "value")
+                            else str(entitlements.tier)
+                        ),
+                    },
+                )
+            effective_user_id = request.user_id
+            effective_tier = (
+                entitlements.tier.value
+                if hasattr(entitlements.tier, "value")
+                else str(entitlements.tier)
             )
 
         # 2. Rate limit consumption check (10/min for Pro tier)
-        await ai_rate_limiter(http_req, http_res, user_id=request.user_id)
+        await ai_rate_limiter(
+            http_req,
+            http_res,
+            user_id=effective_user_id,
+            tier=effective_tier,
+        )
 
         # 3. Invoke Gemini debug assistant
         return active_assistant.debug_code(request)

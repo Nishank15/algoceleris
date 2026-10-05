@@ -46,6 +46,17 @@ __all__ = [
     "ReplayAttackException",
     # Router
     "create_auth_router",
+    # RBAC
+    "get_current_user",
+    "get_optional_current_user",
+    "require_pro",
+    "require_admin",
 ]
 
+from .rbac import (
+    get_current_user,
+    get_optional_current_user,
+    require_admin,
+    require_pro,
+)
 from .router import create_auth_router
