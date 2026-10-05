@@ -22,6 +22,7 @@ from .queue import QueueBroker, get_queue_broker
 from .ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
 from .subscriptions import SubscriptionStore, get_subscription_store
 from .subscriptions.router import create_subscriptions_router
+from .users import create_users_router
 from .ws import WebSocketConnectionManager
 
 
@@ -151,11 +152,13 @@ def create_app(
         bloom_checker=active_bloom,
         redis_client=active_redis,
     )
+    users_router = create_users_router()
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
     api_router.include_router(contests_router)
     api_router.include_router(plagiarism_router)
     api_router.include_router(auth_router)
+    api_router.include_router(users_router)
 
     @app.get("/health", summary="Service health check")
     @api_router.get("/health", summary="API v1 health check")
