@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Terminal, LogOut } from 'lucide-react';
+import { Terminal, LogOut, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 /** Unified top navigation: routes, live latency indicator, user/guest status. */
 export const LinearHeaderNav: React.FC = () => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [latency, setLatency] = useState<number | null>(null);
 
@@ -50,6 +52,17 @@ export const LinearHeaderNav: React.FC = () => {
           <span className={`latency-dot ${latency === null ? 'offline' : 'online'}`} />
           {latency === null ? 'offline' : `${latency}ms`}
         </span>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="nav-theme-toggle"
+          id="nav-theme-toggle"
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
 
         {user && !user.isGuest ? (
           <div className="nav-user-cluster">
