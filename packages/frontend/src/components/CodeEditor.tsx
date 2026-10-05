@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import Editor, { Monaco, OnMount } from '@monaco-editor/react';
 import { Language } from '../types';
 import { LINEAR_MIDNIGHT_THEME, LINEAR_MIDNIGHT_THEME_NAME } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface CodeEditorProps {
   language: Language;
@@ -18,15 +19,21 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   readOnly = false,
   contestMode = false,
 }) => {
+  const { theme } = useTheme();
+  const monacoRef = useRef<Monaco | null>(null);
+
   const handleBeforeMount = useCallback((monaco: Monaco) => {
+    monacoRef.current = monaco;
     monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
     monaco.editor.defineTheme('vscode-dark-modern', LINEAR_MIDNIGHT_THEME);
   }, []);
 
   const handleMount: OnMount = useCallback((editor, monaco) => {
+    monacoRef.current = monaco;
     monaco.editor.defineTheme(LINEAR_MIDNIGHT_THEME_NAME, LINEAR_MIDNIGHT_THEME);
     monaco.editor.defineTheme('vscode-dark-modern', LINEAR_MIDNIGHT_THEME);
-    monaco.editor.setTheme(LINEAR_MIDNIGHT_THEME_NAME);
+    const targetTheme = theme === 'light' ? 'vs' : LINEAR_MIDNIGHT_THEME_NAME;
+    monaco.editor.setTheme(targetTheme);
     editor.focus();
 
     if (contestMode) {
@@ -38,7 +45,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         domNode.addEventListener('contextmenu', (e) => e.preventDefault(), true);
       }
     }
-  }, [contestMode]);
+  }, [contestMode, theme]);
+
+  useEffect(() => {
+    if (monacoRef.current) {
+      const targetTheme = theme === 'light' ? 'vs' : LINEAR_MIDNIGHT_THEME_NAME;
+      monacoRef.current.editor.setTheme(targetTheme);
+    }
+  }, [theme]);
 
   // Map internal language identifiers to Monaco language IDs
   const monacoLanguage = language === 'cpp' ? 'cpp' : language === 'python' ? 'python' : 'java';
@@ -49,7 +63,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         height="100%"
         width="100%"
         language={monacoLanguage}
-        theme={LINEAR_MIDNIGHT_THEME_NAME}
+        theme={theme === 'light' ? 'vs' : LINEAR_MIDNIGHT_THEME_NAME}
         value={value}
         onChange={(val) => onChange(val || '')}
         beforeMount={handleBeforeMount}

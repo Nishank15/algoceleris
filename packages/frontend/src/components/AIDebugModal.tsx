@@ -57,16 +57,16 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
       let borderLeft = 'none';
 
       if (line.startsWith('+') && !line.startsWith('+++')) {
-        bg = 'rgba(16, 185, 129, 0.12)';
-        color = '#34d399';
-        borderLeft = '3px solid #27a644';
+        bg = 'var(--color-accepted-bg)';
+        color = 'var(--color-accepted)';
+        borderLeft = '3px solid var(--color-accepted)';
       } else if (line.startsWith('-') && !line.startsWith('---')) {
-        bg = 'rgba(239, 68, 68, 0.12)';
-        color = '#f87171';
-        borderLeft = '3px solid #eb5757';
+        bg = 'var(--color-wrong-answer-bg)';
+        color = 'var(--color-wrong-answer)';
+        borderLeft = '3px solid var(--color-wrong-answer)';
       } else if (line.startsWith('@@')) {
-        bg = 'rgba(255, 255, 255, 0.05)';
-        color = '#818cf8';
+        bg = 'var(--accent-secondary)';
+        color = 'var(--accent-primary)';
       }
 
       return (
@@ -110,8 +110,9 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
           maxHeight: '85vh',
           display: 'flex',
           flexDirection: 'column',
-          border: '1px solid rgba(139, 92, 246, 0.3)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(124, 58, 237, 0.15)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.35)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -119,7 +120,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
         <div
           className="modal-header"
           style={{
-            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+            borderBottom: '1px solid var(--border-subtle)',
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -132,12 +133,12 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 width: '32px',
                 height: '32px',
                 borderRadius: '8px',
-                background: 'rgba(94, 106, 210, 0.15)',
-                border: '1px solid rgba(94, 106, 210, 0.4)',
+                background: 'var(--accent-secondary)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#f7f8f8',
+                color: 'var(--accent-primary)',
               }}
             >
               <Sparkles size={18} />
@@ -154,9 +155,9 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     letterSpacing: '0.05em',
                     padding: '2px 6px',
                     borderRadius: '4px',
-                    background: 'rgba(94, 106, 210, 0.15)',
-                    color: '#f7f8f8',
-                    border: '1px solid rgba(94, 106, 210, 0.3)',
+                    background: 'var(--accent-secondary)',
+                    color: 'var(--accent-primary)',
+                    border: '1px solid var(--border-subtle)',
                   }}
                 >
                   PRO ASSISTANT
@@ -261,8 +262,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div
                   style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                     padding: '12px 14px',
                   }}
@@ -275,7 +276,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                       fontSize: '11px',
                       fontWeight: 700,
                       letterSpacing: '0.05em',
-                      color: '#f7f8f8',
+                      color: 'var(--text-primary)',
                       marginBottom: '6px',
                       textTransform: 'uppercase',
                     }}
@@ -290,8 +291,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
 
                 <div
                   style={{
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    background: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '8px',
                     padding: '12px 14px',
                   }}
@@ -304,7 +305,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                       fontSize: '11px',
                       fontWeight: 700,
                       letterSpacing: '0.05em',
-                      color: '#34d399',
+                      color: 'var(--color-accepted)',
                       marginBottom: '6px',
                       textTransform: 'uppercase',
                     }}
@@ -321,8 +322,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
               {/* Code Diff Card */}
               <div
                 style={{
-                  background: 'rgba(10, 11, 14, 0.8)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: 'var(--bg-canvas)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
                   overflow: 'hidden',
                 }}
@@ -330,8 +331,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 <div
                   style={{
                     padding: '8px 14px',
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+                    background: 'var(--bg-surface-elevated)',
+                    borderBottom: '1px solid var(--border-subtle)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -362,7 +363,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     maxHeight: '260px',
                     overflowY: 'auto',
                     padding: '8px 0',
-                    backgroundColor: '#090a0d',
+                    backgroundColor: 'var(--bg-canvas)',
                   }}
                 >
                   {renderDiffLines(debugResponse.code_diff)}
@@ -380,7 +381,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
         <div
           className="modal-footer"
           style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            borderTop: '1px solid var(--border-subtle)',
             padding: '14px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -394,7 +395,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
               padding: '8px 16px',
               borderRadius: '6px',
               background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              border: '1px solid var(--border-subtle)',
               color: 'var(--text-secondary)',
               cursor: 'pointer',
               fontSize: '13px',
@@ -415,15 +416,15 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 padding: '8px 18px',
                 borderRadius: '6px',
                 background: applied
-                  ? '#27a644'
-                  : '#8a8f98',
+                  ? 'var(--color-accepted)'
+                  : 'var(--accent-primary)',
                 border: 'none',
-                color: '#ffffff',
+                color: applied ? '#ffffff' : 'var(--accent-primary-fg)',
                 cursor: applied ? 'default' : 'pointer',
                 fontSize: '13px',
                 fontWeight: 600,
                 boxShadow: applied
-                  ? '0 0 15px rgba(16, 185, 129, 0.4)'
+                  ? '0 0 15px var(--color-accepted-bg)'
                   : 'none',
                 transition: 'all 0.2s ease',
               }}
