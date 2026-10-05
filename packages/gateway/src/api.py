@@ -14,6 +14,7 @@ from .contests import (
     get_leaderboard_engine,
     get_proctoring_store,
 )
+from .database import check_db_health
 from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
 from .plagiarism import PlagiarismDetector, create_plagiarism_router
 from .queue import QueueBroker, get_queue_broker
@@ -146,20 +147,13 @@ def create_app(
     api_router.include_router(contests_router)
     api_router.include_router(plagiarism_router)
 
-    app.include_router(api_router)
-
-    @app.websocket("/ws/submissions/{submission_id}")
-    async def websocket_submission_stream(websocket: WebSocket, submission_id: str):
-        await ws_manager.stream_submission_events(submission_id, websocket, active_broker)
-
-    @app.websocket("/ws/contests/{contest_id}/leaderboard")
-    async def websocket_contest_leaderboard(websocket: WebSocket, contest_id: str):
-        await ws_manager.stream_contest_leaderboard(contest_id, websocket, active_broker, active_leaderboard)
-
     @app.get("/health", summary="Service health check")
-    def health_check():
+    @api_router.get("/health", summary="API v1 health check")
+    async def health_check():
+        db_health = await check_db_health()
         return {
             "status": "healthy",
+            "database": db_health.get("database", "disconnected"),
             "broker": active_broker.__class__.__name__,
             "subscription_store": active_sub_store.__class__.__name__,
             "rate_limiter": active_limiter.storage.__class__.__name__,
@@ -170,9 +164,15 @@ def create_app(
             "plagiarism_detector": active_detector.__class__.__name__,
         }
 
-    @api_router.get("/health", summary="API v1 health check")
-    def api_v1_health_check():
-        return health_check()
+    app.include_router(api_router)
+
+    @app.websocket("/ws/submissions/{submission_id}")
+    async def websocket_submission_stream(websocket: WebSocket, submission_id: str):
+        await ws_manager.stream_submission_events(submission_id, websocket, active_broker)
+
+    @app.websocket("/ws/contests/{contest_id}/leaderboard")
+    async def websocket_contest_leaderboard(websocket: WebSocket, contest_id: str):
+        await ws_manager.stream_contest_leaderboard(contest_id, websocket, active_broker, active_leaderboard)
 
     return app
 

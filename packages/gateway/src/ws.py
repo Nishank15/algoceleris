@@ -11,7 +11,12 @@ class WebSocketConnectionManager:
 
     def __init__(self):
         self._active_connections: Dict[str, Set[WebSocket]] = {}
-        self._lock = asyncio.Lock()
+        try:
+            self._lock = asyncio.Lock()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            self._lock = asyncio.Lock()
 
     async def connect(self, submission_id: str, websocket: WebSocket) -> None:
         """Accept WebSocket connection and register under submission_id."""

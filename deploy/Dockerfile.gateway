@@ -20,7 +20,11 @@ RUN pip install --no-cache-dir \
     google-genai \
     stripe \
     razorpay \
-    requests
+    requests \
+    sqlalchemy \
+    asyncpg \
+    alembic \
+    aiosqlite
 
 EXPOSE 8000
 

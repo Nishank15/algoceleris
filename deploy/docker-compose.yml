@@ -26,11 +26,13 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/cloud_judge
       - USE_IN_MEMORY_CONTEST=false
     expose:
       - "8000"
     depends_on:
       - redis
+      - postgres
     networks:
       - cloud_judge_net
 
@@ -44,11 +46,13 @@ services:
       - HOST=0.0.0.0
       - PORT=8000
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/cloud_judge
       - USE_IN_MEMORY_CONTEST=false
     expose:
       - "8000"
     depends_on:
       - redis
+      - postgres
     networks:
       - cloud_judge_net
 
@@ -64,6 +68,26 @@ services:
     networks:
       - cloud_judge_net
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: cloud_judge_postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cloud_judge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cloud_judge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cloud_judge_net
+
   worker:
     build:
       context: ..
@@ -72,8 +96,10 @@ services:
     restart: always
     environment:
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/cloud_judge
     depends_on:
       - redis
+      - postgres
     networks:
       - cloud_judge_net
 
@@ -83,3 +109,4 @@ networks:
 
 volumes:
   redis_data:
+  postgres_data:
