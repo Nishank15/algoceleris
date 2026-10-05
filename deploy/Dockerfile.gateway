@@ -24,7 +24,9 @@ RUN pip install --no-cache-dir \
     sqlalchemy \
     asyncpg \
     alembic \
-    aiosqlite
+    aiosqlite \
+    argon2-cffi \
+    pyjwt
 
 EXPOSE 8000
 
