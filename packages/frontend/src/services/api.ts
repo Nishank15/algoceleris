@@ -17,13 +17,105 @@ const getApiBaseUrl = (useFallback = false) => {
   return '';
 };
 
-async function fetchWithFallback(endpoint: string, options?: RequestInit) {
+let inMemoryAccessToken: string | null = null;
+
+export function getAccessToken(): string | null {
+  return inMemoryAccessToken;
+}
+
+export function setAccessToken(token: string | null): void {
+  inMemoryAccessToken = token;
+}
+
+let refreshPromise: Promise<string | null> | null = null;
+
+async function doSilentRefresh(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${getApiBaseUrl(false)}/api/v1/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.access_token) {
+          setAccessToken(data.access_token);
+          return data.access_token;
+        }
+      }
+    } catch {
+      try {
+        const res = await fetch(`${getApiBaseUrl(true)}/api/v1/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.access_token) {
+            setAccessToken(data.access_token);
+            return data.access_token;
+          }
+        }
+      } catch {
+        // fallback failed
+      }
+    } finally {
+      refreshPromise = null;
+    }
+    setAccessToken(null);
+    return null;
+  })();
+  return refreshPromise;
+}
+
+async function fetchWithFallback(
+  endpoint: string,
+  options?: RequestInit,
+  isRetry = false
+): Promise<Response> {
+  const headers: Record<string, string> = {
+    ...(inMemoryAccessToken ? { Authorization: `Bearer ${inMemoryAccessToken}` } : {}),
+    ...((options?.headers as Record<string, string>) || {}),
+  };
+
+  const reqOptions: RequestInit = {
+    ...options,
+    credentials: 'include',
+    headers,
+  };
+
   try {
     const url = `${getApiBaseUrl(false)}${endpoint}`;
-    const response = await fetch(url, options);
+    const response = await fetch(url, reqOptions);
     if (!response.ok) {
+      if (
+        response.status === 401 &&
+        !isRetry &&
+        !endpoint.includes('/auth/refresh') &&
+        !endpoint.includes('/auth/login') &&
+        !endpoint.includes('/auth/signup') &&
+        !endpoint.includes('/auth/logout')
+      ) {
+        const newToken = await doSilentRefresh();
+        if (newToken) {
+          return fetchWithFallback(endpoint, options, true);
+        }
+      }
+
       const errorText = await response.text();
-      const err: any = new Error(`Request failed (${response.status}): ${errorText}`);
+      let errorMsg = `Request failed (${response.status}): ${errorText}`;
+      try {
+        const parsed = JSON.parse(errorText);
+        if (parsed.detail) {
+          errorMsg = typeof parsed.detail === 'string' ? parsed.detail : JSON.stringify(parsed.detail);
+        }
+      } catch {
+        // keep standard message
+      }
+      const err: any = new Error(errorMsg);
       err.status = response.status;
       err.payload = errorText;
       throw err;
@@ -37,16 +129,40 @@ async function fetchWithFallback(endpoint: string, options?: RequestInit) {
     ) {
       try {
         const fallbackUrl = `${getApiBaseUrl(true)}${endpoint}`;
-        const fallbackResponse = await fetch(fallbackUrl, options);
+        const fallbackResponse = await fetch(fallbackUrl, reqOptions);
         if (!fallbackResponse.ok) {
+          if (
+            fallbackResponse.status === 401 &&
+            !isRetry &&
+            !endpoint.includes('/auth/refresh') &&
+            !endpoint.includes('/auth/login') &&
+            !endpoint.includes('/auth/signup') &&
+            !endpoint.includes('/auth/logout')
+          ) {
+            const newToken = await doSilentRefresh();
+            if (newToken) {
+              return fetchWithFallback(endpoint, options, true);
+            }
+          }
+
           const errorText = await fallbackResponse.text();
-          const err: any = new Error(`Request failed (${fallbackResponse.status}): ${errorText}`);
+          let errorMsg = `Request failed (${fallbackResponse.status}): ${errorText}`;
+          try {
+            const parsed = JSON.parse(errorText);
+            if (parsed.detail) {
+              errorMsg = typeof parsed.detail === 'string' ? parsed.detail : JSON.stringify(parsed.detail);
+            }
+          } catch {
+            // keep standard message
+          }
+          const err: any = new Error(errorMsg);
           err.status = fallbackResponse.status;
           err.payload = errorText;
           throw err;
         }
         return fallbackResponse;
       } catch (fallbackError: any) {
+        if (fallbackError.status) throw fallbackError;
         throw new Error('Judge Service Unavailable (Ensure Docker daemon and gateway are running)');
       }
     }
@@ -356,5 +472,100 @@ export async function getProctoringAudit(
   userId: string
 ): Promise<ProctoringAuditReport> {
   const response = await fetchWithFallback(`/api/v1/contests/${contestId}/proctor/audit/${userId}`);
+  return response.json();
+}
+
+// ==========================================
+// Phase 14: Hardened Authentication Services
+// ==========================================
+
+export interface AuthUserResponse {
+  id: string;
+  username: string;
+  email: string;
+  account_type: 'free' | 'pro' | 'admin';
+  college_name?: string | null;
+  avatar_url?: string | null;
+  created_at?: string;
+}
+
+export interface AuthTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  user: AuthUserResponse;
+}
+
+export interface AvailabilityResponse {
+  available: boolean;
+  field: string;
+  value: string;
+  message: string;
+}
+
+export async function authLogin(identifier: string, password: string): Promise<AuthTokenResponse> {
+  const response = await fetchWithFallback('/api/v1/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ identifier, password }),
+  });
+  const data: AuthTokenResponse = await response.json();
+  setAccessToken(data.access_token);
+  return data;
+}
+
+export async function authSignup(payload: {
+  username: string;
+  email: string;
+  password: string;
+  college_name?: string;
+}): Promise<AuthTokenResponse> {
+  const response = await fetchWithFallback('/api/v1/auth/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data: AuthTokenResponse = await response.json();
+  setAccessToken(data.access_token);
+  return data;
+}
+
+export async function authRefresh(): Promise<AuthTokenResponse> {
+  const response = await fetchWithFallback('/api/v1/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const data: AuthTokenResponse = await response.json();
+  setAccessToken(data.access_token);
+  return data;
+}
+
+export async function authLogout(): Promise<{ status: string; message: string }> {
+  try {
+    const response = await fetchWithFallback('/api/v1/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    setAccessToken(null);
+    return response.json();
+  } catch {
+    setAccessToken(null);
+    return { status: 'success', message: 'Logged out' };
+  }
+}
+
+export async function authGetMe(): Promise<AuthUserResponse> {
+  const response = await fetchWithFallback('/api/v1/auth/me');
+  return response.json();
+}
+
+export async function authCheckAvailability(params: {
+  username?: string;
+  email?: string;
+}): Promise<AvailabilityResponse> {
+  const query = new URLSearchParams();
+  if (params.username) query.set('username', params.username);
+  if (params.email) query.set('email', params.email);
+  const response = await fetchWithFallback(`/api/v1/auth/check-availability?${query.toString()}`);
   return response.json();
 }

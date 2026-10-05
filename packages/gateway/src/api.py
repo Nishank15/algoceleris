@@ -5,6 +5,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, WebSocket, status
 
 from .ai import GeminiDebugAssistant, create_ai_router, get_ai_assistant
+from .auth import BloomUniquenessChecker, create_auth_router
 from .contests import (
     ContestStore,
     LeaderboardEngine,
@@ -98,6 +99,7 @@ def create_app(
     leaderboard_engine: Optional[LeaderboardEngine] = None,
     proctoring_store: Optional[ProctoringStore] = None,
     plagiarism_detector: Optional[PlagiarismDetector] = None,
+    bloom_checker: Optional[BloomUniquenessChecker] = None,
 ) -> FastAPI:
     """FastAPI application factory for the Cloud-Judge V2 Gateway."""
     app = FastAPI(
@@ -113,6 +115,8 @@ def create_app(
     active_leaderboard = leaderboard_engine or get_leaderboard_engine(active_contest_store)
     active_proctoring = proctoring_store or get_proctoring_store()
     active_detector = plagiarism_detector or PlagiarismDetector()
+    active_redis = getattr(active_broker, "_client", None)
+    active_bloom = bloom_checker or BloomUniquenessChecker(redis_client=active_redis)
 
     ws_manager = WebSocketConnectionManager()
     app.state.broker = active_broker
@@ -123,6 +127,7 @@ def create_app(
     app.state.leaderboard_engine = active_leaderboard
     app.state.proctoring_store = active_proctoring
     app.state.plagiarism_detector = active_detector
+    app.state.bloom_checker = active_bloom
     app.state.ws_manager = ws_manager
 
     api_router = create_router(active_broker, rate_limiter=active_limiter)
@@ -142,10 +147,15 @@ def create_app(
         store=active_contest_store,
         detector=active_detector,
     )
+    auth_router = create_auth_router(
+        bloom_checker=active_bloom,
+        redis_client=active_redis,
+    )
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
     api_router.include_router(contests_router)
     api_router.include_router(plagiarism_router)
+    api_router.include_router(auth_router)
 
     @app.get("/health", summary="Service health check")
     @api_router.get("/health", summary="API v1 health check")
@@ -162,6 +172,7 @@ def create_app(
             "leaderboard_engine": active_leaderboard.__class__.__name__,
             "proctoring_store": active_proctoring.__class__.__name__,
             "plagiarism_detector": active_detector.__class__.__name__,
+            "bloom_filter": "redisbloom" if getattr(active_bloom, "_redis_bloom_active", False) else "in_memory",
         }
 
     app.include_router(api_router)

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Terminal, AlertCircle } from 'lucide-react';
+import { Terminal, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { authCheckAvailability } from '../services/api';
 
 interface AuthPageProps {
   mode: 'login' | 'signup';
@@ -18,6 +19,23 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usernameStatus, setUsernameStatus] = useState<{ available?: boolean; message?: string } | null>(null);
+
+  useEffect(() => {
+    if (isLogin || username.trim().length < 3) {
+      setUsernameStatus(null);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await authCheckAvailability({ username: username.trim() });
+        setUsernameStatus({ available: res.available, message: res.message });
+      } catch {
+        // ignore network error during debounced check
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [username, isLogin]);
 
   // Query parameter redirect support e.g. /auth/login?redirect=/problems
   const searchParams = new URLSearchParams(location.search);
@@ -121,6 +139,21 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
                 autoComplete="username"
                 required
               />
+              {usernameStatus && (
+                <div
+                  style={{
+                    fontSize: '11px',
+                    marginTop: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: usernameStatus.available ? 'var(--color-success, #22c55e)' : 'var(--color-danger, #ef4444)',
+                  }}
+                >
+                  {usernameStatus.available ? <CheckCircle2 size={12} /> : <AlertCircle size={12} />}
+                  <span>{usernameStatus.message}</span>
+                </div>
+              )}
             </div>
           )}
 
