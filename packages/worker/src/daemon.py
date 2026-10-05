@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 # Support importing when installed or via sys.path
 try:
     from packages.engine.src import JudgeEvaluator, SubmissionJob, SubmissionReport, TestCase
-    from packages.gateway.src import QueueBroker, get_queue_broker
+    from packages.gateway.src.queue import QueueBroker, get_queue_broker
 except ImportError:
     from src.evaluator import JudgeEvaluator, SubmissionJob, SubmissionReport, TestCase
     from src.queue import QueueBroker, get_queue_broker

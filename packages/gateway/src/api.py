@@ -170,6 +170,10 @@ def create_app(
             "plagiarism_detector": active_detector.__class__.__name__,
         }
 
+    @api_router.get("/health", summary="API v1 health check")
+    def api_v1_health_check():
+        return health_check()
+
     return app
 
 

@@ -1,5 +1,9 @@
-from .api import create_app
-from .main import create_production_app
+from .queue import (
+    InMemoryQueueBroker,
+    QueueBroker,
+    RedisQueueBroker,
+    get_queue_broker,
+)
 from .models import (
     StreamEvent,
     SubmissionRequest,
@@ -7,13 +11,15 @@ from .models import (
     SubmissionStatus,
     TestCaseInput,
 )
-from .queue import (
-    InMemoryQueueBroker,
-    QueueBroker,
-    RedisQueueBroker,
-    get_queue_broker,
-)
-from .ws import WebSocketConnectionManager
+
+try:
+    from .api import create_app
+    from .main import create_production_app
+    from .ws import WebSocketConnectionManager
+except ImportError:
+    create_app = None  # type: ignore
+    create_production_app = None  # type: ignore
+    WebSocketConnectionManager = None  # type: ignore
 
 __all__ = [
     "InMemoryQueueBroker",

@@ -13,6 +13,12 @@ COPY . /app
 
 RUN pip install --no-cache-dir \
     redis \
-    pydantic
+    pydantic \
+    fastapi \
+    uvicorn \
+    stripe \
+    razorpay \
+    requests \
+    google-genai
 
 CMD ["python", "-m", "packages.worker.src.main"]

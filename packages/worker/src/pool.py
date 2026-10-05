@@ -4,7 +4,7 @@ from typing import List, Optional
 
 try:
     from packages.engine.src import JudgeEvaluator
-    from packages.gateway.src import QueueBroker, get_queue_broker
+    from packages.gateway.src.queue import QueueBroker, get_queue_broker
 except ImportError:
     from src.evaluator import JudgeEvaluator
     from src.queue import QueueBroker, get_queue_broker

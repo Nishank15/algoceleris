@@ -16,6 +16,7 @@ class IsolationSandbox:
 
     def __init__(self, cgroup_manager: Optional[CgroupV2Manager] = None):
         self.cgroup_manager = cgroup_manager or CgroupV2Manager()
+        self._can_unshare: Optional[bool] = None
 
     def run(
         self,
@@ -46,14 +47,20 @@ class IsolationSandbox:
         if env:
             clean_env.update(env)
 
-        # On Linux, wrap command with unshare -n (network namespace isolation) if available
+        # On Linux, wrap command with unshare -n (network namespace isolation) if permitted
         final_cmd = list(command)
-        if shutil.which("unshare") and os.name == "posix":
-            # Test if unshare -n can be invoked without error
-            unshare_path = shutil.which("unshare")
-            # Only prepend unshare if run as root or user namespaces allowed
-            if os.geteuid() == 0:
-                final_cmd = [unshare_path, "--net", "--"] + final_cmd
+        if self._can_unshare is None:
+            if shutil.which("unshare") and os.name == "posix" and os.geteuid() == 0:
+                try:
+                    res = subprocess.run([shutil.which("unshare"), "--net", "true"], capture_output=True, timeout=1)
+                    self._can_unshare = (res.returncode == 0)
+                except Exception:
+                    self._can_unshare = False
+            else:
+                self._can_unshare = False
+
+        if self._can_unshare:
+            final_cmd = [shutil.which("unshare"), "--net", "--"] + final_cmd
 
         # Configure resource limits preexec hook
         def preexec_limits():
