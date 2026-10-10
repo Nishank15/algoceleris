@@ -19,6 +19,12 @@ RUN pip install --no-cache-dir \
     stripe \
     razorpay \
     requests \
-    google-genai
+    google-genai \
+    "sqlalchemy[asyncio]" \
+    greenlet \
+    asyncpg \
+    alembic \
+    argon2-cffi \
+    pyjwt
 
 CMD ["python", "-m", "packages.worker.src.main"]
