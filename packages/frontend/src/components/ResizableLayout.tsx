@@ -1,10 +1,15 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { FileText, Code, Terminal } from 'lucide-react';
+
+export type MobileWorkspaceTab = 'problem' | 'editor' | 'console';
 
 interface ResizableLayoutProps {
   isZenMode: boolean;
   leftPane: React.ReactNode;
   editorPane: React.ReactNode;
   consolePane: React.ReactNode;
+  mobileActiveTab?: MobileWorkspaceTab;
+  onMobileTabChange?: (tab: MobileWorkspaceTab) => void;
 }
 
 export const ResizableLayout: React.FC<ResizableLayoutProps> = ({
@@ -12,11 +17,25 @@ export const ResizableLayout: React.FC<ResizableLayoutProps> = ({
   leftPane,
   editorPane,
   consolePane,
+  mobileActiveTab,
+  onMobileTabChange,
 }) => {
   // Horizontal split: percentage width for left pane (Problem)
   const [leftWidthPercent, setLeftWidthPercent] = useState<number>(42);
   // Vertical split: percentage height for editor pane (Top of right area)
   const [editorHeightPercent, setEditorHeightPercent] = useState<number>(60);
+
+  // Mobile tab state
+  const [internalTab, setInternalTab] = useState<MobileWorkspaceTab>('problem');
+  const activeTab = mobileActiveTab ?? internalTab;
+
+  const handleTabChange = useCallback(
+    (tab: MobileWorkspaceTab) => {
+      setInternalTab(tab);
+      onMobileTabChange?.(tab);
+    },
+    [onMobileTabChange]
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const rightAreaRef = useRef<HTMLDivElement>(null);
@@ -80,8 +99,42 @@ export const ResizableLayout: React.FC<ResizableLayoutProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`layout-workspace ${isZenMode ? 'zen-mode' : ''}`}
+      className={`layout-workspace mobile-tab-${activeTab} ${isZenMode ? 'zen-mode' : ''}`}
     >
+      {/* Mobile Tab Control (< 1024px) */}
+      <div className="mobile-workspace-tabs" role="tablist" aria-label="Workspace views">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'problem'}
+          className={`mobile-tab-btn ${activeTab === 'problem' ? 'active' : ''}`}
+          onClick={() => handleTabChange('problem')}
+        >
+          <FileText size={14} />
+          <span>Problem</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'editor'}
+          className={`mobile-tab-btn ${activeTab === 'editor' ? 'active' : ''}`}
+          onClick={() => handleTabChange('editor')}
+        >
+          <Code size={14} />
+          <span>Code Editor</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'console'}
+          className={`mobile-tab-btn ${activeTab === 'console' ? 'active' : ''}`}
+          onClick={() => handleTabChange('console')}
+        >
+          <Terminal size={14} />
+          <span>Output & Tests</span>
+        </button>
+      </div>
+
       {/* Left Pane: Problem Description */}
       <div
         className="pane pane-problem"

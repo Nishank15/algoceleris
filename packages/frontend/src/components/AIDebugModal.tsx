@@ -132,7 +132,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
               style={{
                 width: '32px',
                 height: '32px',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-secondary)',
                 border: '1px solid var(--border-subtle)',
                 display: 'flex',
@@ -324,7 +324,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 style={{
                   background: 'var(--bg-canvas)',
                   border: '1px solid var(--border-subtle)',
-                  borderRadius: '8px',
+                  borderRadius: 'var(--radius-md)',
                   overflow: 'hidden',
                 }}
               >

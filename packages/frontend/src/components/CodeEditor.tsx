@@ -92,6 +92,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           scrollBeyondLastLine: false,
           automaticLayout: true,
           smoothScrolling: true,
+          overviewRulerLanes: 0,
+          hideCursorInOverviewRuler: true,
           tabSize: 4,
           insertSpaces: true,
           lineNumbers: 'on',

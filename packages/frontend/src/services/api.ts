@@ -10,12 +10,17 @@ import {
   ProctoringAuditReport,
 } from '../types';
 
-const getApiBaseUrl = (useFallback = false) => {
-  if (typeof window !== 'undefined' && (window.location.port === '3000' || window.location.port === '5173')) {
-    return useFallback ? 'http://localhost:8000' : 'http://localhost:8080';
-  }
+export const getApiBaseUrl = (_useFallback = false): string => {
   return '';
 };
+
+export function buildWebSocketUrl(path: string): string {
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const wsProtocol = isHttps ? 'wss:' : 'ws:';
+  const host = typeof window !== 'undefined' && window.location.host ? window.location.host : '';
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${wsProtocol}//${host}${cleanPath}`;
+}
 
 let inMemoryAccessToken: string | null = null;
 
@@ -33,7 +38,7 @@ async function doSilentRefresh(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     try {
-      const res = await fetch(`${getApiBaseUrl(false)}/api/v1/auth/refresh`, {
+      const res = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -45,23 +50,8 @@ async function doSilentRefresh(): Promise<string | null> {
           return data.access_token;
         }
       }
-    } catch {
-      try {
-        const res = await fetch(`${getApiBaseUrl(true)}/api/v1/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.access_token) {
-            setAccessToken(data.access_token);
-            return data.access_token;
-          }
-        }
-      } catch {
-        // fallback failed
-      }
+    } catch (err) {
+      console.warn('Silent refresh network error:', err);
     } finally {
       refreshPromise = null;
     }
@@ -194,18 +184,12 @@ export function subscribeSubmissionStream(
   onComplete?: () => void,
   onError?: (error: Event) => void
 ): () => void {
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const getWsHost = (fallback = false) => {
-    const isLocalDev = window.location.port === '3000' || window.location.port === '5173';
-    return isLocalDev ? (fallback ? 'localhost:8000' : 'localhost:8080') : window.location.host;
-  };
-
   let socket: WebSocket | null = null;
   let isClosed = false;
 
-  const connect = (fallback = false) => {
+  const connect = () => {
     if (isClosed) return;
-    const wsUrl = `${wsProtocol}//${getWsHost(fallback)}/ws/submissions/${submissionId}`;
+    const wsUrl = buildWebSocketUrl(`/ws/submissions/${submissionId}`);
     socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {
@@ -233,26 +217,17 @@ export function subscribeSubmissionStream(
     };
 
     socket.onerror = (err) => {
-      console.warn(`Submission WebSocket error (fallback=${fallback}):`, err);
-      if (!fallback && window.location.port === '3000') {
-        // Handled in onclose
-      } else {
-        if (onError) onError(err);
-      }
+      console.warn('Submission WebSocket error:', err);
+      if (onError) onError(err);
     };
 
-    socket.onclose = (e) => {
+    socket.onclose = () => {
       if (isClosed) return;
-      if (!fallback && window.location.port === '3000' && e.code !== 1000) {
-        console.warn('WebSocket closed abnormally, trying fallback 8000...');
-        connect(true);
-      } else {
-        if (onComplete) onComplete();
-      }
+      if (onComplete) onComplete();
     };
   };
 
-  connect(false);
+  connect();
 
   return () => {
     isClosed = true;
@@ -395,17 +370,12 @@ export function subscribeContestLeaderboard(
   onUpdate?: (delta: any) => void,
   onError?: (error: Event) => void
 ): () => void {
-  const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const getWsHost = (fallback = false) => {
-    return window.location.port === '3000' ? (fallback ? 'localhost:8000' : 'localhost:8080') : window.location.host;
-  };
-
   let socket: WebSocket | null = null;
   let isClosed = false;
 
-  const connect = (fallback = false) => {
+  const connect = () => {
     if (isClosed) return;
-    const wsUrl = `${wsProtocol}//${getWsHost(fallback)}/ws/contests/${contestId}/leaderboard`;
+    const wsUrl = buildWebSocketUrl(`/ws/contests/${contestId}/leaderboard`);
     socket = new WebSocket(wsUrl);
 
     socket.onmessage = (event) => {
@@ -422,24 +392,16 @@ export function subscribeContestLeaderboard(
     };
 
     socket.onerror = (err) => {
-      console.warn(`Contest Leaderboard WebSocket error (fallback=${fallback}):`, err);
-      if (!fallback && window.location.port === '3000') {
-        // Handled in onclose
-      } else {
-        if (onError) onError(err);
-      }
+      console.warn('Contest Leaderboard WebSocket error:', err);
+      if (onError) onError(err);
     };
 
-    socket.onclose = (e) => {
+    socket.onclose = () => {
       if (isClosed) return;
-      if (!fallback && window.location.port === '3000' && e.code !== 1000) {
-        console.warn('Leaderboard WebSocket closed abnormally, trying fallback 8000...');
-        connect(true);
-      }
     };
   };
 
-  connect(false);
+  connect();
 
   return () => {
     isClosed = true;
