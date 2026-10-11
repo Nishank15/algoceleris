@@ -12,8 +12,7 @@ build/
 *.egg-info/
 .env
 .env.local
-# .planning/
-# .agents/
+.planning/
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
 .playwright/
