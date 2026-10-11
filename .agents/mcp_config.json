@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "ast-grep": {
+      "command": "ast-grep",
+      "args": [
+        "lsp"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-chrome-devtools"
+      ]
+    },
+    "codebase-memory": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "trace-mcp"
+      ]
+    }
+  }
+}

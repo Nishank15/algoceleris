@@ -1,0 +1,45 @@
+{
+    "gateguard-security": {
+        "enabled": true,
+        "PreToolUse": {
+            "matcher": "run_command",
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": "node .agents/hooks/gateguard.js",
+                    "timeout": 15
+                },
+                {
+                    "type": "command",
+                    "command": "node .agents/hooks/validate-command.js",
+                    "timeout": 15
+                }
+            ]
+        }
+    },
+    "post-edit-formatter": {
+        "enabled": true,
+        "PostToolUse": {
+            "matcher": "write_to_file|replace_file_content",
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": "node .agents/hooks/enforce-formatting.js",
+                    "timeout": 30
+                }
+            ]
+        }
+    },
+    "verify-test-gate": {
+        "enabled": true,
+        "Stop": {
+            "hooks": [
+                {
+                    "type": "command",
+                    "command": "node .agents/hooks/verify-test-suite.js",
+                    "timeout": 60
+                }
+            ]
+        }
+    }
+}
