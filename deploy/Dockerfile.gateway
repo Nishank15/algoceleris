@@ -21,7 +21,8 @@ RUN pip install --no-cache-dir \
     stripe \
     razorpay \
     requests \
-    sqlalchemy \
+    "sqlalchemy[asyncio]" \
+    greenlet \
     asyncpg \
     alembic \
     aiosqlite \

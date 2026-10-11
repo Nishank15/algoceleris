@@ -142,7 +142,15 @@ export const ContestsPage: React.FC = () => {
     let cancelled = false;
     listContests()
       .then((list) => {
-        if (!cancelled) setContests(Array.isArray(list) && list.length ? list : buildFallbackContests());
+        if (!cancelled) {
+          const raw = Array.isArray(list) && list.length ? list : buildFallbackContests();
+          const normalized = raw.map((c) => ({
+            ...c,
+            start_time: c.start_time < 1e11 ? c.start_time * 1000 : c.start_time,
+            end_time: c.end_time < 1e11 ? c.end_time * 1000 : c.end_time,
+          }));
+          setContests(normalized);
+        }
       })
       .catch(() => {
         if (!cancelled) setContests(buildFallbackContests());
@@ -250,7 +258,7 @@ export const ContestsPage: React.FC = () => {
           {c.problems.length} problems ({c.problems.map((p) => p.letter_code).join(', ')})
         </p>
         {phase !== 'ENDED' && (
-          <div className={`countdown-timer-mono ${phase === 'ACTIVE' ? 'live' : 'soon'}`}>
+          <div className={`countdown-timer-mono contest-countdown ${phase === 'ACTIVE' ? 'live' : 'soon'}`}>
             <span className="countdown-label">{phase === 'ACTIVE' ? 'Ends in' : 'Starts in'}</span>
             {formatCountdown((phase === 'ACTIVE' ? c.end_time : c.start_time) - now)}
           </div>

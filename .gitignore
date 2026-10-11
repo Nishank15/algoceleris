@@ -13,4 +13,6 @@ build/
 .env
 .env.local
 .planning/
-.agents/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/
+.playwright/

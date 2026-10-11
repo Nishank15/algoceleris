@@ -1,0 +1,23 @@
+[
+    {
+        "id": "instinct-001",
+        "trigger": "modifying Dockerfile.gateway or Dockerfile.worker dependencies",
+        "rule": "Always include greenlet and aiosqlite when installing sqlalchemy[asyncio] to prevent container startup 503 crashes.",
+        "confidence": 1.0,
+        "source": "v2.2-docker-gateway-fix"
+    },
+    {
+        "id": "instinct-002",
+        "trigger": "exposing Vite via reverse proxy or Cloudflare tunnel",
+        "rule": "Set server.allowedHosts: true in vite.config.ts to avoid blocked DNS rebinding rejections.",
+        "confidence": 1.0,
+        "source": "v2.2-tunnel-host-fix"
+    },
+    {
+        "id": "instinct-003",
+        "trigger": "frontend health checks / telemetry",
+        "rule": "Never hardcode http://localhost:8080 in client bundles; use relative paths (/api/v1/health) to support tunneling.",
+        "confidence": 1.0,
+        "source": "v2.2-telemetry-fix"
+    }
+]

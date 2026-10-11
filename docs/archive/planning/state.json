@@ -1,0 +1,38 @@
+{
+  "contract": "1.0.0",
+  "flavor": "core",
+  "milestone": "v2.2",
+  "phases": [
+    {
+      "number": "13",
+      "name": "PostgreSQL Infrastructure & Alembic Migration Engine",
+      "status": "complete"
+    },
+    {
+      "number": "14",
+      "name": "RedisBloom Uniqueness Layer & Hardened Authentication",
+      "status": "complete"
+    },
+    {
+      "number": "15",
+      "name": "Role-Based Access Control (RBAC) & Entitlements",
+      "status": "complete"
+    },
+    {
+      "number": "16",
+      "name": "Auth UX, Guest History Migration & DB-Backed Analytics",
+      "status": "complete"
+    },
+    {
+      "number": "17",
+      "name": "Linear Dark / Light Mode Toggle System",
+      "status": "complete"
+    }
+  ],
+  "next": {
+    "command": "/gsd-ship",
+    "label": "Ship committed work",
+    "reason": "Committed work not shipped — time to ship"
+  },
+  "updated_at": "2026-10-05T16:58:50.017Z"
+}

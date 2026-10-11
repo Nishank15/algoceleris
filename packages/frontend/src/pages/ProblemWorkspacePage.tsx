@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Play, Send } from 'lucide-react';
 import { PROBLEMS } from '../constants/problems';
 import { getStarterTemplates } from '../constants/templates';
 import { markProblemSolved, markProblemAttempted, recordGuestSubmission } from '../services/problemService';
@@ -43,6 +44,7 @@ export const ProblemWorkspacePage: React.FC = () => {
   const activeProblemId = slug || 'two-sum';
   const setActiveProblemId = useCallback((id: string) => navigate(`/problems/${id}`), [navigate]);
   const [activeLanguage, setActiveLanguage] = useState<Language>('cpp');
+  const [mobileTab, setMobileTab] = useState<'problem' | 'editor' | 'console'>('problem');
   const { user } = useAuth();
 
   // Subscription state
@@ -343,10 +345,12 @@ export const ProblemWorkspacePage: React.FC = () => {
   );
 
   const handleRunSamples = useCallback(() => {
+    setMobileTab('console');
     executeSubmission(true);
   }, [executeSubmission]);
 
   const handleSubmit = useCallback(() => {
+    setMobileTab('console');
     executeSubmission(false);
   }, [executeSubmission]);
 
@@ -495,6 +499,8 @@ export const ProblemWorkspacePage: React.FC = () => {
 
       <ResizableLayout
         isZenMode={isZenMode}
+        mobileActiveTab={mobileTab}
+        onMobileTabChange={setMobileTab}
         leftPane={<ProblemPane problem={activeProblem} />}
         editorPane={
           <CodeEditor
@@ -522,6 +528,43 @@ export const ProblemWorkspacePage: React.FC = () => {
           />
         }
       />
+
+      {/* Mobile Ergonomic Action Bar (< 1024px) */}
+      <div className="mobile-workspace-toolbar">
+        <select
+          className="lang-select mobile-lang-select"
+          value={activeLanguage}
+          onChange={(e) => handleLanguageChange(e.target.value as Language)}
+          disabled={isRunning}
+          aria-label="Programming Language"
+        >
+          <option value="cpp">C++20 (GCC)</option>
+          <option value="python">Python 3.12</option>
+          <option value="java">Java 21</option>
+        </select>
+        <div className="mobile-actions-cluster">
+          <button
+            type="button"
+            className="btn btn-secondary mobile-run-btn"
+            onClick={handleRunSamples}
+            disabled={isRunning}
+            title="Run sample test cases"
+          >
+            <Play size={13} fill="currentColor" />
+            <span>{isRunning ? 'Running' : 'Run'}</span>
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary mobile-submit-btn"
+            onClick={handleSubmit}
+            disabled={isRunning}
+            title="Submit solution to online judge"
+          >
+            <Send size={13} />
+            <span>{submitLabel ?? (isRunning ? 'Judging...' : 'Submit')}</span>
+          </button>
+        </div>
+      </div>
 
       {isZenMode && <ZenModeBanner onExit={() => setIsZenMode(false)} />}
 
