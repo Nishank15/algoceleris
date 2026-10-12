@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Terminal, LogOut, Sun, Moon, Menu, X, Code2, Trophy, User, LogIn } from 'lucide-react';
+import { Terminal, LogOut, Sun, Moon, Menu, X, Code2, Trophy, User, LogIn, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -52,6 +52,7 @@ export const LinearHeaderNav: React.FC = () => {
           </Link>
           <NavLink to="/problems" className={linkClass} id="nav-problems">Problems</NavLink>
           <NavLink to="/contests" className={linkClass} id="nav-contests">Contests</NavLink>
+          <NavLink to="/campus/calendar" className={linkClass} id="nav-campus">Campus</NavLink>
         </div>
         <div className="linear-nav-right">
           <span className="latency-pill" id="nav-latency" title="Gateway round-trip latency">
@@ -151,6 +152,14 @@ export const LinearHeaderNav: React.FC = () => {
               >
                 <Trophy size={16} />
                 <span>Contests</span>
+              </NavLink>
+              <NavLink
+                to="/campus/calendar"
+                className={linkClass}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Calendar size={16} />
+                <span>Campus</span>
               </NavLink>
               {user && !user.isGuest ? (
                 <>

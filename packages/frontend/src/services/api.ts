@@ -61,7 +61,7 @@ async function doSilentRefresh(): Promise<string | null> {
   return refreshPromise;
 }
 
-async function fetchWithFallback(
+export async function fetchWithFallback(
   endpoint: string,
   options?: RequestInit,
   isRetry = false

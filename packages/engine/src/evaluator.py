@@ -19,6 +19,7 @@ class TestCase:
     input_data: str
     expected_output: str
     is_sample: bool = False
+    is_secret: bool = False
 
 
 @dataclass
@@ -31,6 +32,8 @@ class TestCaseResult:
     stdout: str = ""
     stderr: str = ""
     diff: Optional[str] = None
+    is_sample: bool = False
+    is_secret: bool = False
 
 
 @dataclass
@@ -190,6 +193,8 @@ class JudgeEvaluator:
                     stdout=run_res.stdout,
                     stderr=run_res.stderr or run_res.error_message or "",
                     diff=diff_str,
+                    is_sample=getattr(tc, "is_sample", False),
+                    is_secret=getattr(tc, "is_secret", False) or not getattr(tc, "is_sample", False),
                 )
                 test_results.append(tc_result)
 

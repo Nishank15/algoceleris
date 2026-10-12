@@ -9,6 +9,11 @@ import { ProblemsPage } from './pages/ProblemsPage';
 import { ProblemWorkspacePage } from './pages/ProblemWorkspacePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ContestsPage } from './pages/ContestsPage';
+import { AssessmentCreatePage } from './pages/campus/AssessmentCreatePage';
+import { CampusCalendarPage } from './pages/campus/CampusCalendarPage';
+import { StudentExamArenaPage } from './pages/campus/StudentExamArenaPage';
+import { FacultyProctorCockpitPage } from './pages/campus/FacultyProctorCockpitPage';
+import { VivaInterviewWorkspacePage } from './pages/campus/VivaInterviewWorkspacePage';
 
 export const App: React.FC = () => (
   <ThemeProvider>
@@ -25,6 +30,17 @@ export const App: React.FC = () => (
           <Route path="/problems/:slug" element={<ProblemWorkspacePage />} />
           <Route path="/u/:username" element={<ProfilePage />} />
           <Route path="/contests" element={<ContestsPage />} />
+          <Route path="/campus/assessments/new" element={<AssessmentCreatePage />} />
+          <Route path="/campus/calendar" element={<CampusCalendarPage />} />
+          <Route path="/campus/assessments/:id/arena" element={<StudentExamArenaPage />} />
+          <Route path="/campus/assessments/:id/cockpit" element={<FacultyProctorCockpitPage />} />
+          <Route path="/campus/viva/:room_code" element={<VivaInterviewWorkspacePage />} />
+          <Route path="/portal/:org_slug/assessments/new" element={<AssessmentCreatePage />} />
+          <Route path="/portal/:org_slug/calendar" element={<CampusCalendarPage />} />
+          <Route path="/portal/:org_slug/assessments/:id/arena" element={<StudentExamArenaPage />} />
+          <Route path="/portal/:org_slug/assessments/:id/cockpit" element={<FacultyProctorCockpitPage />} />
+          <Route path="/portal/:org_slug/viva/:room_code" element={<VivaInterviewWorkspacePage />} />
+          <Route path="/portal/:org_slug" element={<CampusCalendarPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
