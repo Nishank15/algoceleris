@@ -19,6 +19,7 @@ class ResourceLimits:
     cpu_limit_pct: int = 100            # 100% of 1 core (1 CPU)
     time_limit_ms: int = 2000           # 2000 ms (2 seconds)
     pids_limit: int = 64                # max processes/threads
+    network_isolated: bool = True       # Linux network namespace isolation flag
 
 
 @dataclass

@@ -124,6 +124,12 @@ class Submission(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), index=True, nullable=False
     )
+    assessment_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("assessments.id", ondelete="SET NULL"), index=True, nullable=True
+    )
+    room_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("interview_rooms.id", ondelete="SET NULL"), index=True, nullable=True
+    )
 
     user: Mapped[Optional["User"]] = relationship("User", back_populates="submissions")
 

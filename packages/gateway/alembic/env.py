@@ -19,6 +19,7 @@ for p in [str(PROJECT_ROOT), str(GATEWAY_ROOT)]:
         sys.path.insert(0, p)
 
 from packages.gateway.src.models.entities import Base
+import packages.gateway.src.models.campus  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -35,10 +36,10 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
-    """Retrieve database URL from config or environment variable."""
+    """Retrieve database URL from environment variable or config."""
     return (
-        config.get_main_option("sqlalchemy.url")
-        or os.getenv("DATABASE_URL")
+        os.getenv("DATABASE_URL")
+        or config.get_main_option("sqlalchemy.url")
         or "postgresql+asyncpg://postgres:postgres@localhost:5432/cloud_judge"
     )
 

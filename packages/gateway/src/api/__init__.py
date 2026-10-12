@@ -4,9 +4,9 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, WebSocket, status
 
-from .ai import GeminiDebugAssistant, create_ai_router, get_ai_assistant
-from .auth import BloomUniquenessChecker, create_auth_router
-from .contests import (
+from ..ai import GeminiDebugAssistant, create_ai_router, get_ai_assistant
+from ..auth import BloomUniquenessChecker, create_auth_router
+from ..contests import (
     ContestStore,
     LeaderboardEngine,
     ProctoringStore,
@@ -15,15 +15,21 @@ from .contests import (
     get_leaderboard_engine,
     get_proctoring_store,
 )
-from .database import check_db_health
-from .models import SubmissionRequest, SubmissionResponse, SubmissionStatus
-from .plagiarism import PlagiarismDetector, create_plagiarism_router
-from .queue import QueueBroker, get_queue_broker
-from .ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
-from .subscriptions import SubscriptionStore, get_subscription_store
-from .subscriptions.router import create_subscriptions_router
-from .users import create_users_router
-from .ws import WebSocketConnectionManager
+from ..database import check_db_health
+from ..models import SubmissionRequest, SubmissionResponse, SubmissionStatus
+from ..plagiarism import PlagiarismDetector, create_plagiarism_router
+from ..queue import QueueBroker, get_queue_broker
+from ..ratelimit import RateLimiter, TokenBucketLimiter, get_limiter
+from ..subscriptions import SubscriptionStore, get_subscription_store
+from ..subscriptions.router import create_subscriptions_router
+from ..users import create_users_router
+from .v1.campus import router as campus_router
+from ..ws import WebSocketConnectionManager
+from ..core.proctoring_mesh import (
+    get_proctoring_mesh_store,
+    handle_campus_proctor_websocket,
+)
+from ..core.viva_crdt import handle_viva_crdt_websocket
 
 
 def create_router(
@@ -153,12 +159,14 @@ def create_app(
         redis_client=active_redis,
     )
     users_router = create_users_router()
+
     api_router.include_router(sub_router)
     api_router.include_router(ai_router)
     api_router.include_router(contests_router)
     api_router.include_router(plagiarism_router)
     api_router.include_router(auth_router)
     api_router.include_router(users_router)
+    api_router.include_router(campus_router)
 
     @app.get("/health", summary="Service health check")
     @api_router.get("/health", summary="API v1 health check")
@@ -188,6 +196,22 @@ def create_app(
     async def websocket_contest_leaderboard(websocket: WebSocket, contest_id: str):
         await ws_manager.stream_contest_leaderboard(contest_id, websocket, active_broker, active_leaderboard)
 
+    @app.websocket("/ws/campus/assessments/{assessment_id}/proctor")
+    async def websocket_campus_proctor(websocket: WebSocket, assessment_id: str):
+        active_mesh_store = get_proctoring_mesh_store(redis_client=active_redis)
+        await handle_campus_proctor_websocket(
+            websocket=websocket,
+            assessment_id_str=assessment_id,
+            broker=active_broker,
+            mesh_store=active_mesh_store,
+        )
+
+    @app.websocket("/ws/campus/viva/{room_code}")
+    async def websocket_campus_viva(websocket: WebSocket, room_code: str):
+        await handle_viva_crdt_websocket(
+            websocket=websocket,
+            room_code=room_code,
+            broker=active_broker,
+        )
+
     return app
-
-
