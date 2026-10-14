@@ -163,12 +163,20 @@ export async function fetchWithFallback(
 export async function submitCode(
   request: SubmissionRequest
 ): Promise<SubmissionResponse> {
+  const code = request.code || request.source_code;
+  const { source_code, ...rest } = request;
+  const payload = {
+    ...rest,
+    code,
+    language: request.language,
+    problem_slug: request.problem_slug || request.problem_id || 'custom-run',
+  };
   const response = await fetchWithFallback('/api/v1/submissions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(request),
+    body: JSON.stringify(payload),
   });
   return response.json();
 }

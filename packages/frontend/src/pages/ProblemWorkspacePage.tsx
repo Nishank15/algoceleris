@@ -249,7 +249,9 @@ export const ProblemWorkspacePage: React.FC = () => {
 
       try {
         const response = await submitCode({
+          problem_slug: (activeProblem as any).slug || activeProblem.id,
           language: activeLanguage,
+          code: currentCode,
           source_code: currentCode,
           time_limit_ms: activeProblem.timeLimitMs,
           memory_limit_bytes: activeProblem.memoryLimitBytes,
@@ -285,10 +287,15 @@ export const ProblemWorkspacePage: React.FC = () => {
               setSubmissionStatus('COMPLETED');
               setIsRunning(false);
 
+              if (ev.data && (ev.data as any).verdict) {
+                setSubmissionReport(ev.data as any);
+                recordOutcome((ev.data as any).verdict, ev.data as any);
+              }
+
               // Query full submission report from gateway
               getSubmission(subId)
                 .then((subData) => {
-                  if (subData?.report) {
+                  if (subData?.report && subData.report.verdict !== 'PENDING') {
                     setSubmissionReport(subData.report);
                     recordOutcome(subData.report.verdict, subData.report);
                   }
@@ -299,27 +306,37 @@ export const ProblemWorkspacePage: React.FC = () => {
             }
           },
           () => {
-            // Stream closed: if watchdog is still armed it keeps guarding the verdict
-            setIsRunning(false);
+            // Stream closed: if report is not yet populated or pending, poll once
+            getSubmission(subId)
+              .then((subData) => {
+                if (subData?.report && subData.report.verdict !== 'PENDING') {
+                  clearWatchdog();
+                  setSubmissionReport(subData.report);
+                  setSubmissionStatus('COMPLETED');
+                  setIsRunning(false);
+                  recordOutcome(subData.report.verdict, subData.report);
+                }
+              })
+              .catch(() => {});
           },
           (err) => {
             console.warn('WebSocket stream error, polling status...', err);
             // Polling fallback if WebSocket drops (watchdog still guards total wait)
-            setTimeout(async () => {
+            const pollInterval = setInterval(async () => {
               try {
                 const subData = await getSubmission(subId);
-                if (subData?.report) {
+                if (subData?.report && subData.report.verdict !== 'PENDING') {
+                  clearInterval(pollInterval);
                   clearWatchdog();
                   setSubmissionReport(subData.report);
                   setSubmissionStatus('COMPLETED');
+                  setIsRunning(false);
                   recordOutcome(subData.report.verdict, subData.report);
                 }
               } catch (pollErr) {
                 console.error('Polling error:', pollErr);
-              } finally {
-                if (!watchdogTimerRef.current) setIsRunning(false);
               }
-            }, 1000);
+            }, 500);
           }
         );
 

@@ -8,7 +8,6 @@ import {
   Shuffle,
   ArrowUpDown,
   Filter,
-  ChevronRight,
   RotateCcw,
 } from 'lucide-react';
 import { PROBLEMS } from '../constants/problems';
@@ -214,148 +213,225 @@ export const ProblemsPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Catalog Table */}
-        <div className="catalog-table-wrapper">
-          <table className="catalog-table">
-            <thead>
-              <tr>
-                <th className="th-status" style={{ width: '48px' }}>
-                  Status
-                </th>
-                <th className="th-title" onClick={() => handleSort('title')}>
-                  <div className="th-sort-wrapper">
-                    <span>Title</span>
-                    <ArrowUpDown size={12} className="sort-icon-svg" />
-                  </div>
-                </th>
-                <th className="th-tags" style={{ width: '240px' }}>
-                  Topics
-                </th>
-                <th className="th-acceptance" style={{ width: '130px' }} onClick={() => handleSort('acceptance')}>
-                  <div className="th-sort-wrapper">
-                    <span>Acceptance</span>
-                    <ArrowUpDown size={12} className="sort-icon-svg" />
-                  </div>
-                </th>
-                <th className="th-difficulty" style={{ width: '110px' }} onClick={() => handleSort('difficulty')}>
-                  <div className="th-sort-wrapper">
-                    <span>Difficulty</span>
-                    <ArrowUpDown size={12} className="sort-icon-svg" />
-                  </div>
-                </th>
-                <th className="th-action" style={{ width: '60px' }}></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProblems.length === 0 ? (
-                <tr>
-                  <td colSpan={6}>
-                    <div className="catalog-empty-state">
-                      <Filter size={28} className="empty-state-icon" />
-                      <h3 className="empty-state-title">No problems match your criteria</h3>
-                      <p className="empty-state-desc">
-                        Try adjusting your search query, difficulty pill, or topic filters.
-                      </p>
-                      <button
-                        type="button"
-                        className="empty-reset-btn"
-                        onClick={handleResetFilters}
-                      >
-                        <RotateCcw size={14} />
-                        <span>Reset Filters</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                filteredProblems.map((problem) => {
-                  const status = getProblemSolvedStatus(problem.id, solvedIds, attemptedIds);
-                  const isSolved = status === 'solved';
-                  const isAttempted = status === 'attempted';
+        {/* Unified 100% Width CSS Grid Catalog */}
+        <div className="catalog-table-wrapper" role="table" aria-label="Problems Catalog">
+          {/* Header Row: 5 separate columns strictly matching row grid */}
+          <div
+            className="catalog-header-row"
+            role="row"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '48px minmax(260px, 4fr) minmax(200px, 2.5fr) 110px 100px',
+              width: '100%',
+              alignItems: 'center',
+            }}
+          >
+            {/* Header Column 1: Status (own 48px column) */}
+            <div
+              className="catalog-col col-status"
+              role="columnheader"
+              style={{
+                width: '48px',
+                minWidth: '48px',
+                maxWidth: '48px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center',
+              }}
+            >
+              <span>Status</span>
+            </div>
 
-                  return (
-                    <tr
-                      key={problem.id}
-                      className="catalog-row"
-                      onClick={() => navigate(`/problems/${problem.id}`)}
+            {/* Header Column 2: Title (own column matching row grid) */}
+            <div
+              className="catalog-col col-title"
+              role="columnheader"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                minWidth: 0,
+              }}
+              onClick={() => handleSort('title')}
+            >
+              <div className="th-sort-wrapper">
+                <span>Title</span>
+                <ArrowUpDown size={12} className="sort-icon-svg" />
+              </div>
+            </div>
+
+            {/* Header Column 3: Topics */}
+            <div
+              className="catalog-col col-tags"
+              role="columnheader"
+              style={{ minWidth: 0 }}
+            >
+              <span>Topics</span>
+            </div>
+
+            {/* Header Column 4: Acceptance */}
+            <div
+              className="catalog-col col-acceptance"
+              role="columnheader"
+              style={{ width: '110px' }}
+              onClick={() => handleSort('acceptance')}
+            >
+              <div className="th-sort-wrapper">
+                <span>Acceptance</span>
+                <ArrowUpDown size={12} className="sort-icon-svg" />
+              </div>
+            </div>
+
+            {/* Header Column 5: Difficulty */}
+            <div
+              className="catalog-col col-difficulty"
+              role="columnheader"
+              style={{ width: '100px', display: 'flex', justifyContent: 'center' }}
+              onClick={() => handleSort('difficulty')}
+            >
+              <div className="th-sort-wrapper">
+                <span>Difficulty</span>
+                <ArrowUpDown size={12} className="sort-icon-svg" />
+              </div>
+            </div>
+          </div>
+
+          <div className="catalog-body" role="rowgroup">
+            {filteredProblems.length === 0 ? (
+              <div className="catalog-empty-state">
+                <Filter size={28} className="empty-state-icon" />
+                <h3 className="empty-state-title">No problems match your criteria</h3>
+                <p className="empty-state-desc">
+                  Try adjusting your search query, difficulty pill, or topic filters.
+                </p>
+                <button
+                  type="button"
+                  className="empty-reset-btn"
+                  onClick={handleResetFilters}
+                >
+                  <RotateCcw size={14} />
+                  <span>Reset Filters</span>
+                </button>
+              </div>
+            ) : (
+              filteredProblems.map((problem) => {
+                const status = getProblemSolvedStatus(problem.id, solvedIds, attemptedIds);
+                const isSolved = status === 'solved';
+                const isAttempted = status === 'attempted';
+
+                return (
+                  <div
+                    key={problem.id}
+                    className="catalog-row"
+                    role="row"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '48px minmax(260px, 4fr) minmax(200px, 2.5fr) 110px 100px',
+                      width: '100%',
+                      alignItems: 'center',
+                    }}
+                    onClick={() => navigate(`/problems/${problem.id}`)}
+                  >
+                    {/* Row Column 1: Status (own 48px column) */}
+                    <div
+                      className="catalog-col col-status"
+                      role="cell"
+                      style={{
+                        width: '48px',
+                        minWidth: '48px',
+                        maxWidth: '48px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        textAlign: 'center',
+                      }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {/* Solved Status */}
-                      <td className="td-status" onClick={(e) => e.stopPropagation()}>
-                        {isSolved ? (
-                          <span title="Solved" className="status-icon-solved">
-                            <CheckCircle2 size={16} />
+                      {isSolved ? (
+                        <span title="Solved" className="status-icon-solved">
+                          <CheckCircle2 size={16} />
+                        </span>
+                      ) : isAttempted ? (
+                        <span title="Attempted" className="status-icon-attempted">
+                          <CircleDot size={16} />
+                        </span>
+                      ) : (
+                        <span className="status-icon-unsolved">—</span>
+                      )}
+                    </div>
+
+                    {/* Row Column 2: Title (own column matching header) */}
+                    <div
+                      className="catalog-col col-title"
+                      role="cell"
+                      style={{ minWidth: 0 }}
+                    >
+                      <Link
+                        to={`/problems/${problem.id}`}
+                        className="problem-title-link"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {problem.title}
+                      </Link>
+                    </div>
+
+                    {/* Row Column 3: Topics (minmax(200px, 2.5fr), horizontal flex row) */}
+                    <div
+                      className="catalog-col col-tags"
+                      role="cell"
+                      style={{ minWidth: 0 }}
+                    >
+                      <div className="row-tags-wrapper">
+                        {(problem.tags || []).slice(0, 3).map((tag) => (
+                          <span
+                            key={tag}
+                            className="catalog-tag-badge"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedTag(tag);
+                            }}
+                            title={`Filter by ${tag}`}
+                          >
+                            {tag}
                           </span>
-                        ) : isAttempted ? (
-                          <span title="Attempted" className="status-icon-attempted">
-                            <CircleDot size={16} />
+                        ))}
+                        {(problem.tags || []).length > 3 && (
+                          <span
+                            className="catalog-tag-more"
+                            title={(problem.tags || []).slice(3).join(', ')}
+                          >
+                            +{problem.tags.length - 3}
                           </span>
-                        ) : (
-                          <span className="status-icon-unsolved">—</span>
                         )}
-                      </td>
+                      </div>
+                    </div>
 
-                      {/* Problem Title & Number */}
-                      <td className="td-title">
-                        <Link
-                          to={`/problems/${problem.id}`}
-                          className="problem-title-link"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          {problem.title}
-                        </Link>
-                      </td>
+                    {/* Row Column 4: Acceptance (110px tabular-nums) */}
+                    <div
+                      className="catalog-col col-acceptance"
+                      role="cell"
+                      style={{ width: '110px' }}
+                    >
+                      <span className="acceptance-rate-mono">
+                        {problem.acceptanceRate.toFixed(1)}%
+                      </span>
+                    </div>
 
-                      {/* Topic Tags */}
-                      <td className="td-tags">
-                        <div className="row-tags-wrapper">
-                          {(problem.tags || []).slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="catalog-tag-badge"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedTag(tag);
-                              }}
-                              title={`Filter by ${tag}`}
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {(problem.tags || []).length > 2 && (
-                            <span
-                              className="catalog-tag-more"
-                              title={(problem.tags || []).slice(2).join(', ')}
-                            >
-                              +{problem.tags.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </td>
-
-                      {/* Acceptance Rate */}
-                      <td className="td-acceptance">
-                        <span className="acceptance-rate-mono">
-                          {problem.acceptanceRate.toFixed(1)}%
-                        </span>
-                      </td>
-
-                      {/* Difficulty Badge */}
-                      <td className="td-difficulty">
-                        <span className={`catalog-diff-badge diff-${problem.difficulty.toLowerCase()}`}>
-                          {problem.difficulty}
-                        </span>
-                      </td>
-
-                      {/* Navigate Action */}
-                      <td className="td-action">
-                        <ChevronRight size={14} className="row-chevron-icon" />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                    {/* Row Column 5: Difficulty (100px, centered/right aligned) */}
+                    <div
+                      className="catalog-col col-difficulty"
+                      role="cell"
+                      style={{ width: '100px', display: 'flex', justifyContent: 'center' }}
+                    >
+                      <span className={`catalog-diff-badge diff-${problem.difficulty.toLowerCase()}`}>
+                        {problem.difficulty}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

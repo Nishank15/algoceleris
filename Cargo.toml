@@ -1,0 +1,45 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/judge-core",
+    "crates/judge-db",
+    "crates/judge-worker",
+    "crates/judge-telemetry",
+    "crates/judge-viva",
+    "crates/judge-gateway",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["AlgoCeleris Team"]
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# Shared External Dependencies
+tokio = { version = "1.43", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.12", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2.0"
+anyhow = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "json", "macros"] }
+
+# Internal Workspace Crates
+judge-core = { path = "crates/judge-core" }
+judge-db = { path = "crates/judge-db" }
+judge-worker = { path = "crates/judge-worker" }
+judge-telemetry = { path = "crates/judge-telemetry" }
+judge-viva = { path = "crates/judge-viva" }
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"

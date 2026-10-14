@@ -236,7 +236,7 @@ export const TestConsole: React.FC<TestConsoleProps> = ({
 
         {/* Tab 3: Execution Output */}
         {activeTab === 'output' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div id="test-output" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {/* Status Telemetry Banner */}
             <div className="execution-telemetry-banner">
               <div className="telemetry-status">{getStatusBadge()}</div>

@@ -64,7 +64,14 @@ const SPECS: Record<string, ProblemSpec> = {
     cppSol: `class Solution {
 public:
     vector<int> twoSum(vector<int>& nums, int target) {
-        // Write your solution here
+        unordered_map<int, int> seen;
+        for (int i = 0; i < (int)nums.size(); ++i) {
+            int complement = target - nums[i];
+            if (seen.find(complement) != seen.end()) {
+                return {seen[complement], i};
+            }
+            seen[nums[i]] = i;
+        }
         return {};
     }
 };`,
@@ -81,7 +88,12 @@ public:
 }`,
     pySol: `class Solution:
     def twoSum(self, nums: List[int], target: int) -> List[int]:
-        # Write your solution here
+        seen = {}
+        for i, num in enumerate(nums):
+            complement = target - num
+            if complement in seen:
+                return [seen[complement], i]
+            seen[num] = i
         return []`,
     pyMain: `def main():
     data = sys.stdin.read().split()
@@ -93,7 +105,14 @@ public:
         print(min(r), max(r))`,
     javaSol: `class Solution {
     public int[] twoSum(int[] nums, int target) {
-        // Write your solution here
+        Map<Integer, Integer> seen = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (seen.containsKey(complement)) {
+                return new int[] { seen.get(complement), i };
+            }
+            seen.put(nums[i], i);
+        }
         return new int[0];
     }
 }`,

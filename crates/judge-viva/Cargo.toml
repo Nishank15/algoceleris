@@ -1,0 +1,30 @@
+[package]
+name = "judge-viva"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+judge-core = { workspace = true }
+judge-db = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+yrs = { version = "0.22", features = ["sync"] }
+axum = { version = "0.8", default-features = false, features = ["ws"] }
+futures-util = "0.3"
+redis = { version = "0.27", default-features = false, features = ["tokio-comp", "aio"] }
+sqlx = { workspace = true }
+
+[dev-dependencies]
+axum = { version = "0.8", features = ["ws", "tokio", "http1"] }
+tokio-tungstenite = "0.29"
+

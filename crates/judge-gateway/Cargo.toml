@@ -1,0 +1,45 @@
+[package]
+name = "judge-gateway"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+name = "judge_gateway"
+path = "src/lib.rs"
+
+[[bin]]
+name = "judge-gateway"
+path = "src/main.rs"
+
+[dependencies]
+judge-core = { path = "../judge-core" }
+judge-db = { path = "../judge-db" }
+judge-telemetry = { path = "../judge-telemetry" }
+judge-viva = { path = "../judge-viva" }
+
+axum = { version = "0.8", features = ["macros", "ws"] }
+futures-util = "0.3"
+tower = { version = "0.5", features = ["util"] }
+tower-http = { version = "0.6", features = ["cors", "trace", "compression-full"] }
+argon2 = "0.5"
+jsonwebtoken = "9.3"
+redis = { version = "0.27", default-features = false, features = ["tokio-comp", "aio"] }
+
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+sqlx = { workspace = true }
+
+[dev-dependencies]
+tokio-tungstenite = "0.29"
