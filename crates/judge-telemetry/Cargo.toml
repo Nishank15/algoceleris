@@ -1,0 +1,22 @@
+[package]
+name = "judge-telemetry"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+judge-core = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+axum = { version = "0.8", default-features = false, features = ["ws"] }
+futures-util = "0.3"
+redis = { version = "0.27", default-features = false, features = ["tokio-comp", "aio"] }

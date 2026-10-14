@@ -71,16 +71,21 @@ export interface StreamEvent {
 }
 
 export interface SubmissionRequest {
+  problem_slug?: string;
+  problem_id?: string;
   language: string;
+  code?: string;
   source_code: string;
   time_limit_ms?: number;
   memory_limit_bytes?: number;
-  test_cases: {
+  test_cases?: {
     id: number;
     input_data: string;
     expected_output: string;
     is_sample?: boolean;
   }[];
+  custom_input?: string;
+  assessment_id?: string;
 }
 
 export interface SubmissionResponse {

@@ -311,6 +311,10 @@ export async function createAssessment(
  * Retrieves a single assessment
  */
 export async function getAssessment(assessmentId: string): Promise<AssessmentResponse> {
+  const found = MOCK_ASSESSMENTS.find((a) => a.id === assessmentId);
+  if (!getAccessToken() && found) {
+    return found;
+  }
   try {
     const res = await fetchWithFallback(`/api/v1/campus/assessments/${assessmentId}`);
     if (res.ok) {
@@ -320,7 +324,6 @@ export async function getAssessment(assessmentId: string): Promise<AssessmentRes
     console.warn('Campus API getAssessment fallback:', err);
   }
 
-  const found = MOCK_ASSESSMENTS.find((a) => a.id === assessmentId);
   if (found) return found;
   throw new Error(`Assessment ${assessmentId} not found`);
 }
@@ -329,6 +332,12 @@ export async function getAssessment(assessmentId: string): Promise<AssessmentRes
  * Lists assessments across cohorts or by specific cohort
  */
 export async function listAssessments(cohortId?: string): Promise<AssessmentResponse[]> {
+  if (!getAccessToken()) {
+    if (cohortId) {
+      return MOCK_ASSESSMENTS.filter((a) => a.cohort_id === cohortId);
+    }
+    return MOCK_ASSESSMENTS;
+  }
   try {
     const endpoint = cohortId
       ? `/api/v1/campus/cohorts/${cohortId}/assessments`
@@ -715,6 +724,9 @@ export async function fetchProctorEvents(
   assessmentId: string,
   userId?: string
 ): Promise<ProctorEventItem[]> {
+  if (!getAccessToken()) {
+    return MOCK_INCIDENT_FEED;
+  }
   try {
     const query = userId ? `?user_id=${userId}` : '';
     const res = await fetchWithFallback(`/api/v1/campus/assessments/${assessmentId}/proctor/events${query}`);
@@ -737,6 +749,9 @@ export const getProctorEvents = fetchProctorEvents;
 export async function fetchProctoredStudents(
   assessmentId: string
 ): Promise<ProctoredCandidateState[]> {
+  if (!getAccessToken()) {
+    return MOCK_PROCTORED_STUDENTS;
+  }
   try {
     const res = await fetchWithFallback(`/api/v1/campus/assessments/${assessmentId}/proctor/students`);
     if (res.ok) {
@@ -785,6 +800,12 @@ export const MOCK_VIVA_ROOM: VivaRoomResponse = {
  * Retrieves Viva interview room details with role-aware private rubric masking
  */
 export async function fetchVivaRoom(roomCode: string): Promise<VivaRoomResponse> {
+  if (!getAccessToken()) {
+    return {
+      ...MOCK_VIVA_ROOM,
+      room_code: roomCode,
+    };
+  }
   try {
     const res = await fetchWithFallback(`/api/v1/campus/viva/${roomCode}`);
     if (res.ok) {

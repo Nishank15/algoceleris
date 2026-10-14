@@ -3,26 +3,28 @@
 **Role:** Systems Architect (`@architect`)  
 **Status:** PROPOSED & RATIFIED  
 **Target Platform:** AlgoCeleris / Cloud-Judge V2  
-**Current Milestone Focus:** **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]**  
-**Completed Milestone:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]**  
+**Current Milestone Focus:** **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture**  
+**Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]**  
 **Operational Invariant:** Read-only planning artifact; zero production code modified during blueprinting.
 
 ---
 
 ## 1. Executive Roadmap & Milestone Matrix
 
-To deliver enterprise campus capability while maintaining zero regression on core judge performance, the execution roadmap is structured as follows:
+To deliver enterprise campus capability and sub-millisecond execution throughput while maintaining zero regression on core judge performance, the execution roadmap is structured as follows:
 
 ```mermaid
 graph LR
     v2_2["✅ v2.2 Shipped<br/>PostgreSQL, RedisBloom,<br/>RBAC & Theme Inversion"] --> v2_3["✅ v2.3 Shipped<br/>Frontend Polish, Relative Telemetry,<br/>Typography & Playwright Audit"]
-    v2_3 --> v3_0["🎯 v3.0 Current Plan<br/>AlgoCeleris Campus:<br/>Multi-Tenant Assessments, Proctoring & Viva"]
+    v2_3 --> v3_0["✅ v3.0 Shipped<br/>AlgoCeleris Campus:<br/>Multi-Tenant Assessments, Proctoring & Viva"]
+    v3_0 --> v4_0["✅ v4.0 Shipped<br/>Rust Core & Rspack Migration:<br/>Kernel Sandbox & Axum Re-architecture"]
 ```
 
 | Milestone | Scope & Themes | Key Invariants | Target Phases |
 |---|---|---|---|
 | **v2.3** *(Completed)* | **Frontend Polish, Visual Stability & Automated UI Audit** | Verified relative WS origins, concentric border-radii, tabular-nums, responsive workspace tabs, and headless Playwright crawl across 7 routes and 2 viewports. | Phases 1–4 [COMPLETED] |
 | **v3.0** *(Completed)* | **AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal** | Enterprise multi-tenancy (`organizations`, `cohorts`), assignment & exam lifecycle engine, deadline gatekeepers, late penalty calculator, secret test suites, real-time proctoring telemetry mesh, and live Yjs CRDT multiplayer viva rooms. | Phases 5–15 [COMPLETED] |
+| **v4.0** *(Completed)* | **Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture** | Rsbuild/Rspack cutover, modular Rust workspace (`crates/`), cgroups v2 + seccomp-bpf sandboxing, Tree-sitter AST winnowing, Axum 0.8 + Tower + Tokio, `yrs` CRDT viva sync, and HAProxy Strangler-Fig cutover. | 18 Phases across Tracks A–G [COMPLETED] |
 
 ---
 
@@ -601,6 +603,387 @@ $$\text{FinalScore} = \max\left(0.0, \text{RawScore} \times \left(1.0 - \frac{\t
 
 ---
 
+# PART III: MILESTONE v4.0 ARCHITECTURAL BLUEPRINT
+## "Rust Core & Rspack Migration — High-Throughput Kernel Sandboxing & Complete Backend Re-architecture"
+
+### 1. Executive Architectural Scope & High-Throughput Topology
+
+Milestone v4.0 re-architects AlgoCeleris / Cloud-Judge V2 from its Python/FastAPI runtime into a high-throughput, memory-disciplined, compile-time verified Rust micro-crate ecosystem (`crates/`), paired with high-performance Rust-based frontend tooling via Rsbuild / Rspack.
+
+#### Performance Objectives & Architectural Motivations
+1. **Memory Residency Ceilings ($\le 64\text{MB}$ RSS per Gateway Daemon):**
+   - The Python/FastAPI gateway processes currently occupy ~180MB RSS under baseline load due to the CPython runtime, interpreter overhead, and async event loop heap structures.
+   - The compiled Axum 0.8 / Tokio daemons reduce baseline memory consumption to $\le 64\text{MB}$ RSS, enabling deployment on resource-constrained AWS `t2.micro`/`t3.micro` burstable instances without paging pressure.
+2. **True Kernel Sandboxing & Sub-50ms Evaluation Startup:**
+   - Code evaluation transitions from external subshells to direct Linux `cgroups v2` hierarchical controllers and `seccomp-bpf` syscall filters implemented natively in Rust.
+   - Using `unshare(CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWUTS | CLONE_NEWNS)` and explicit capability dropping (`CAP_DROP_ALL`), execution starts in $\le 15\text{ms}$ without dynamic Docker container spin-up overhead.
+3. **Frontend Build & HMR Acceleration (Rsbuild / Rspack):**
+   - Cut build times from ~4s to $< 800\text{ms}$ while preserving Monaco Editor language WebWorker separation and the Refero Linear Midnight precision palette.
+4. **Zero GC Latency Spikes in Real-Time WebSockets:**
+   - Multiplayer Viva CRDT synchronization (`yrs`) and proctoring telemetry meshes (`judge-telemetry`) operate with zero garbage collection pauses and sub-5ms p99 WebSocket round-trip times.
+
+```mermaid
+graph TD
+    CLIENT["Browser Clients (Faculty, Candidates A & B)"]
+    INGRESS["HAProxy L7 Ingress (Port 8080)"]
+
+    subgraph "Strangler-Fig Ingress Layer"
+        INGRESS -->|"/api/v1/campus/*, /ws/campus/*"| RUST_GW["Axum Gateway Cluster (Ports 9000/9001)"]
+        INGRESS -->|"Legacy fallback routes"| PY_GW["Legacy FastAPI Cluster (Ports 8000/8001)"]
+    end
+
+    subgraph "Rust Micro-Crate Workspace (crates/)"
+        RUST_GW --> CORE["judge-core (Pure Domain, Zero I/O)"]
+        RUST_GW --> DB["judge-db (SQLx 0.8, PgPool, Postgres 16)"]
+        RUST_GW --> TELEMETRY["judge-telemetry (Redis Pub/Sub Relayer)"]
+        RUST_GW --> VIVA["judge-viva (Axum WS, Yrs CRDT)"]
+    end
+
+    subgraph "Asynchronous Task Pipeline & Kernel Sandbox"
+        RUST_GW -->|"LPUSH submissions:queue"| REDIS[("Redis 7.2 Cluster / RedisBloom")]
+        WORKER["judge-worker Daemons"] -->|"BRPOP submissions:queue"| REDIS
+        WORKER --> CORE
+        WORKER -->|"Linux cgroups v2 + seccomp-bpf"| ISOLATION["Sandboxed Execution (256MB RAM, 1 vCPU, unshare --net)"]
+        WORKER -->|"AST Winnowing"| PLAGIARISM["Tree-sitter Plagiarism Engine"]
+    end
+
+    DB --> PG[("PostgreSQL 16 Relational Storage")]
+    TELEMETRY --> REDIS
+    VIVA --> REDIS
+```
+
+---
+
+### 2. Crate Boundaries & Cargo Workspace Architecture
+
+All Rust code is organized into a modular Cargo workspace located at the root directory under `crates/`. Each crate enforces strict single-responsibility boundaries:
+
+```
+crates/
+├── judge-core/       # Pure domain models, error hierarchies, pure business invariants (Zero I/O)
+├── judge-db/         # SQLx 0.8 PostgreSQL 16 persistence, repositories, batch transactions
+├── judge-worker/     # Kernel cgroups v2 controller, seccomp-bpf, runners, Tree-sitter winnowing
+├── judge-telemetry/  # Proctoring telemetry ingestion, Redis Pub/Sub multiplexer, rate limiting
+├── judge-viva/       # Real-time collaborative interview engine, Axum WebSockets, Yrs CRDT sync
+└── judge-gateway/    # Axum 0.8 HTTP/REST server, Tower middleware, RBAC extractors, routes
+```
+
+#### Detailed Crate Responsibilities & Invariants
+
+| Crate | Responsibilities & Invariants | Key Dependencies | Target Artifact |
+|---|---|---|---|
+| `crates/judge-core` | Pure domain entities (`Submission`, `Assessment`, `Verdict`), mathematical formulas (late penalty deduction, risk scoring), state machine transitions (`Draft -> Scheduled -> Active -> GracePeriod -> Closed`), pure domain errors. **Invariant:** Absolute zero I/O, no network or database dependencies. | `serde`, `thiserror`, `uuid`, `chrono` | `lib` |
+| `crates/judge-db` | Asynchronous PostgreSQL 16 connection pooling via `sqlx::PgPool`, compile-time query verification (`sqlx::query!`), entity-to-table mappers, transactional batch CSV roster insertion (`COPY` / bulk unnest), audit log repository. | `sqlx`, `judge-core`, `tokio`, `uuid` | `lib` |
+| `crates/judge-worker` | Linux `cgroups v2` hierarchical resource controllers (`memory.max=256M`, `cpu.max=100000 100000`), Linux namespace isolation (`unshare`), capability dropping, `seccomp-bpf` syscall filters, multi-language runners (GCC/C++20, Python 3.12, Java 21 OpenJDK), Tree-sitter AST winnowing plagiarism engine. | `judge-core`, `tokio`, `tree-sitter`, `tree-sitter-cpp`, `tree-sitter-python`, `tree-sitter-java`, `redis` | `bin` & `lib` |
+| `crates/judge-telemetry` | High-throughput Axum WebSocket handler `/ws/campus/assessments/{id}/proctor`, Redis Pub/Sub frame relaying, sub-10ms event ingestion for `tab_switch`, `fullscreen_exit`, `paste_burst`, Token-Bucket rate limiting via Redis Lua scripts. | `judge-core`, `tokio`, `axum`, `redis`, `tower` | `lib` |
+| `crates/judge-viva` | Axum WebSocket handler `/ws/campus/viva/{room_code}`, multiplayer buffer synchronization via `yrs` (Yjs CRDT), peer awareness/cursor distribution, Redis Pub/Sub cross-gateway fanout, strict instructor rubric isolation (students never receive rubric frames). | `judge-core`, `judge-db`, `yrs`, `axum`, `tokio`, `redis` | `lib` |
+| `crates/judge-gateway` | Axum 0.8 HTTP API server, Tower middleware (CORS, TraceLayer, Prometheus metrics), Argon2id password verification, JWT access tokens in memory, HttpOnly refresh tokens with Redis token family replay detection, multi-tenant RBAC extractors (`RequireOrgAdmin`, `RequireInstructor`, `RequireStudent`), assessment CRUD, secret test masking gateway. | `judge-core`, `judge-db`, `judge-telemetry`, `judge-viva`, `axum`, `tower`, `tokio`, `argon2`, `jsonwebtoken`, `redis` | `bin` |
+
+---
+
+### 3. Compiler Invariants & Hardware Constraints
+
+1. **Strict Clippy & Compiler Enforcement:**
+   Root `Cargo.toml` specifies strict linting policies:
+   ```toml
+   [workspace.lints.rust]
+   unsafe_code = "forbid"
+
+   [workspace.lints.clippy]
+   all = "deny"
+   pedantic = "warn"
+   module_name_repetitions = "allow"
+   must_use_candidate = "allow"
+   ```
+   *Exception:* Isolated `#![allow(unsafe_code)]` is permitted **exclusively** inside `crates/judge-worker/src/sandbox/linux.rs` where raw Linux system calls (`libc::unshare`, `libc::prctl`, `libc::setrlimit`) are required for process namespace creation and seccomp filter loading.
+
+2. **Async Runtime Targets:**
+   - **Runtime:** `tokio` 1.x with `features = ["full"]` utilizing work-stealing multi-threaded schedulers.
+   - **HTTP & WebSockets:** `axum` 0.8 with `tower` and `tower-http` middleware stacks.
+   - **Database Access:** `sqlx` 0.8 with asynchronous connection pools (`PgPoolOptions`) and Postgres binary wire protocol.
+
+3. **Target Memory Ceilings & Deployments:**
+   - **Gateway Memory Ceiling:** $\le 64\text{MB}$ RSS per instance under 1000 concurrent active WebSocket connections.
+   - **Worker Memory Ceiling:** $\le 32\text{MB}$ RSS baseline worker daemon overhead; sandboxed child processes strictly throttled by cgroups v2 at `256MB` RAM and `1 vCPU`.
+   - **Target Hardware:** AWS `t2.micro` / `t3.micro` EC2 instances (1 vCPU, 1GB RAM) or Linux container daemons with zero swap reliance.
+
+---
+
+### 4. 18 Micro-Phases Across 7 Tracks
+
+#### Track A: Frontend Bundler Cutover (Phase 1)
+
+##### Phase 1: Frontend Bundler Cutover (Vite -> Rsbuild / Rspack with Monaco WebWorker Chunking) [COMPLETED]
+- **Scope**:
+  1. Replace `vite` and `@vitejs/plugin-react` with `@rsbuild/core` and `@rsbuild/plugin-react`.
+  2. Configure `rsbuild.config.ts` to support Monaco Editor WebWorkers via explicit worker entry chunking:
+     - `monaco-editor/esm/vs/editor/editor.worker`
+     - `monaco-editor/esm/vs/language/json/json.worker`
+     - `monaco-editor/esm/vs/language/css/css.worker`
+     - `monaco-editor/esm/vs/language/html/html.worker`
+     - `monaco-editor/esm/vs/language/typescript/ts.worker`
+  3. Replicate Vite dev server reverse proxy for `/api` and `/ws` to `http://localhost:8080`.
+  4. Ensure zero visual regression on Refero Linear Midnight tokens, CSS variables, and layout stability.
+- **Acceptance Criteria**:
+  ```bash
+  npm --prefix packages/frontend run build
+  node scripts/verify-campus-portal.mjs
+  ```
+
+---
+
+#### Track B: Cargo Workspace Scaffolding & Pure Domain Core (Phases 2–3)
+
+##### Phase 2: Cargo Workspace Scaffolding, Strict Lints & Crate Topology [COMPLETED]
+- **Scope**:
+  1. Initialize root `Cargo.toml` defining the workspace with 6 member crates under `crates/`.
+  2. Declare workspace-level shared dependencies (`tokio`, `serde`, `serde_json`, `uuid`, `chrono`, `tracing`, `thiserror`, `anyhow`).
+  3. Enforce strict compiler lints (`-D warnings`, `unsafe_code = "forbid"`).
+  4. Verify all crates build and compile with zero warnings.
+- **Acceptance Criteria**:
+  ```bash
+  cargo check --workspace --all-targets
+  cargo clippy --workspace --all-targets -- -D warnings
+  ```
+
+##### Phase 3: Pure Domain Core (`judge-core`: Zero-I/O Domain Entities, Error Types & Invariants) [COMPLETED]
+- **Scope**:
+  1. Author domain models: `Submission`, `Verdict`, `Language`, `Assessment`, `AssessmentState`, `Organization`, `Cohort`, `RiskScore`, `RubricCriterion`.
+  2. Implement assessment state machine with validated transitions:
+     $$\text{Draft} \longrightarrow \text{Scheduled} \longrightarrow \text{Active} \longrightarrow \text{GracePeriod} \longrightarrow \text{Closed}$$
+  3. Implement mathematical late penalty deduction formula:
+     $$\text{DeductedScore} = \text{RawScore} \times \left(1.0 - \frac{\text{PenaltyPercentage}}{100.0}\right)$$
+  4. Implement proctoring risk score aggregator ($AcidLime < 15, Amber \in [15, 34], Crimson \ge 35$).
+  5. Define strongly-typed `DomainError` enum using `thiserror`.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-core --lib
+  ```
+
+---
+
+#### Track C: Database Repositories & SQLx Async Mappings (Phases 4–5)
+
+##### Phase 4: Database Infrastructure & SQLx Schema Mapping (`judge-db`) [COMPLETED]
+- **Scope**:
+  1. Configure `PgPoolOptions` with bounded pool sizes, acquire timeouts, and statement timeouts.
+  2. Map relational entities against PostgreSQL 16 schema (`organizations`, `cohorts`, `org_memberships`, `assessments`, `secret_test_suites`, `assessment_submissions`, `viva_rooms`).
+  3. Ensure all entity primary keys use UUIDs and support JSONB serialization.
+  4. Implement database health probe verifying connection availability.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-db --lib
+  ```
+
+##### Phase 5: High-Throughput Transactional Repositories & Batch Ingestion [COMPLETED]
+- **Scope**:
+  1. Implement atomic submission insertion and status updates.
+  2. Implement high-speed transactional batch roster ingestion using PostgreSQL `COPY` or unnest arrays, inserting $\ge 5000$ student records in $< 100\text{ms}$ with zero deadlock risk.
+  3. Implement audit trail repository for immutable proctoring incident logging.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-db --test test_repositories
+  ```
+
+---
+
+#### Track D: High-Performance Kernel Sandbox & Plagiarism Engine (Phases 6–8)
+
+##### Phase 6: Linux cgroups v2 Resource Controller & Namespace Isolation (`judge-worker`) [COMPLETED]
+- **Scope**:
+  1. Implement native Linux `cgroups v2` hierarchical management:
+     - Memory ceiling: `memory.max = 268435456` (256MB), `memory.high = 251658240` (240MB).
+     - CPU allocation: `cpu.max = 100000 100000` (1 vCPU hard ceiling).
+  2. Linux namespace isolation via `libc::unshare(CLONE_NEWNET | CLONE_NEWPID | CLONE_NEWIPC | CLONE_NEWUTS | CLONE_NEWNS)`.
+  3. Drop all Linux capabilities (`CAP_DROP_ALL`) before executing untrusted candidate code.
+  4. Enforce zero outbound/inbound network socket creation.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-worker --lib -- sandbox::cgroups
+  ```
+
+##### Phase 7: Seccomp-BPF Strict Filters & Multi-Language Sandboxed Runners [COMPLETED]
+- **Scope**:
+  1. Compile strict `seccomp-bpf` system call filters:
+     - Blacklist: `fork`, `vfork`, `clone`, `socket`, `connect`, `bind`, `ptrace`, `kill`, `execveat`.
+     - Whitelist: standard I/O (`read`, `write`), memory management (`brk`, `mmap`, `mprotect`), exit.
+  2. Multi-language sandboxed runners:
+     - C++20 (`g++ -O3 -std=c++20`)
+     - Python 3.12 (`python3 -u`)
+     - Java 21 OpenJDK (`javac` & `java -Xmx256m`)
+  3. Sub-50ms execution launch latency without dynamic container spin-up.
+  4. High-resolution CPU/wall-clock watchdog timers via `tokio::time::timeout`.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-worker --test test_execution_sandbox
+  ```
+
+##### Phase 8: High-Performance AST Winnowing & Plagiarism Engine [COMPLETED]
+- **Scope**:
+  1. Tree-sitter grammar parsing for C++, Python, and Java.
+  2. Structural AST normalization: variable renaming invariance, comment/whitespace stripping, control flow canonicalization.
+  3. K-gram Rabin-Karp rolling hashing and winnowing window fingerprint extraction.
+  4. Inverted index similarity search computing Jaccard index similarity matrices in sub-linear time.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-worker --test test_plagiarism_engine
+  ```
+
+---
+
+#### Track E: Real-Time Meshes & Multiplayer CRDT (Phases 9–11)
+
+##### Phase 9: High-Throughput Telemetry Ingestion & Redis Pub/Sub Relayer (`judge-telemetry`) [COMPLETED]
+- **Scope**:
+  1. Axum WebSocket endpoint `/ws/campus/assessments/{id}/proctor` with sub-10ms event processing.
+  2. Ingest telemetry frames: `tab_switch`, `fullscreen_exit`, `paste_burst`.
+  3. Fan-out real-time telemetry frames across dual Axum gateways via Redis Pub/Sub channels.
+  4. Sliding-window Redis Token-Bucket rate limiting guard.
+  5. Live candidate risk score calculation and incident feed broadcast.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-telemetry --all-targets
+  ```
+
+##### Phase 10: Multiplayer Viva Engine & Yrs CRDT Synchronization (`judge-viva`) [COMPLETED]
+- **Scope**:
+  1. Axum WebSocket handler `/ws/campus/viva/{room_code}`.
+  2. Real-time document state synchronization using `yrs` (Yjs Rust port) supporting binary update decoding and encoding.
+  3. Peer presence and remote cursor awareness protocol broadcasting.
+  4. In-memory document session pooling with periodic snapshot serialization to PostgreSQL.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-viva --all-targets
+  ```
+
+##### Phase 11: Real-Time Dual-Gateway Distribution & Strict Rubric Privacy Isolation [COMPLETED]
+- **Scope**:
+  1. Multi-gateway Redis Pub/Sub distribution for concurrent viva sessions.
+  2. **Candidate Rubric Masking Invariant:** Enforce strict architectural isolation ensuring candidate WebSocket frames **never** contain rubric data, evaluation sliders, or instructor notes.
+  3. REST handler `PATCH /api/v1/campus/viva/{room_code}/rubric` allowing authorized faculty to persist evaluation grades to PostgreSQL.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-viva --test test_viva_isolation
+  ```
+
+---
+
+#### Track F: Axum Gateway & Campus REST APIs (Phases 12–16)
+
+##### Phase 12: Axum Gateway HTTP Server, Tower Middleware & Dual-Token Auth (`judge-gateway`) [COMPLETED]
+- **Scope**:
+  1. Axum 0.8 HTTP server with Tower middleware stack: CORS, tracing, compression, Prometheus metrics.
+  2. Password hashing and verification strictly via RFC 9106 Argon2id ($t=2, m=65536, p=4$).
+  3. Dual-token architecture:
+     - Access Token: Short-lived (15 min) JWT stored exclusively in client memory.
+     - Refresh Token: Long-lived (7-14 days) token stored in `HttpOnly, SameSite=Lax, Secure` cookie.
+     - Replay Protection: Token family tracking in Redis with immediate family revocation on reuse detection.
+  4. Health checks `/health` and `/api/v1/health` matching existing JSON schema.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-gateway --test test_auth_gateway
+  ```
+
+##### Phase 13: Multi-Tenant RBAC Extractors & Organization Hierarchy (`judge-gateway`) [COMPLETED]
+- **Scope**:
+  1. Custom Axum extractors: `RequireOrgAdmin`, `RequireInstructor`, `RequireStudent`, `RequirePro`, `RequireAdmin`.
+  2. Emit RFC 7807 structured JSON 403 payloads on authorization failures.
+  3. REST endpoints for organization registration, cohort CRUD, and student roster batch importation.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-gateway --test test_rbac_extractors
+  ```
+
+##### Phase 14: Assessment Lifecycle Management & Deadline Gatekeeper APIs (`judge-gateway`) [COMPLETED]
+- **Scope**:
+  1. Assessment lifecycle REST endpoints (`POST /api/v1/campus/assessments`, `GET /api/v1/campus/assessments/:id`).
+  2. Timeline enforcement: `publish_at`, `starts_at`, `due_at`, `cutoff_at`.
+  3. Automatic transition to `GRACE_PERIOD` with formula-based late penalty deduction.
+  4. Time accommodation overrides (`+15m`, `+30m`) and force-submission endpoints.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-gateway --test test_assessment_lifecycle
+  ```
+
+##### Phase 15: Secret Test Suite Evaluation & Masking Gateway Layer [COMPLETED]
+- **Scope**:
+  1. Submission intake endpoint `POST /api/v1/submissions` pushing jobs to Redis queue.
+  2. WebSocket execution stream `/ws/submissions/{id}` relaying live test case outcomes.
+  3. **Secret Test Masking Invariant:** Mask test case inputs and expected outputs as `[SECRET TEST MASKED]` on student responses until instructor grade release.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-gateway --test test_secret_masking
+  ```
+
+##### Phase 16: Faculty Cockpit & Viva Escalation Management Endpoints [COMPLETED]
+- **Scope**:
+  1. Live proctoring cockpit summary API `GET /api/v1/campus/assessments/:id/cockpit`.
+  2. Viva Escalation provisioning endpoint `POST /api/v1/campus/assessments/:id/viva/provision`.
+  3. Rubric evaluation retrieval `GET /api/v1/campus/viva/:room_code/rubric` and update `PATCH /api/v1/campus/viva/:room_code/rubric`.
+- **Acceptance Criteria**:
+  ```bash
+  cargo test -p judge-gateway --test test_cockpit_apis
+  ```
+
+---
+
+#### Track G: HAProxy Strangler-Fig Routing Cutover & Multi-Role Playwright Parity Audit (Phases 17–18) [COMPLETED]
+
+##### Phase 17: HAProxy Strangler-Fig Routing Configuration & Zero-Downtime Cutover [COMPLETED]
+- **Scope**:
+  1. Update `deploy/haproxy/haproxy.cfg` to register new Rust Axum gateways on ports 9000 and 9001 alongside legacy gateways on 8000 and 8001.
+  2. Implement Strangler-Fig path-based traffic migration:
+     - Stage 17.1: Route `/api/v1/campus/` and `/ws/campus/` to Rust Axum backend.
+     - Stage 17.2: Route `/api/v1/submissions` and `/ws/submissions/` to Rust Axum backend.
+     - Stage 17.3: Complete 100% traffic migration to Rust cluster.
+  3. Health check failover and zero-downtime hot reloading.
+- **Acceptance Criteria**:
+  ```bash
+  haproxy -c -f deploy/haproxy/haproxy.cfg
+  curl -f http://localhost:8080/health
+  ```
+
+##### Phase 18: Multi-Role End-to-End Playwright Parity Audit & Chaos Load Test [COMPLETED]
+- **Scope**:
+  1. Execute `scripts/verify-campus-portal.mjs` against HAProxy port 8080 routed to the Rust backend.
+  2. Verify 3 isolated browser contexts (Faculty, Candidate A, Candidate B) complete all 6 stages with zero errors.
+  3. Run 1000-concurrent submission benchmark with `vegeta` / `k6` to verify sub-5ms median latency and zero memory leaks.
+  4. Assert memory residency remains $\le 64\text{MB}$ RSS per gateway daemon on AWS t2/t3 deployments.
+  5. Enforce zero console errors, zero uncaught page errors, and zero HTTP 500 responses.
+- **Acceptance Criteria**:
+  ```bash
+  node scripts/verify-campus-portal.mjs
+  npm --prefix packages/frontend run build
+  cargo test --workspace --all-targets
+  ```
+
+---
+
+### 5. Milestone v4.0 Acceptance Criteria Summary Table
+
+| Phase | Track | Module / Crate | Key Invariants Verified | Deterministic Verification Command |
+|---|---|---|---|---|
+| **Phase 1** | Track A | `packages/frontend` | Rsbuild/Rspack cutover, Monaco WebWorkers, zero styling regression [COMPLETED] | `npm --prefix packages/frontend run build && node scripts/verify-campus-portal.mjs` |
+| **Phase 2** | Track B | Cargo Workspace | Workspace scaffolding, strict Clippy flags (`-D warnings`) [COMPLETED] | `cargo check --workspace --all-targets && cargo clippy --workspace --all-targets -- -D warnings` |
+| **Phase 3** | Track B | `judge-core` | Zero I/O, domain errors, state machine, late penalty & risk score math [COMPLETED] | `cargo test -p judge-core --all-targets && cargo clippy -p judge-core --all-targets -- -D warnings` |
+| **Phase 4** | Track C | `judge-db` | SQLx 0.8 PgPool, PostgreSQL 16 schema mapping, UUID primary keys [COMPLETED] | `cargo test -p judge-db --all-targets` |
+| **Phase 5** | Track C | `judge-db` | Atomic submission updates, $\ge 5000$ roster batch insert $< 100\text{ms}$ [COMPLETED] | `cargo test -p judge-db --test test_repositories` |
+| **Phase 6** | Track D | `judge-worker` | Linux cgroups v2 (256MB RAM, 1 vCPU), `unshare --net`, dropped caps [COMPLETED] | `cargo test -p judge-worker --all-targets` |
+| **Phase 7** | Track D | `judge-worker` | Seccomp-bpf syscall filters, GCC/Python/Java, sub-50ms execution [COMPLETED] | `cargo test -p judge-worker --test test_execution_sandbox` |
+| **Phase 8** | Track D | `judge-worker` | Tree-sitter AST parsing, identifier normalization, winnowing hashing [COMPLETED] | `cargo test -p judge-worker --test test_plagiarism_engine` |
+| **Phase 9** | Track E | `judge-telemetry` | Sub-10ms telemetry ingestion, Redis Pub/Sub, Token-Bucket rate limiting [COMPLETED] | `cargo test -p judge-telemetry --all-targets` |
+| **Phase 10** | Track E | `judge-viva` | Axum WebSocket, Yrs CRDT binary synchronization, peer awareness [COMPLETED] | `cargo test -p judge-viva --all-targets` |
+| **Phase 11** | Track E | `judge-viva` | Multi-gateway Redis fanout, candidate rubric masking invariant [COMPLETED] | `cargo test -p judge-viva --test test_viva_isolation` |
+| **Phase 12** | Track F | `judge-gateway` | Axum 0.8, Tower middleware, Argon2id, dual-token JWT, replay detection [COMPLETED] | `cargo test -p judge-gateway --test test_auth_gateway` |
+| **Phase 13** | Track F | `judge-gateway` | Multi-tenant RBAC extractors, RFC 7807 403 payloads, organization CRUD [COMPLETED] | `cargo test -p judge-gateway --test test_rbac_extractors` |
+| **Phase 14** | Track F | `judge-gateway` | Assessment lifecycle state machine, deadline gates, late penalty math [COMPLETED] | `cargo test -p judge-gateway --test test_assessment_lifecycle` |
+| **Phase 15** | Track F | `judge-gateway` | Worker queue dispatch, WebSocket streaming, secret test case masking [COMPLETED] | `cargo test -p judge-gateway --test test_secret_masking` |
+| **Phase 16** | Track F | `judge-gateway` | Proctoring cockpit API, Viva room provisioning, rubric evaluation [COMPLETED] | `cargo test -p judge-gateway --test test_cockpit_apis` |
+| **Phase 17** | Track G | HAProxy Ingress | Strangler-Fig routing cutover, health check failover, zero downtime [COMPLETED] | `haproxy -c -f deploy/haproxy/haproxy.cfg && node scripts/test-phase17-haproxy-cutover.mjs` |
+| **Phase 18** | Track G | End-to-End E2E | 3-context Playwright verification, 1000-sub load test, $\le 64\text{MB}$ memory [COMPLETED] | `node scripts/verify-campus-portal.mjs && cargo test --workspace` |
+
+---
+
 ## Acceptance Criteria for Milestone v2.3 Execution
 
 1. **Phase 1 Verification: [COMPLETED]**
@@ -617,4 +1000,5 @@ $$\text{FinalScore} = \max\left(0.0, \text{RawScore} \times \left(1.0 - \frac{\t
 
 ---
 *Authored by Systems Architect (`@architect`) — Cloud-Judge V2 Planning Artifact.*
+
 
