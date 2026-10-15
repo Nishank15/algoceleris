@@ -1,0 +1,15 @@
+node_modules/
+target/
+dist/
+build/
+.git/
+.planning/
+.playwright/
+.playwright-cli/
+packages/gateway/
+packages/worker/
+packages/engine/
+docs/archive/
+Cargo.lock
+package-lock.json
+skills-lock.json

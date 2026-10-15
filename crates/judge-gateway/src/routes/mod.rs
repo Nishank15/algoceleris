@@ -60,4 +60,13 @@ pub use campus::{
     BatchMemberItem, CohortResponse, CreateCohortRequest, CreateOrganizationRequest,
     OrganizationResponse, RosterMemberResponse,
 };
+pub mod hackathons;
+pub use hackathons::{
+    create_or_join_team_handler, get_hackathon_detail_handler, list_hackathons_handler,
+    provision_organization_handler, register_hackathon_handler, submit_hackathon_project_handler,
+    CampusProvisionRequest, CampusProvisionResponse, HackathonDetailResponse,
+    HackathonMilestoneItem, HackathonRegisterRequest, HackathonRegisterResponse,
+    HackathonShowcaseItem, HackathonSubmissionRequest, HackathonSubmissionResponse,
+    HackathonSummary, HackathonTeamRequest, HackathonTeamResponse, HackathonTrackItem,
+};
 pub use health::{health_handler, HealthResponse};

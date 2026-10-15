@@ -21,17 +21,17 @@ pub use extractors::{
 pub use routes::{
     ai_debug_handler, batch_ingest_members_handler, check_availability_handler,
     contest_leaderboard_ws_handler, create_assessment_handler, create_cohort_assessment_handler,
-    create_cohort_handler, create_organization_handler, create_razorpay_order_handler,
+    create_cohort_handler, create_or_join_team_handler, create_organization_handler, create_razorpay_order_handler,
     create_stripe_checkout_handler, force_submit_assessment_handler, get_assessment_handler,
     get_cohort_roster_handler, get_contest_handler, get_contest_leaderboard_handler,
-    get_entitlements_handler, get_global_leaderboard_handler, get_organization_handler,
+    get_entitlements_handler, get_global_leaderboard_handler, get_hackathon_detail_handler, get_organization_handler,
     get_problem_handler, get_proctor_cockpit_handler, get_submission_handler,
     get_user_profile_handler, get_viva_rubric_handler, grant_time_accommodation_handler,
-    health_handler, list_cohort_assessments_handler, list_contests_handler, list_problems_handler,
+    health_handler, list_cohort_assessments_handler, list_contests_handler, list_hackathons_handler, list_problems_handler,
     login_handler, logout_handler, mask_test_case_json, mask_test_case_results, me_handler,
-    migrate_guest_submissions_handler, proctor_stream_handler, provision_viva_escalation_handler,
-    refresh_handler, register_handler, submission_stream_handler, submit_assessment_solution_handler,
-    submit_code_handler, update_assessment_status_handler, update_viva_rubric_handler,
+    migrate_guest_submissions_handler, proctor_stream_handler, provision_organization_handler, provision_viva_escalation_handler,
+    refresh_handler, register_hackathon_handler, register_handler, submission_stream_handler, submit_assessment_solution_handler,
+    submit_code_handler, submit_hackathon_project_handler, update_assessment_status_handler, update_viva_rubric_handler,
     verify_razorpay_payment_handler, viva_room_ws_handler, AIDebugRequest, AIDebugResponse,
     AssessmentResponse, AvailabilityQuery, AvailabilityResponse, BatchIngestRequest,
     BatchIngestResponse, BatchMemberItem, CandidateCockpitSummary, CohortResponse,
@@ -178,6 +178,28 @@ pub fn create_router(state: AppState) -> Router {
         .route(
             "/api/v1/campus/viva/{room_code}/rubric",
             get(get_viva_rubric_handler).patch(update_viva_rubric_handler),
+        )
+        // Hackathons & Developer Competitions
+        .route("/api/v1/hackathons", get(list_hackathons_handler))
+        .route(
+            "/api/v1/hackathons/{slug}",
+            get(get_hackathon_detail_handler),
+        )
+        .route(
+            "/api/v1/hackathons/{slug}/register",
+            post(register_hackathon_handler),
+        )
+        .route(
+            "/api/v1/hackathons/{slug}/teams",
+            post(create_or_join_team_handler),
+        )
+        .route(
+            "/api/v1/hackathons/{slug}/submissions",
+            post(submit_hackathon_project_handler),
+        )
+        .route(
+            "/api/v1/campus/orgs/provision",
+            post(provision_organization_handler),
         )
         // Code Evaluation Intake & WebSocket Stream (Secret Test Masking Invariant)
         .route("/api/v1/submissions", post(submit_code_handler))

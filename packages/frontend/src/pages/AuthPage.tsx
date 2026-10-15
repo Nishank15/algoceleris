@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Terminal, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Terminal, AlertCircle, CheckCircle2, GraduationCap, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authCheckAvailability, migrateGuestSubmissions } from '../services/api';
 import { getGuestSubmissions, clearGuestSubmissions } from '../services/problemService';
@@ -297,6 +297,34 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
             </>
           )}
         </p>
+
+        {/* Institutional Campus Gateway Card */}
+        <div className="auth-institutional-gateway" id="auth-campus-gateway">
+          <div className="auth-inst-header">
+            <span className="auth-inst-badge">
+              <GraduationCap size={14} />
+              <span>Campus Edition</span>
+            </span>
+            <h3 className="auth-inst-title">🏛️ AlgoCeleris for Universities & Engineering Colleges</h3>
+            <p className="auth-inst-subtitle">
+              Access your institution's private programming labs, PAT assessments, and AI mentor portal.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary auth-inst-btn"
+            onClick={() => navigate('/campus')}
+            id="btn-campus-portal"
+          >
+            <span>Enter University Campus Portal</span>
+            <ArrowRight size={14} />
+          </button>
+          <div className="auth-inst-foot">
+            <Link to="/campus/register" className="auth-inst-link" id="link-campus-register">
+              Register & Provision a New Institution &rarr;
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );

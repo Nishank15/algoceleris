@@ -3,8 +3,8 @@
 **Role:** Systems Architect (`@architect`)  
 **Status:** PROPOSED & RATIFIED  
 **Target Platform:** AlgoCeleris / Cloud-Judge V2  
-**Current Milestone Focus:** **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture**  
-**Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]**  
+**Current Milestone Focus:** **Milestone v4.1 — Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform**  
+**Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]** | **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture [COMPLETED]**  
 **Operational Invariant:** Read-only planning artifact; zero production code modified during blueprinting.
 
 ---
@@ -18,6 +18,7 @@ graph LR
     v2_2["✅ v2.2 Shipped<br/>PostgreSQL, RedisBloom,<br/>RBAC & Theme Inversion"] --> v2_3["✅ v2.3 Shipped<br/>Frontend Polish, Relative Telemetry,<br/>Typography & Playwright Audit"]
     v2_3 --> v3_0["✅ v3.0 Shipped<br/>AlgoCeleris Campus:<br/>Multi-Tenant Assessments, Proctoring & Viva"]
     v3_0 --> v4_0["✅ v4.0 Shipped<br/>Rust Core & Rspack Migration:<br/>Kernel Sandbox & Axum Re-architecture"]
+    v4_0 --> v4_1["🚀 v4.1 Active<br/>Campus LPilot Isolation &<br/>Full-Stack Hackathons"]
 ```
 
 | Milestone | Scope & Themes | Key Invariants | Target Phases |
@@ -25,6 +26,7 @@ graph LR
 | **v2.3** *(Completed)* | **Frontend Polish, Visual Stability & Automated UI Audit** | Verified relative WS origins, concentric border-radii, tabular-nums, responsive workspace tabs, and headless Playwright crawl across 7 routes and 2 viewports. | Phases 1–4 [COMPLETED] |
 | **v3.0** *(Completed)* | **AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal** | Enterprise multi-tenancy (`organizations`, `cohorts`), assignment & exam lifecycle engine, deadline gatekeepers, late penalty calculator, secret test suites, real-time proctoring telemetry mesh, and live Yjs CRDT multiplayer viva rooms. | Phases 5–15 [COMPLETED] |
 | **v4.0** *(Completed)* | **Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture** | Rsbuild/Rspack cutover, modular Rust workspace (`crates/`), cgroups v2 + seccomp-bpf sandboxing, Tree-sitter AST winnowing, Axum 0.8 + Tower + Tokio, `yrs` CRDT viva sync, and HAProxy Strangler-Fig cutover. | 18 Phases across Tracks A–G [COMPLETED] |
+| **v4.1** *(Active)* | **Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform** | Navbar decoupling (`Hackathons` in, `Campus` out), `/auth/login` institutional gateway card, `/campus` LPilot landing & 3-step onboarding wizard, co-branded split-screen login, strict 3-tier sidebar (`student`/`faculty`/`org_admin`), 6-stage progressive lab room with section-locked code, 4-tab student analytics, and full-stack Hackathons catalog + Command Center with Axum routes. | Phases 19–24 |
 
 ---
 
@@ -999,6 +1001,69 @@ crates/
    - Playwright headless audit crawls all 7 routes on desktop and mobile viewports with **zero console errors** and **zero failed network requests**. Reference snapshots saved to `.planning/ui-audit-snapshots/`.
 
 ---
+
+# PART IV: MILESTONE v4.1 ARCHITECTURAL BLUEPRINT
+## "Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform"
+
+### 1. Executive Intent & Invariants
+- **Consumer vs. Institutional Clean Split**: Public consumer header (`LinearHeaderNav.tsx`, `Header.tsx`) strictly displays `Problems` | `Contests` | `Hackathons`. Private B2B institutional portal is decoupled into `/campus/*` with its own isolated layout (`CampusSidebarLayout.tsx`).
+- **LPilot Architecture**: Student workflow modeled after LPilot engineering education pedagogy: 6-stage progressive lab room (`Content`, `Demo`, `LED MCQs`, `Practice w/ Section-Locked Code`, `Challenging w/ Pseudocode & Design PDF`, `Submit Checklist`) and 4-tab personal learning analytics (`Learning Journey`, `Programming`, `AI Mentor`, `CLO`).
+- **Strict 3-Tier Academic Hierarchy**: Backend RBAC and frontend navigation strictly partition permissions across `student`, `faculty`, and `org_admin`. Students never see assessment creation triggers or proctor cockpits.
+- **Full-Stack Hackathons Platform**: Consumer `/hackathons` catalog, 5-tab Hackathon Command Center (`Overview`, `Tracks & Bounties`, `Team Lobby`, `Qualifier & Submission`, `Showcase & Rubric`), and native Rust Axum endpoints.
+
+### 2. Phase Summaries (Phases 19–24)
+
+#### Phase 19: Consumer Navbar Decoupling, Institutional Landing & Tenant Onboarding Wizard
+- **Public Navigation**: Decouple `LinearHeaderNav.tsx` and `Header.tsx`: remove `Campus`, add `Hackathons` (`/hackathons`).
+- **Consumer Auth Entry**: Embed Institutional Gateway card at the bottom of `AuthPage.tsx` with links to `/campus` and `/campus/register`.
+- **Institutional Landing (`/campus`)**: LPilot-grade hero, blueprint grid, institution quick-select pills (`vit-chennai`, `iitm`, `nitt`), slug input, `[Sign in to Institution Portal ->]`, and `[Provision Your University]`.
+- **Tenant Onboarding Wizard (`/campus/register`)**: 3-step self-serve setup (Org Identity & Domain config -> License selection [Department vs. Enterprise] -> Razorpay/Stripe checkout & tenant provisioning).
+
+#### Phase 20: Split-Screen Co-Branded Login & Strict 3-Tier Role Sidebar Layout
+- **Institutional Login (`/campus/:orgSlug/login`)**: 50% Royal Blue capability showcase (`AlgoCeleris × VIT CHENNAI`) + 50% Obsidian portal login supporting `Student`, `Faculty`, `Institution Admin` with 1-click Demo Credential autofill pills.
+- **Campus Sidebar Shell (`CampusSidebarLayout.tsx`)**: Collapsible 248px sidebar with role-gated navigation trees, top breadcrumb/status bar, and bottom user profile card with role switcher.
+
+#### Phase 21: LPilot Student Dashboard, Active/Completed Lab Lists & 8-Tab Read-Only Review
+- **Student Dashboard (`/campus/:orgSlug/student/dashboard`)**: 4 KPI cards (`Active labs`, `Completed labs`, `Average marks`, `CLO attainment`), open lab callout, recent results list, and attention notifications.
+- **Active & Completed Lab Catalogs**: Filterable views by class section, semester, faculty, and evaluation status with scores and `[View Details ->]` / `[>< Just Practice]`.
+- **8-Tab Evaluated Lab Review (`/campus/:orgSlug/student/labs/:labId/review`)**: Read-only submission review across `Content`, `Demo`, `LED`, `Practice`, `Challenging`, `Evaluation Summary` (public/private test cases), `Submission History`, `Feedback Summary`.
+
+#### Phase 22: 6-Stage Progressive Lab Room (`CampusLabRoomPage.tsx`)
+- **Top Header**: Countdown timer, student identity, breadcrumb navigation.
+- **6 Pedagogical Stages**:
+  1. `Content`: Lecture notes & embedded interactive PDF viewer.
+  2. `Demonstration Problems`: Worked step-by-step solutions with execution traces.
+  3. `LED`: 10-question auto-graded interactive MCQ quiz.
+  4. `Practice Problems`: Numbered problem pills, section-locked code workspace (Fixed Section 1 Header -> Editable Solution Area -> Fixed Section 2 Driver).
+  5. `Challenging Problems`: Pseudocode scratchpad editor, Design PDF flowchart uploader, section-locked code workspace, test case evaluator.
+  6. `Submit`: Live completion checklist gatekeeper (`LED`, `Practice`, `Challenging`) and submission action.
+
+#### Phase 23: 4-Tab Student Learning Analytics & Faculty/Admin Portals
+- **Student Analytics Suite (`/campus/:orgSlug/student/analytics/:tab`)**:
+  - `Learning Journey`: Active time, lab engagement, activity breakdown and time-spent Recharts.
+  - `Programming`: Code run counts, submission timeline, marks progression chart.
+  - `AI Mentor`: Hint usage, response latency, query categorizations.
+  - `CLO`: Course Learning Outcome attainment radar/bar chart and attainment trends.
+- **Faculty & Admin Portals**: Faculty cohort management, lab creation triggers, live proctor cockpit links, AST plagiarism matrix, and Admin license/seat roster management.
+
+#### Phase 24: Full-Stack Consumer Hackathon Platform
+- **Hackathons Catalog (`/hackathons`)**: Hero banner (`DevsHouse '26`), prize pools, track pills, live countdown, filterable event grid.
+- **5-Tab Command Center (`/hackathons/:slug`)**: `Overview & Timeline`, `Tracks & Bounties`, `Team Lobby & Matchmaking`, `Qualifier & Project Submission`, `Showcase & Judge Rubric Leaderboard`.
+- **Rust Axum Gateway Endpoints**: `GET/POST /api/v1/hackathons/*` and `POST /api/v1/campus/orgs/provision`.
+
+### 3. Milestone v4.1 Verification & Acceptance Criteria Matrix
+
+| Phase | Deliverable | Target Acceptance Criteria | Verification Command |
+|---|---|---|---|
+| **Phase 19** | Navbar decoupling (`Hackathons` in, `Campus` out), `/auth/login` gateway card, `/campus` landing & `/campus/register` onboarding wizard | Zero TypeScript errors, clean bundle compilation, new routes mounted | `npm --prefix packages/frontend run build` |
+| **Phase 20** | `/campus/:orgSlug/login` LPilot split-screen login + `CampusSidebarLayout.tsx` strict 3-tier sidebar | 3 distinct role sidebars verified, 1-click demo login functional | `npm --prefix packages/frontend run build` |
+| **Phase 21** | Student Dashboard, Active/Completed Lab Lists with 5-filter bar, 8-tab Read-Only Review | 4 KPI cards rendering, filter bar functional, 8 review tabs accessible | `npm --prefix packages/frontend run build` |
+| **Phase 22** | 6-Stage Progressive Lab Room (`CampusLabRoomPage.tsx`) | 6 workflow stages active, section-locked Monaco editor functional, PDF upload simulation | `npm --prefix packages/frontend run build` |
+| **Phase 23** | 4-Tab Student Learning Analytics + Faculty/Admin Dashboards | Recharts rendering 4 tabs, faculty cohort overview and admin roster functional | `npm --prefix packages/frontend run build` |
+| **Phase 24** | Consumer Hackathons Catalog, 5-Tab Command Center, Rust Axum `/api/v1/hackathons/*` | Full hackathon lifecycle functional, Rust backend check passes | `cargo check --workspace && npm --prefix packages/frontend run build` |
+
+---
 *Authored by Systems Architect (`@architect`) — Cloud-Judge V2 Planning Artifact.*
+
 
 

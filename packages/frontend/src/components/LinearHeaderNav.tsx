@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Terminal, LogOut, Sun, Moon, Menu, X, Code2, Trophy, User, LogIn, Calendar } from 'lucide-react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Terminal, LogOut, Sun, Moon, Menu, X, Code2, Trophy, User, LogIn, Rocket } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -9,8 +9,14 @@ export const LinearHeaderNav: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [latency, setLatency] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Standalone Institutional Campus Platform uses dedicated CampusSidebarLayout, hide consumer header
+  if (location.pathname.startsWith('/campus') || location.pathname.startsWith('/portal')) {
+    return null;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +58,7 @@ export const LinearHeaderNav: React.FC = () => {
           </Link>
           <NavLink to="/problems" className={linkClass} id="nav-problems">Problems</NavLink>
           <NavLink to="/contests" className={linkClass} id="nav-contests">Contests</NavLink>
-          <NavLink to="/campus/calendar" className={linkClass} id="nav-campus">Campus</NavLink>
+          <NavLink to="/hackathons" className={linkClass} id="nav-hackathons">Hackathons</NavLink>
         </div>
         <div className="linear-nav-right">
           <span className="latency-pill" id="nav-latency" title="Gateway round-trip latency">
@@ -154,12 +160,12 @@ export const LinearHeaderNav: React.FC = () => {
                 <span>Contests</span>
               </NavLink>
               <NavLink
-                to="/campus/calendar"
+                to="/hackathons"
                 className={linkClass}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <Calendar size={16} />
-                <span>Campus</span>
+                <Rocket size={16} />
+                <span>Hackathons</span>
               </NavLink>
               {user && !user.isGuest ? (
                 <>
