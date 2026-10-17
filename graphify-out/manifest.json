@@ -372,16 +372,16 @@
     "semantic_hash": "de67012ff47ebc2350609e44298fda62"
   },
   "crates/judge-gateway/src/routes/campus.rs": {
-    "mtime": 1792233260.6331093,
-    "seen": 1792233829.471749,
-    "ast_hash": "fb3c77bae4978725dfbba5a0ba94f729",
+    "mtime": 1792237007.5277696,
+    "seen": 1792239932.377874,
+    "ast_hash": "58d9757b5a78ac273c49402b0e9fa5e8",
     "semantic_hash": ""
   },
   "crates/judge-gateway/src/routes/cockpit.rs": {
-    "mtime": 1791961771.274858,
-    "seen": 1792090152.50853,
-    "ast_hash": "f3256683310e0c2eaa60226c0c37b2ed",
-    "semantic_hash": "f3256683310e0c2eaa60226c0c37b2ed"
+    "mtime": 1792235764.100896,
+    "seen": 1792239932.377874,
+    "ast_hash": "38f4e0e38e44b666981209a856406126",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/src/routes/contests.rs": {
     "mtime": 1791961771.275236,
@@ -432,9 +432,9 @@
     "semantic_hash": "8b53985324c3f6bcce5dbcf492729fef"
   },
   "crates/judge-gateway/src/state.rs": {
-    "mtime": 1792180372.5789337,
-    "seen": 1792183294.0460858,
-    "ast_hash": "1f6a32f45164cec1286b696f4634d17e",
+    "mtime": 1792236993.183797,
+    "seen": 1792239932.377882,
+    "ast_hash": "f4946345fa6dbce96d338b746f73433e",
     "semantic_hash": ""
   },
   "crates/judge-gateway/tests/test_assessment_lifecycle.rs": {
@@ -738,9 +738,9 @@
     "semantic_hash": "bef5b9bb0dd942c09065dcb17172b324"
   },
   "packages/frontend/src/App.tsx": {
-    "mtime": 1792232454.948347,
-    "seen": 1792233829.471801,
-    "ast_hash": "75ee83fc8925c9f59f4d32c96bb97007",
+    "mtime": 1792235122.4363277,
+    "seen": 1792239932.3779268,
+    "ast_hash": "2ff574d33303e4e1e2d33ecaa00b0d50",
     "semantic_hash": ""
   },
   "packages/frontend/src/components/AIDebugModal.tsx": {
@@ -756,10 +756,10 @@
     "semantic_hash": "8720b2e763ab2d0a9a197ac7bc000dcf"
   },
   "packages/frontend/src/components/ContestLeaderboardModal.tsx": {
-    "mtime": 1791052631.5299928,
-    "seen": 1792090152.508568,
-    "ast_hash": "2a564113f4f8536c166ad02c585a7fcb",
-    "semantic_hash": "2a564113f4f8536c166ad02c585a7fcb"
+    "mtime": 1792235955.9034212,
+    "seen": 1792239932.37793,
+    "ast_hash": "070e920142e2949b74823cb313f75167",
+    "semantic_hash": ""
   },
   "packages/frontend/src/components/DeveloperAnalyticsModal.tsx": {
     "mtime": 1791052677.370111,
@@ -858,10 +858,10 @@
     "semantic_hash": "145bb23179f2f61bdd87a3ed1c5bb186"
   },
   "packages/frontend/src/context/AuthContext.tsx": {
-    "mtime": 1791207581.3000135,
-    "seen": 1792090152.508578,
-    "ast_hash": "5b3406272995e6b9e0bdfeb4a0d80bcd",
-    "semantic_hash": "5b3406272995e6b9e0bdfeb4a0d80bcd"
+    "mtime": 1792235027.2848465,
+    "seen": 1792239932.377943,
+    "ast_hash": "1ea7ca541dec48494d133470536f5fed",
+    "semantic_hash": ""
   },
   "packages/frontend/src/context/ThemeContext.tsx": {
     "mtime": 1791214011.0264704,
@@ -870,10 +870,10 @@
     "semantic_hash": "b9e23cb28a16ecb1eec86d91f699a533"
   },
   "packages/frontend/src/hooks/useContestProctoring.ts": {
-    "mtime": 1791003030.4187474,
-    "seen": 1792090152.508579,
-    "ast_hash": "106ecd8a92f89b328e3dbf15db1c1a57",
-    "semantic_hash": "106ecd8a92f89b328e3dbf15db1c1a57"
+    "mtime": 1792235968.4817963,
+    "seen": 1792239932.377944,
+    "ast_hash": "c31a03d5effc56c64a6fc147b4032f57",
+    "semantic_hash": ""
   },
   "packages/frontend/src/main.tsx": {
     "mtime": 1791961771.3412633,
@@ -888,9 +888,9 @@
     "semantic_hash": "d60d69aece48187d7d55a52901ec602d"
   },
   "packages/frontend/src/pages/AuthPage.tsx": {
-    "mtime": 1792176811.4845936,
-    "seen": 1792177069.484663,
-    "ast_hash": "c4bd65a1f640bba95819385c8ad848b4",
+    "mtime": 1792235981.646134,
+    "seen": 1792239932.3779461,
+    "ast_hash": "896413584081450fafad5578f4cbe167",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/ContestsPage.tsx": {
@@ -906,10 +906,10 @@
     "semantic_hash": "f84a1432da4092004218ec5e3ebec932"
   },
   "packages/frontend/src/pages/ProblemWorkspacePage.tsx": {
-    "mtime": 1791961771.3420095,
-    "seen": 1792090152.508584,
-    "ast_hash": "57de01588c99e3ae46209b13ede3ff57",
-    "semantic_hash": "57de01588c99e3ae46209b13ede3ff57"
+    "mtime": 1792236044.0053036,
+    "seen": 1792239932.377949,
+    "ast_hash": "717a192c2ccae72c90804d22bf972ee6",
+    "semantic_hash": ""
   },
   "packages/frontend/src/pages/ProblemsPage.tsx": {
     "mtime": 1792176868.7112396,
@@ -924,16 +924,16 @@
     "semantic_hash": "3cfb3e41adfaa69369346b40b997f434"
   },
   "packages/frontend/src/services/api.ts": {
-    "mtime": 1792181280.156988,
-    "seen": 1792183294.046164,
-    "ast_hash": "a543ecdb68c117888f63e87c2aadb0da",
+    "mtime": 1792236018.9179635,
+    "seen": 1792239932.377961,
+    "ast_hash": "0357b6cc39dbf4c87c322a2e5656adb9",
     "semantic_hash": ""
   },
   "packages/frontend/src/services/campusApi.ts": {
-    "mtime": 1791961771.344215,
-    "seen": 1792090152.508597,
-    "ast_hash": "c092a5a347149504f26da4620d60a889",
-    "semantic_hash": "c092a5a347149504f26da4620d60a889"
+    "mtime": 1792235868.49774,
+    "seen": 1792239932.3779619,
+    "ast_hash": "bf724b6fc1392d82ec14dfca104b646b",
+    "semantic_hash": ""
   },
   "packages/frontend/src/services/campusSession.ts": {
     "mtime": 1792179298.8519156,
@@ -942,10 +942,10 @@
     "semantic_hash": ""
   },
   "packages/frontend/src/services/problemService.ts": {
-    "mtime": 1791212434.0767438,
-    "seen": 1792090152.508598,
-    "ast_hash": "68b82f68bcf0353a10b884d896f98b62",
-    "semantic_hash": "68b82f68bcf0353a10b884d896f98b62"
+    "mtime": 1792235994.0747588,
+    "seen": 1792239932.377963,
+    "ast_hash": "a38b26988689b8a0948d422f84b7223d",
+    "semantic_hash": ""
   },
   "packages/frontend/src/theme.ts": {
     "mtime": 1791024400.7019238,
@@ -1284,51 +1284,51 @@
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/HackathonDetailPage.tsx": {
-    "mtime": 1792178350.8872745,
-    "seen": 1792178460.5601568,
-    "ast_hash": "3545780adc03b8121e4a319dd8663f85",
+    "mtime": 1792235620.0391579,
+    "seen": 1792239932.3779469,
+    "ast_hash": "0575f32072d37393167f6c5ee45c5355",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/HackathonsPage.tsx": {
-    "mtime": 1792178163.2852442,
-    "seen": 1792178460.560158,
-    "ast_hash": "845d026441cfb68a51624211b5af9d95",
+    "mtime": 1792235636.7710035,
+    "seen": 1792239932.3779478,
+    "ast_hash": "be53ff772f854cdf536a0a14e2de3d13",
     "semantic_hash": ""
   },
   "crates/judge-gateway/tests/test_campus_phase31.rs": {
-    "mtime": 1792179622.1940746,
-    "seen": 1792179709.480905,
-    "ast_hash": "1a6d8fcead7dec23871723e2d1f991e0",
+    "mtime": 1792237020.061891,
+    "seen": 1792239932.3778849,
+    "ast_hash": "dad36e8344ae2d36f590579f65dc5641",
     "semantic_hash": ""
   },
   "packages/frontend/src/components/CampusSidebarLayout.tsx": {
-    "mtime": 1792233442.9272914,
-    "seen": 1792233829.471803,
-    "ast_hash": "ce69fa887b81d4d4c79e5ec74cdb4cd2",
+    "mtime": 1792236911.0946076,
+    "seen": 1792239932.377929,
+    "ast_hash": "ab6d4639f6caabfb92e34149024c3b30",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusLandingPage.tsx": {
-    "mtime": 1792233279.238679,
-    "seen": 1792233829.471835,
-    "ast_hash": "dd7372eb71a505f7d79d604a327cba31",
+    "mtime": 1792235491.1298335,
+    "seen": 1792239932.3779562,
+    "ast_hash": "46e02cd759c7dab130637b6d8b3f597f",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusLoginPage.tsx": {
-    "mtime": 1792179450.8630579,
-    "seen": 1792179709.480973,
-    "ast_hash": "cb2957f25853adfd243e124eb83ea42b",
+    "mtime": 1792236957.0461648,
+    "seen": 1792239932.377957,
+    "ast_hash": "181be6557acdbb8ff4c70ec11db48b8b",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusOnboardingPage.tsx": {
-    "mtime": 1792179417.4993293,
-    "seen": 1792179709.4809742,
-    "ast_hash": "80339d5515bff8a665cf6f396dca73c8",
+    "mtime": 1792235536.4861119,
+    "seen": 1792239932.377957,
+    "ast_hash": "cf93c8fe8ccfdf85e05823bbe8557c8e",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusWorkspacePage.tsx": {
-    "mtime": 1792179537.7169478,
-    "seen": 1792179709.4809752,
-    "ast_hash": "8922cb9aeb916f6fd2f2d0296f3b48b2",
+    "mtime": 1792236969.78937,
+    "seen": 1792239932.377959,
+    "ast_hash": "5641479129f941428ea7ce03212e1811",
     "semantic_hash": ""
   },
   "crates/judge-gateway/tests/test_campus_phase32.rs": {
@@ -1338,45 +1338,45 @@
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusAdminDashboard.tsx": {
-    "mtime": 1792183152.5283556,
-    "seen": 1792183294.046156,
-    "ast_hash": "a2f10164dc34baf55b1e657e580a10b8",
+    "mtime": 1792235201.1452625,
+    "seen": 1792239932.377952,
+    "ast_hash": "ffdf3168682a749a7bf3f994586f9d6c",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusAnalyticsPage.tsx": {
-    "mtime": 1792232491.8122675,
-    "seen": 1792233829.471831,
-    "ast_hash": "f1648790b7815b8d6e5db56def368cc8",
+    "mtime": 1792235257.1500525,
+    "seen": 1792239932.377952,
+    "ast_hash": "445d391c26d0bae6983edee5bc9e9dbf",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusFacultyDashboard.tsx": {
-    "mtime": 1792183166.2863033,
-    "seen": 1792183294.0461571,
-    "ast_hash": "5e26a9974ceb46980df07ba0e317bc38",
+    "mtime": 1792236936.6561728,
+    "seen": 1792239932.377953,
+    "ast_hash": "189e12fc78e6f3dd06bce24ad4f340fe",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusLabReviewPage.tsx": {
-    "mtime": 1792232543.439118,
-    "seen": 1792233829.471832,
-    "ast_hash": "af5f34ded446e1c9fb2422c143a4cfc0",
+    "mtime": 1792235407.2906687,
+    "seen": 1792239932.377954,
+    "ast_hash": "10a0779997c4d562e9f8bb2f5641b877",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusLabRoomPage.tsx": {
-    "mtime": 1792232531.8379807,
-    "seen": 1792233829.471833,
-    "ast_hash": "ebd1c3ff212a2c91d25ad77fdc33458d",
+    "mtime": 1792235913.7647877,
+    "seen": 1792239932.377955,
+    "ast_hash": "40212c6d575bddd23c16f36543e58b71",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusLabsListPage.tsx": {
-    "mtime": 1792233666.0473573,
-    "seen": 1792233829.4718342,
-    "ast_hash": "8f40fb0a3dd65585a2f7a3d10a1ae312",
+    "mtime": 1792235466.3989248,
+    "seen": 1792239932.377955,
+    "ast_hash": "c5d1572bf41dd777b46ad57ca58a2674",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/CampusStudentDashboard.tsx": {
-    "mtime": 1792181632.1922598,
-    "seen": 1792183294.0461628,
-    "ast_hash": "1a8090bb767aa1a18b1ffa39228f860b",
+    "mtime": 1792236924.0888598,
+    "seen": 1792239932.3779578,
+    "ast_hash": "7d1ee683218d74c320eab388d81c669c",
     "semantic_hash": ""
   },
   "scripts/verify-v43-linear-reset.mjs": {
@@ -1386,27 +1386,27 @@
     "semantic_hash": ""
   },
   "audit-results.json": {
-    "mtime": 1792233752.4573452,
-    "seen": 1792233829.471723,
-    "ast_hash": "88473679af57fe3741bf16ccb1438e46",
+    "mtime": 1792237140.9839647,
+    "seen": 1792239932.377849,
+    "ast_hash": "b1c2c7497f4f6f9b297922936dc4b607",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/FacultyProctorCockpitPage.tsx": {
-    "mtime": 1792232153.990495,
-    "seen": 1792233829.471839,
-    "ast_hash": "2386adb072502d9cb838f8923e37f2ba",
+    "mtime": 1792235886.4760146,
+    "seen": 1792239932.377959,
+    "ast_hash": "4b372b8fe8283c0443698465a7a8a170",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/StudentExamArenaPage.tsx": {
-    "mtime": 1792232276.580223,
-    "seen": 1792233829.47184,
-    "ast_hash": "c7eebb65556a12d8c7743b9a9797932b",
+    "mtime": 1792236076.6463103,
+    "seen": 1792239932.37796,
+    "ast_hash": "b61d6a2d49f66b63068bd199d697d33a",
     "semantic_hash": ""
   },
   "packages/frontend/src/pages/campus/VivaInterviewWorkspacePage.tsx": {
-    "mtime": 1792232153.9908051,
-    "seen": 1792233829.47184,
-    "ast_hash": "2d68ea3feef9fe21461526275d4ffb31",
+    "mtime": 1792236062.686634,
+    "seen": 1792239932.377961,
+    "ast_hash": "019c960ba71b46e8350945b449c1a8cf",
     "semantic_hash": ""
   },
   "scripts/audit-full-v43.mjs": {
@@ -1416,9 +1416,9 @@
     "semantic_hash": ""
   },
   "REPORT_V4.3.md": {
-    "mtime": 1792233813.716598,
-    "seen": 1792233829.471887,
-    "ast_hash": "336dd62a1ee2b05d07fb8309640753f4",
+    "mtime": 1792236251.6991346,
+    "seen": 1792239932.378002,
+    "ast_hash": "06c2b783c306597291f301dedafc56e3",
     "semantic_hash": ""
   }
 }

@@ -1,22 +1,22 @@
 # Graph Report - cloud-judge-v2  (2026-10-17)
 
 ## Corpus Check
-- 235 files · ~232,169 words
+- 235 files · ~232,417 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 9 file(s) not represented in the graph (top: (none) 3, .css 3, .gateway 1)
 
 ## Summary
-- 2888 nodes · 5717 edges · 161 communities (140 shown, 21 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 194 edges (avg confidence: 0.86)
+- 2906 nodes · 5728 edges · 168 communities (139 shown, 29 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 200 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0b7df2d0`
+- Built from commit: `78d471e0`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- CampusLabRoomPage.tsx
+- ThemeContext.tsx
 - cli.cjs
 - judge-core/src/lib.rs
 - ProblemWorkspacePage.tsx
@@ -42,15 +42,14 @@
 - Linear — Style Reference
 - test_viva_isolation.rs
 - judge-worker/src/lib.rs
-- ast.rs
 - hackathons.rs
 - SubmissionRecord
-- AppState
+- campus.rs
 - VivaRoom
 - test-phase12-exam-arena.mjs
 - TelemetryEvent
 - Cloud-Judge V2 (AlgoCeleris) — Milestone v4.3 Comprehensive Audit Report
-- AuthContext.tsx
+- routes/assessment.rs
 - Local Storage
 - judge-viva/src/ws.rs
 - VivaDoc
@@ -59,8 +58,9 @@
 - cli-exit.cjs
 - engine.rs
 - test-phase11-faculty-scheduler.mjs
-- Test generation (plan → generate → heal)
+- 3. Heal
 - compilerOptions
+- test_execution_sandbox.rs
 - subscriptions.rs
 - RubricEvaluationUpdate
 - contests.rs
@@ -77,13 +77,13 @@
 - src/theme.ts
 - test-phase17-haproxy-cutover.mjs
 - drift-scan.cjs
-- TestConsole.tsx
+- RequireInstructor
 - test-phase13-proctor-cockpit.mjs
 - new.cjs
 - TelemetryRelay
 - SeccompAction
 - Browser Session Management
-- Verdict
+- DomainError
 - test-phase3-mobile-hardening.mjs
 - Tracing
 - TokenBucket
@@ -103,7 +103,7 @@
 - dev-fullstack.sh
 - hooks/package.json
 - PART I: MILESTONE v2.3 ARCHITECTURAL BLUEPRINT
-- 3. Heal
+- TokenStore
 - "AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal"
 - 6. The 11 Implementation Phases (Atomic Execution Plan)
 - tasteskill: Anti-Slop Frontend Skill
@@ -114,11 +114,12 @@
 - IMPLEMENTATION_PLAN.md
 - api.ts
 - 2. Phase Summaries (Phases 19–24)
+- password.rs
 - test_auth_gateway.rs
-- RubricEvaluationUpdate
 - Running Custom Playwright Code
 - 4. DESIGN ENGINEERING DIRECTIVES (Bias Correction)
-- github-release-notes.cjs
+- token.rs
+- ast.rs
 - test_secret_masking.rs
 - 10. REFERENCE VOCABULARY (Pattern Names the Agent Should Know)
 - Video Recording
@@ -131,14 +132,14 @@
 - 9. AI TELLS (Forbidden Patterns)
 - Execution Workflow
 - Advanced Mocking with run-code
-- lint.cjs
+- RiskSeverity
 - DbPool
 - APPENDICES - Real Source-Backed Reference Material
 - 11. REDESIGN PROTOCOL
 - 3. DEFAULT ARCHITECTURE & CONVENTIONS
 - 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
-- "Rust Core & Rspack Migration — High-Throughput Kernel Sandboxing & Complete Backend Re-architecture"
-- AssessmentStatus
+- Local Storage
+- cgroups.rs
 - 12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)
 - 5. CONTEXT-AWARE PROACTIVITY
 - 8. DARK MODE PROTOCOL
@@ -159,66 +160,61 @@
 - 7. DIAL DEFINITIONS (Technical Reference)
 - Cloud-Judge V2 Vision & Feature Requirements
 - security-critic.md
-- Attaching to a Running Browser
-- StatusCode
-- 1. Planning
-- ErrorBoundary
-- CampusRole
+- exit-code-registry.cjs
+- Session Storage
+- 2. Generate
+- 2. Clean-Slate Purge & 4-Phase Execution Roadmap (Phases 29–32)
+- Phase 2: Web Design Guidelines & Typography Audit
 - deserialize
-- MembershipStatus
-- Track D: High-Performance Kernel Sandbox & Plagiarism Engine (Phases 6–8)
+- Phase 4: Autonomous Playwright & DevTools Verification [COMPLETED]
 
 ## God Nodes (most connected - your core abstractions)
 1. `GatewayError` - 106 edges
 2. `AppState` - 98 edges
-3. `fetchWithFallback()` - 53 edges
+3. `fetchWithFallback()` - 52 edges
 4. `DbError` - 49 edges
 5. `react` - 47 edges
 6. `VivaError` - 40 edges
 7. `lucide-react` - 36 edges
 8. `create_router()` - 34 edges
 9. `WorkerError` - 34 edges
-10. `AssessmentRecord` - 29 edges
+10. `App()` - 29 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `1.1 Problem Audit & Root Cause Analysis` --references--> `getApiBaseUrl()`  [INFERRED]
+  IMPLEMENTATION_PLAN.md → packages/frontend/src/services/api.ts
 - `5.1 Palette & Color Tokens` --references--> `CampusSidebarLayout()`  [INFERRED]
   REPORT_V4.3.md → packages/frontend/src/components/CampusSidebarLayout.tsx
 - `6. Detailed Feature-by-Feature Scorecard (24 Modules)` --references--> `CampusSidebarLayout()`  [INFERRED]
   REPORT_V4.3.md → packages/frontend/src/components/CampusSidebarLayout.tsx
-- `Phase 25: Routing Bug Fix, Apple Design Tokens & `/campus` Gallery Overhaul (+ Apple Store Configurator `/campus/register`)` --references--> `ScrollToTop()`  [INFERRED]
-  IMPLEMENTATION_PLAN.md → packages/frontend/src/App.tsx
-- `Phase 29: The Great Purge, `App.tsx` Repair, Consumer Polish & CSS Reset [COMPLETED]` --references--> `ScrollToTop()`  [INFERRED]
-  IMPLEMENTATION_PLAN.md → packages/frontend/src/App.tsx
 - `3.2 Workspace Mobile Hardening (`ProblemWorkspacePage.tsx` & `ResizableLayout.tsx`)` --references--> `ResizableLayout()`  [INFERRED]
   IMPLEMENTATION_PLAN.md → packages/frontend/src/components/ResizableLayout.tsx
+- `Phase 3: Pure Domain Core (`judge-core`: Zero-I/O Domain Entities, Error Types & Invariants) [COMPLETED]` --references--> `Language`  [INFERRED]
+  IMPLEMENTATION_PLAN.md → packages/frontend/src/types.ts
 
 ## Import Cycles
 - 2-file cycle: `crates/judge-worker/src/runner/engine.rs -> crates/judge-worker/src/runner/mod.rs -> crates/judge-worker/src/runner/engine.rs`
 
-## Communities (161 total, 21 thin omitted)
+## Communities (168 total, 29 thin omitted)
 
-### Community 1 - "CampusLabRoomPage.tsx"
-Cohesion: 0.11
-Nodes (22): CodeEditor(), CodeEditorProps, LINEAR_MIDNIGHT_THEME, LINEAR_MIDNIGHT_THEME_NAME, getInitialTheme(), Theme, ThemeContext, ThemeContextType (+14 more)
+### Community 1 - "ThemeContext.tsx"
+Cohesion: 0.21
+Nodes (9): CodeEditorProps, LINEAR_MIDNIGHT_THEME, LINEAR_MIDNIGHT_THEME_NAME, getInitialTheme(), Theme, ThemeContext, ThemeContextType, ThemeProvider() (+1 more)
 
 ### Community 2 - "cli.cjs"
-Cohesion: 0.11
-Nodes (27): assembleChangelog(), cmdExtract(), cmdGithubReleaseNotes(), cmdRender(), cmdVerify(), {
+Cohesion: 0.05
+Nodes (58): assembleChangelog(), cmdExtract(), cmdGithubReleaseNotes(), cmdRender(), cmdVerify(), {
   compareSemverCore,
   isStableTripletSemver,
-}, { ExitError, runMain }, fs (+19 more)
-
-### Community 3 - "judge-core/src/lib.rs"
-Cohesion: 0.06
-Nodes (18): calculate_late_penalty(), transition_assessment_state(), validate_assessment_timeline(), validate_rubric_balance(), DomainError, AssessmentClosed, CutoffExceeded, InvalidPenalty (+10 more)
+}, { ExitError, runMain }, fs (+50 more)
 
 ### Community 4 - "ProblemWorkspacePage.tsx"
-Cohesion: 0.06
-Nodes (54): AIDebugModal(), AIDebugModalProps, DeveloperAnalyticsModal(), DeveloperAnalyticsModalProps, Header(), HeaderProps, MicroSandboxTeaser(), SNIPPETS (+46 more)
+Cohesion: 0.05
+Nodes (67): AIDebugModal(), AIDebugModalProps, CodeEditor(), DeveloperAnalyticsModal(), DeveloperAnalyticsModalProps, diffTokens(), DiffViewer(), DiffViewerProps (+59 more)
 
 ### Community 5 - "campusApi.ts"
 Cohesion: 0.07
-Nodes (48): Phase 3: Pure Domain Core (`judge-core`: Zero-I/O Domain Entities, Error Types & Invariants) [COMPLETED], calculateRiskScore(), FacultyProctorCockpitPage(), resolveRiskSeverity(), STARTER_CODES, StudentExamArenaPage(), calculateRubricWeightedTotal(), DEFAULT_VIVA_CRITERIA (+40 more)
+Nodes (49): useTheme(), calculateRiskScore(), FacultyProctorCockpitPage(), resolveRiskSeverity(), STARTER_CODES, StudentExamArenaPage(), calculateRubricWeightedTotal(), DEFAULT_VIVA_CRITERIA (+41 more)
 
 ### Community 6 - "components_heatmap.tsx"
 Cohesion: 0.07
@@ -229,12 +225,12 @@ Cohesion: 0.07
 Nodes (47): barHeight(), BG_FALLBACK, buildGrid(), Cam, camera(), Cell, clamp01(), computeStats() (+39 more)
 
 ### Community 8 - "judge-core/src/lib.rs"
-Cohesion: 0.17
-Nodes (8): AssessmentSubmission, AssessmentSubmissionRecord, Cohort, CohortRecord, InterviewRoomRecord, Organization, OrganizationRecord, UserRecord
+Cohesion: 0.20
+Nodes (7): Cohort, CohortRecord, InterviewRoomRecord, NewMember, Organization, OrganizationRecord, UserRecord
 
 ### Community 9 - "api.ts"
-Cohesion: 0.17
-Nodes (20): ContestLeaderboardModal(), ContestLeaderboardModalProps, buildFallbackContests(), ContestsPage(), derivePhase(), fallbackLeaderboard(), formatCountdown(), mkProblems() (+12 more)
+Cohesion: 0.18
+Nodes (19): ContestLeaderboardModal(), ContestLeaderboardModalProps, buildFallbackContests(), ContestsPage(), derivePhase(), fallbackLeaderboard(), formatCountdown(), mkProblems() (+11 more)
 
 ### Community 10 - "gen-capability-registry.cjs"
 Cohesion: 0.08
@@ -257,24 +253,24 @@ Cohesion: 0.08
 Nodes (29): assertPointsCoverage(), buildContract(), CANONICAL_POINTS, ADR-0894, CONTRACT_PATH, coveredKindsInRegion(), crossCheckRoleFamilies(), crossCheckRoles() (+21 more)
 
 ### Community 16 - "test_cockpit_apis.rs"
-Cohesion: 0.10
-Nodes (16): create_router(), test_auth_http_login_refresh_logout_flow(), test_health_endpoints(), test_signup_and_registration_flow(), generate_test_token(), setup_test_assessment(), test_live_postgres_cockpit_and_viva_if_available(), test_private_rubric_endpoint_permits_instructor_and_rejects_candidates() (+8 more)
+Cohesion: 0.16
+Nodes (7): generate_test_token(), setup_test_assessment(), test_live_postgres_cockpit_and_viva_if_available(), test_private_rubric_endpoint_permits_instructor_and_rejects_candidates(), test_proctor_cockpit_returns_aggregated_anomaly_counts_and_risk_tiering(), test_student_accessing_cockpit_endpoint_returns_403_forbidden(), test_viva_escalation_successfully_provisions_new_room_record()
 
 ### Community 17 - "VivaClusterMessage"
 Cohesion: 0.10
 Nodes (10): decode(), format_viva_channel(), TABLE, VivaClusterMessage, Awareness, CrdtUpdate, RubricUpdate, VivaRedisRelay (+2 more)
 
 ### Community 18 - "judge-core/src/models.rs"
-Cohesion: 0.22
-Nodes (14): Assessment, AssessmentMode, Exam, Homework, Viva, AssessmentSubmission, Cohort, Language (+6 more)
+Cohesion: 0.10
+Nodes (28): Assessment, AssessmentMode, Exam, Homework, Viva, AssessmentStatus, Active, Closed (+20 more)
 
 ### Community 19 - "judge-db/src/models.rs"
 Cohesion: 0.19
 Nodes (18): ChallengingProblemSpec, HackathonEntity, HackathonMatchmakerItem, HackathonMilestoneItem, HackathonRegistrationItem, HackathonShowcaseItem, HackathonStore, HackathonTeamItem (+10 more)
 
 ### Community 20 - "auth.rs"
-Cohesion: 0.19
-Nodes (17): encode_access_token(), AvailabilityQuery, AvailabilityResponse, check_availability_handler(), clear_refresh_cookie(), DbUser, extract_refresh_token(), format_refresh_cookie() (+9 more)
+Cohesion: 0.21
+Nodes (14): AvailabilityQuery, AvailabilityResponse, check_availability_handler(), clear_refresh_cookie(), DbUser, extract_refresh_token(), format_refresh_cookie(), logout_handler() (+6 more)
 
 ### Community 21 - "routes/submission.rs"
 Cohesion: 0.16
@@ -285,7 +281,7 @@ Cohesion: 0.09
 Nodes (15): WorkerError, CgroupError, Domain, Io, NamespaceError, ParseError, PermissionDenied, SyscallError (+7 more)
 
 ### Community 23 - "test_secret_masking.rs"
-Cohesion: 0.08
+Cohesion: 0.09
 Nodes (5): main(), shutdown_signal(), test_campus_phase31_complete_lifecycle(), test_campus_phase32_lab_engine_and_dynamic_analytics(), test_hackathons_catalog_and_dynamic_lifecycle()
 
 ### Community 24 - "Linear — Style Reference"
@@ -293,24 +289,24 @@ Cohesion: 0.05
 Nodes (37): Agent Prompt Guide, Badge / Status Tag, Berkeley Mono — Code-adjacent UI text — issue IDs (ENG-2703), keyboard shortcuts, monospaced metadata · `--font-berkeley-mono`, Border Radius, Card (Product Screenshot Frame), Card (Subtle), Components, CSS Custom Properties (+29 more)
 
 ### Community 25 - "test_viva_isolation.rs"
-Cohesion: 0.13
-Nodes (4): setup_viva_server(), test_candidate_rubric_masking_invariant(), test_evaluator_frame_delivery(), viva_ws_endpoint()
+Cohesion: 0.09
+Nodes (7): test_awareness_envelope_serialization(), test_state_vector_diff_exchange(), test_yrs_crdt_convergence(), setup_viva_server(), test_candidate_rubric_masking_invariant(), test_evaluator_frame_delivery(), viva_ws_endpoint()
 
-### Community 27 - "ast.rs"
-Cohesion: 0.15
-Nodes (12): AstTokenizer, is_comment(), is_identifier(), is_literal(), StructuralToken, walk_ast(), compute_kgram_hashes(), Fingerprint (+4 more)
+### Community 27 - "judge-worker/src/lib.rs"
+Cohesion: 0.17
+Nodes (9): AstTokenizer, compute_kgram_hashes(), DEFAULT_K, DEFAULT_W, Fingerprint, hash_token_kind(), RABIN_KARP_BASE, winnow() (+1 more)
 
 ### Community 28 - "hackathons.rs"
 Cohesion: 0.17
 Nodes (15): create_or_join_team_handler(), get_hackathon_detail_handler(), HackathonDetailResponse, HackathonRegisterRequest, HackathonRegisterResponse, HackathonSubmissionRequest, HackathonSubmissionResponse, HackathonSummary (+7 more)
 
 ### Community 29 - "SubmissionRecord"
-Cohesion: 0.20
-Nodes (10): Submission, SubmissionRecord, create_submission(), finalize_assessment_submission(), get_assessment_submission(), get_submission_by_id(), SubmissionRepository, SubmissionRepository<'a> (+2 more)
+Cohesion: 0.17
+Nodes (12): AssessmentSubmission, AssessmentSubmissionRecord, Submission, SubmissionRecord, create_submission(), finalize_assessment_submission(), get_assessment_submission(), get_submission_by_id() (+4 more)
 
-### Community 30 - "AppState"
-Cohesion: 0.06
-Nodes (87): OrgMembershipRecord, AccessTokenClaims, AuthenticatedUser, OptionalUser, RequireInstructor, RequireOrgAdmin, RequireStudent, resolve_target_assessment_id() (+79 more)
+### Community 30 - "campus.rs"
+Cohesion: 0.08
+Nodes (36): ActivityCategoryItem, ActivityPoint, AddRosterMemberRequest, AiHintCategoryItem, AiSessionTrendItem, BatchIngestRequest, BatchIngestResponse, BatchMemberItem (+28 more)
 
 ### Community 31 - "VivaRoom"
 Cohesion: 0.12
@@ -321,20 +317,20 @@ Cohesion: 0.08
 Nodes (21): appTsxPath, appTsxSrc, arenaPagePath, arenaSrc, baseTime, campusApiPath, campusApiSrc, cutoffTime (+13 more)
 
 ### Community 33 - "TelemetryEvent"
-Cohesion: 0.18
-Nodes (14): RiskScore, RiskSeverity, Critical, Elevated, Low, calculate_risk_score(), CandidateProctorState, ProctorAlertFrame (+6 more)
+Cohesion: 0.28
+Nodes (8): CandidateProctorState, ProctorAlertFrame, TelemetryEvent, TelemetryEventType, FullscreenExit, Heartbeat, PasteBurst, TabSwitch
 
 ### Community 34 - "Cloud-Judge V2 (AlgoCeleris) — Milestone v4.3 Comprehensive Audit Report"
-Cohesion: 0.11
-Nodes (18): 1. Executive Audit Summary, 2.1 Missing React Hook Imports in `CampusLabsListPage.tsx`, 2.2 Role Switcher Route Desynchronization in `CampusSidebarLayout.tsx`, 2.3 Campus Organization Directory Seeding in `judge-gateway`, 2.4 Playwright Leaderboard View Assertion, 2. Critical Bugs & Runtime Exceptions (Blockers Resolved), 3. Incomplete or Broken Interactive Features, 4. Data Integrity & Mock String Leaks (+10 more)
+Cohesion: 0.10
+Nodes (19): 1. Executive Audit Summary, 2.1 Missing React Hook Imports in `CampusLabsListPage.tsx`, 2.2 Role Switcher Route Desynchronization in `CampusSidebarLayout.tsx`, 2.3 Campus Organization Directory Seeding in `judge-gateway`, 2.4 Playwright Leaderboard View Assertion, 2.7 Silent Auth Refresh Handling, 2. Critical Bugs & Runtime Exceptions (Blockers Resolved), 3. Interactive Features & WebSocket Integrity (+11 more)
 
-### Community 35 - "AuthContext.tsx"
-Cohesion: 0.31
-Nodes (12): AuthContext, AuthContextType, AuthProvider(), restoreSession(), GUEST_USER, mapAuthUser(), authLogin(), authLogout() (+4 more)
+### Community 35 - "routes/assessment.rs"
+Cohesion: 0.27
+Nodes (20): AssessmentResponse, create_assessment_handler(), create_cohort_assessment_handler(), CreateAssessmentRequest, do_create_assessment(), fetch_assessment_record(), force_submit_assessment_handler(), ForceSubmitRequest (+12 more)
 
 ### Community 36 - "Local Storage"
-Cohesion: 0.06
-Nodes (35): Advanced: Multiple Cookies or Custom Options, Advanced: Multiple Operations, Authentication State Reuse, Clear All Cookies, Clear All localStorage, Clear sessionStorage, Common Patterns, Cookies (+27 more)
+Cohesion: 0.09
+Nodes (21): Advanced: Multiple Cookies or Custom Options, Authentication State Reuse, Clear All Cookies, Common Patterns, Cookies, Delete a Cookie, Delete Database, Filter Cookies by Domain (+13 more)
 
 ### Community 37 - "judge-viva/src/ws.rs"
 Cohesion: 0.21
@@ -345,32 +341,32 @@ Cohesion: 0.12
 Nodes (28): PROBLEMS, useAuth(), AuthPage(), AuthPageProps, ProblemsPage(), SortField, SortOrder, DIFF_COLORS (+20 more)
 
 ### Community 41 - "cli-exit.cjs"
-Cohesion: 0.11
-Nodes (23): ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion(), getJsonErrorMode(), getPendingOutcome() (+15 more)
+Cohesion: 0.16
+Nodes (19): ADR-3889, CONTRACT_VERSION_KEY, exitCodeFor(), exitCodeRegistryModule, findExitContractFlag(), getContractVersion(), getJsonErrorMode(), getPendingOutcome() (+11 more)
 
 ### Community 42 - "engine.rs"
-Cohesion: 0.13
-Nodes (6): DEFAULT_MEMORY_LIMIT_BYTES, DEFAULT_OUTPUT_LIMIT_BYTES, DEFAULT_TIME_LIMIT, ExecutionEngine, ExecutionResult, read_bounded_stream()
+Cohesion: 0.10
+Nodes (13): Verdict, Accepted, CompilationError, MemoryLimitExceeded, Pending, RuntimeError, TimeLimitExceeded, WrongAnswer (+5 more)
 
 ### Community 43 - "test-phase11-faculty-scheduler.mjs"
 Cohesion: 0.10
 Nodes (18): appTsxPath, appTsxSrc, calendarPagePath, calendarPageSrc, campusApiPath, campusApiSrc, createPagePath, createPageSrc (+10 more)
 
-### Community 44 - "Test generation (plan → generate → heal)"
-Cohesion: 0.17
-Nodes (12): 0. How generation works, 2.1 Inputs, 2.2 Generate one scenario, 2.3 Generate multiple scenarios, 2.4 Run generated tests, 2. Generate, Add assertions manually, Building a test file (+4 more)
+### Community 44 - "3. Heal"
+Cohesion: 0.11
+Nodes (18): 0. How generation works, 1.1 Prerequisite: workspace, 1.2 Prerequisite: seed test, 1.3 Explore the app, 1.4 Write the spec file, 1. Planning, 3.1 Find failing tests, 3.2 Debug one failure (+10 more)
 
 ### Community 45 - "compilerOptions"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowImportingTsExtensions, isolatedModules, jsx, lib, module, moduleResolution, noEmit (+10 more)
 
 ### Community 47 - "subscriptions.rs"
-Cohesion: 0.24
+Cohesion: 0.22
 Nodes (14): ai_debug_handler(), AIDebugRequest, AIDebugResponse, create_razorpay_order_handler(), create_stripe_checkout_handler(), EntitlementsResponse, get_entitlements_handler(), RazorpayOrderRequest (+6 more)
 
 ### Community 48 - "RubricEvaluationUpdate"
-Cohesion: 0.11
-Nodes (16): AwarenessEnvelope, VivaError, CrdtSyncError, DatabaseError, Domain, InvalidRubricEvaluation, Json, ProtocolError (+8 more)
+Cohesion: 0.09
+Nodes (21): AwarenessEnvelope, VivaError, CrdtSyncError, DatabaseError, Domain, InvalidRubricEvaluation, Json, ProtocolError (+13 more)
 
 ### Community 49 - "contests.rs"
 Cohesion: 0.27
@@ -389,16 +385,16 @@ Cohesion: 0.14
 Nodes (12): ARCH_MAP, CACHE_DIR, CACHED_BIN_PATH, { ExitError }, extractFileFromTar(), fs, https, httpsGetFollowingRedirects() (+4 more)
 
 ### Community 53 - "test_assessment_lifecycle.rs"
-Cohesion: 0.27
-Nodes (10): generate_test_token(), setup_test_hierarchy(), test_chronological_timeline_validation_rejects_malformed_dates(), test_faculty_force_submit_and_status_transition(), test_grace_period_submission_calculates_ceiling_hour_late_penalty(), test_live_postgres_assessment_lifecycle_if_available(), test_on_time_submission_accepts_with_zero_deduction(), test_post_cutoff_submission_strictly_rejected_with_403() (+2 more)
+Cohesion: 0.17
+Nodes (16): create_router(), generate_test_token(), setup_test_hierarchy(), test_chronological_timeline_validation_rejects_malformed_dates(), test_faculty_force_submit_and_status_transition(), test_grace_period_submission_calculates_ceiling_hour_late_penalty(), test_live_postgres_assessment_lifecycle_if_available(), test_on_time_submission_accepts_with_zero_deduction() (+8 more)
 
 ### Community 55 - "App.tsx"
-Cohesion: 0.09
-Nodes (45): App(), ErrorBoundaryProps, ErrorBoundaryState, ScrollToTop(), CampusSidebarLayout(), loadOrgs(), LinearHeaderNav(), User (+37 more)
+Cohesion: 0.08
+Nodes (52): App(), ErrorBoundaryProps, ErrorBoundaryState, CampusSidebarLayout(), loadOrgs(), LinearHeaderNav(), CampusAdminDashboard(), AnalyticsTab (+44 more)
 
 ### Community 56 - "NewMember"
-Cohesion: 0.25
-Nodes (7): NewMember, batch_insert_memberships(), build_batch_insert_query(), list_cohort_memberships(), MembershipRepository, MembershipRepository<'a>, test_benchmark_batch_roster_query_construction_5000()
+Cohesion: 0.32
+Nodes (6): batch_insert_memberships(), build_batch_insert_query(), list_cohort_memberships(), MembershipRepository, MembershipRepository<'a>, test_benchmark_batch_roster_query_construction_5000()
 
 ### Community 57 - "ProctorEventRecord"
 Cohesion: 0.30
@@ -424,9 +420,9 @@ Nodes (13): { execSync }, { execSync }, cfgContent, createMockServer(), HAPROXY_
 Cohesion: 0.18
 Nodes (9): fs, isInsideRoot(), isUnderSkippedDir(), path, regexScanStats, scanTree(), SKIP_DIR_NAMES, walk() (+1 more)
 
-### Community 63 - "TestConsole.tsx"
-Cohesion: 0.23
-Nodes (12): diffTokens(), DiffViewer(), DiffViewerProps, IsometricCubeLoader(), IsometricCubeLoaderProps, isWatchdogError(), TestConsole(), TestConsoleProps (+4 more)
+### Community 63 - "RequireInstructor"
+Cohesion: 0.25
+Nodes (12): OrgMembershipRecord, AccessTokenClaims, decode_access_token(), AuthenticatedUser, OptionalUser, RequireInstructor, RequireOrgAdmin, RequireStudent (+4 more)
 
 ### Community 64 - "test-phase13-proctor-cockpit.mjs"
 Cohesion: 0.15
@@ -437,20 +433,20 @@ Cohesion: 0.21
 Nodes (12): ADJECTIVES, ALLOWED_TYPES, { ExitError, runMain }, fs, generateFragmentName(), main(), NOUNS_A, NOUNS_B (+4 more)
 
 ### Community 66 - "TelemetryRelay"
-Cohesion: 0.14
-Nodes (4): TelemetryMesh, format_telemetry_channel(), TelemetryRelay, .LOCAL_BROADCAST_CAPACITY
+Cohesion: 0.19
+Nodes (3): TelemetryMesh, TelemetryRelay, .LOCAL_BROADCAST_CAPACITY
 
 ### Community 67 - "SeccompAction"
 Cohesion: 0.18
 Nodes (7): SeccompAction, Allow, Errno, KillProcess, KillThread, Trap, SyscallPolicy
 
 ### Community 68 - "Browser Session Management"
-Cohesion: 0.13
-Nodes (15): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, A/B Testing Sessions, Best Practices, Browser Session Commands, Browser Session Configuration, Browser Session Isolation Properties (+7 more)
+Cohesion: 0.10
+Nodes (20): 1. Name Browser Sessions Semantically, 2. Always Clean Up, 3. Delete Stale Browser Data, A/B Testing Sessions, Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser (+12 more)
 
-### Community 69 - "Verdict"
-Cohesion: 0.25
-Nodes (8): Verdict, Accepted, CompilationError, MemoryLimitExceeded, Pending, RuntimeError, TimeLimitExceeded, WrongAnswer
+### Community 69 - "DomainError"
+Cohesion: 0.15
+Nodes (15): calculate_late_penalty(), transition_assessment_state(), validate_assessment_timeline(), validate_rubric_balance(), DomainError, AssessmentClosed, CutoffExceeded, InvalidPenalty (+7 more)
 
 ### Community 70 - "test-phase3-mobile-hardening.mjs"
 Cohesion: 0.17
@@ -469,20 +465,20 @@ Cohesion: 0.29
 Nodes (5): consoleErrors, http500Errors, pageErrors, rootDir, snapshotDir
 
 ### Community 75 - "4. 18 Micro-Phases Across 7 Tracks"
-Cohesion: 0.10
-Nodes (21): 4. 18 Micro-Phases Across 7 Tracks, Phase 10: Multiplayer Viva Engine & Yrs CRDT Synchronization (`judge-viva`) [COMPLETED], Phase 11: Real-Time Dual-Gateway Distribution & Strict Rubric Privacy Isolation [COMPLETED], Phase 12: Axum Gateway HTTP Server, Tower Middleware & Dual-Token Auth (`judge-gateway`) [COMPLETED], Phase 13: Multi-Tenant RBAC Extractors & Organization Hierarchy (`judge-gateway`) [COMPLETED], Phase 14: Assessment Lifecycle Management & Deadline Gatekeeper APIs (`judge-gateway`) [COMPLETED], Phase 15: Secret Test Suite Evaluation & Masking Gateway Layer [COMPLETED], Phase 16: Faculty Cockpit & Viva Escalation Management Endpoints [COMPLETED] (+13 more)
+Cohesion: 0.06
+Nodes (36): 1. Executive Architectural Scope & High-Throughput Topology, 2. Crate Boundaries & Cargo Workspace Architecture, 3. Compiler Invariants & Hardware Constraints, 4. 18 Micro-Phases Across 7 Tracks, 5. Milestone v4.0 Acceptance Criteria Summary Table, Acceptance Criteria for Milestone v2.3 Execution, Detailed Crate Responsibilities & Invariants, PART III: MILESTONE v4.0 ARCHITECTURAL BLUEPRINT (+28 more)
 
 ### Community 76 - "ref_fs"
 Cohesion: 0.22
 Nodes (6): fs, payload, prohibitedPatterns, command, fs, input
 
 ### Community 77 - "TelemetryError"
-Cohesion: 0.18
-Nodes (8): TelemetryError, ChannelClosed, ConnectionError, IdentityMismatch, Json, RateLimitExceeded, Redis, SerializationError
+Cohesion: 0.14
+Nodes (10): TelemetryError, ChannelClosed, ConnectionError, IdentityMismatch, Json, RateLimitExceeded, Redis, SerializationError (+2 more)
 
 ### Community 78 - "CommandConfig"
-Cohesion: 0.09
-Nodes (9): CppRunner, JavaRunner, CommandConfig, PythonRunner, DEFAULT_CGROUP_ROOT, DEFAULT_CPU_MAX_QUOTA, DEFAULT_MEMORY_HIGH_BYTES, DEFAULT_MEMORY_MAX_BYTES (+1 more)
+Cohesion: 0.13
+Nodes (4): CppRunner, JavaRunner, CommandConfig, PythonRunner
 
 ### Community 79 - "compilerOptions"
 Cohesion: 0.25
@@ -509,12 +505,8 @@ Cohesion: 0.38
 Nodes (5): assertRootNotEmpty(), rootDir, scanDomStrings(), scanDomStyles(), stats
 
 ### Community 94 - "PART I: MILESTONE v2.3 ARCHITECTURAL BLUEPRINT"
-Cohesion: 0.10
-Nodes (21): 1.1 Problem Audit & Root Cause Analysis, 1.2 Architectural Specification, 1.3 Acceptance Criteria & Verification, 2.1 Concentric Border-Radii Audit & Mathematical Enforcement, 2.2 Tabular Figures & Numerical Stability (`font-variant-numeric: tabular-nums`), 2.3 Optical Alignment, Icon-Text Pairings & Contrast Audit, 3.1 Responsive Breakpoints & Viewport Architecture, 3.2 Workspace Mobile Hardening (`ProblemWorkspacePage.tsx` & `ResizableLayout.tsx`) (+13 more)
-
-### Community 95 - "3. Heal"
-Cohesion: 0.33
-Nodes (6): 3.1 Find failing tests, 3.2 Debug one failure, 3.3 Apply the fix, 3.4 Reconcile with the spec, 3.5 Iteration and giving up, 3. Heal
+Cohesion: 0.15
+Nodes (13): 1.1 Problem Audit & Root Cause Analysis, 1.2 Architectural Specification, 1.3 Acceptance Criteria & Verification, 3.1 Responsive Breakpoints & Viewport Architecture, 3.2 Workspace Mobile Hardening (`ProblemWorkspacePage.tsx` & `ResizableLayout.tsx`), 3.3 Navigation Mobile Hardening (`LinearHeaderNav.tsx`), 3.4 Monaco Editor Touch & Virtual Keyboard Ergonomics, 3.5 Seamless Theme Inversion Transitions (+5 more)
 
 ### Community 96 - ""AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal""
 Cohesion: 0.17
@@ -533,36 +525,36 @@ Cohesion: 0.13
 Nodes (15): Appendix B - Canonical Sources (read these before reinventing), Apple Liquid Glass (Apple platforms only), Atlassian, Bootstrap, Carbon, Fluent UI, GOV.UK, Material Web (+7 more)
 
 ### Community 100 - "GatewayError"
-Cohesion: 0.12
-Nodes (15): TokenStore, GatewayError, BadRequest, Conflict, Database, Domain, Forbidden, InternalError (+7 more)
+Cohesion: 0.15
+Nodes (34): GatewayError, BadRequest, Conflict, Database, Domain, Forbidden, InternalError, InvalidCredentials (+26 more)
 
 ### Community 101 - "Browser Automation with playwright-cli"
 Cohesion: 0.07
 Nodes (27): Attaching screenshots and videos to pull requests, Browser Automation with playwright-cli, Browser Sessions, Commands, Core, DevTools, Emulation, Example: Debugging with DevTools (+19 more)
 
 ### Community 102 - "playwright-cli/SKILL.md"
-Cohesion: 0.21
-Nodes (4): Examples, Inspecting Element Attributes, Debugging Playwright Tests, Running Playwright Tests
+Cohesion: 0.16
+Nodes (7): Examples, Inspecting Element Attributes, Debugging Playwright Tests, Running Playwright Tests, CLI Route Commands, Request Mocking, URL Patterns
 
 ### Community 103 - "IMPLEMENTATION_PLAN.md"
 Cohesion: 0.25
-Nodes (7): 1. Executive Roadmap & Milestone Matrix, 1. Visual Invariants: Unified Refero Linear Midnight (`docs/DESIGN.md`), 3. Milestone v4.3 Verification & Acceptance Criteria Matrix, PART II: MILESTONE v3.0 ARCHITECTURAL BLUEPRINT, PART VI: MILESTONE v4.3 ARCHITECTURAL BLUEPRINT (Phases 29–32), Technical Architecture Blueprint: Cloud-Judge V2 Roadmap & Execution Plan, "Unified Refero Linear Midnight Design System (`docs/DESIGN.md`), Real Rust-Backed Multi-Tenant Campus Portal & Full-Stack Hackathon Platform"
+Nodes (7): 1. Executive Intent & Invariants, 1. Executive Roadmap & Milestone Matrix, 3. Milestone v4.1 Verification & Acceptance Criteria Matrix, "Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform", PART II: MILESTONE v3.0 ARCHITECTURAL BLUEPRINT, PART IV: MILESTONE v4.1 ARCHITECTURAL BLUEPRINT, Technical Architecture Blueprint: Cloud-Judge V2 Roadmap & Execution Plan
 
 ### Community 104 - "api.ts"
 Cohesion: 0.04
-Nodes (67): HackathonDetailPage(), HackathonsPage(), loadData(), ActivityCategoryItem, ActivityPoint, aiDebug(), AiHintCategoryItem, AiSessionTrendItem (+59 more)
+Nodes (83): AuthContext, AuthContextType, AuthProvider(), restoreSession(), GUEST_USER, mapAuthUser(), User, fetchLab() (+75 more)
 
 ### Community 105 - "2. Phase Summaries (Phases 19–24)"
-Cohesion: 0.18
-Nodes (11): 1. Executive Intent & Invariants, 2. Phase Summaries (Phases 19–24), 3. Milestone v4.1 Verification & Acceptance Criteria Matrix, "Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform", PART IV: MILESTONE v4.1 ARCHITECTURAL BLUEPRINT, Phase 19: Consumer Navbar Decoupling, Institutional Landing & Tenant Onboarding Wizard, Phase 20: Split-Screen Co-Branded Login & Strict 3-Tier Role Sidebar Layout, Phase 21: LPilot Student Dashboard, Active/Completed Lab Lists & 8-Tab Read-Only Review (+3 more)
+Cohesion: 0.29
+Nodes (7): 2. Phase Summaries (Phases 19–24), Phase 19: Consumer Navbar Decoupling, Institutional Landing & Tenant Onboarding Wizard, Phase 20: Split-Screen Co-Branded Login & Strict 3-Tier Role Sidebar Layout, Phase 21: LPilot Student Dashboard, Active/Completed Lab Lists & 8-Tab Read-Only Review, Phase 22: 6-Stage Progressive Lab Room (`CampusLabRoomPage.tsx`), Phase 23: 4-Tab Student Learning Analytics & Faculty/Admin Portals, Phase 24: Full-Stack Consumer Hackathon Platform
 
-### Community 106 - "test_auth_gateway.rs"
-Cohesion: 0.09
-Nodes (14): hash_password(), verify_password(), ACCESS_TOKEN_EXPIRATION_SECONDS, decode_access_token(), decode_refresh_token(), DEFAULT_JWT_SECRET, encode_refresh_token(), REFRESH_TOKEN_EXPIRATION_SECONDS (+6 more)
+### Community 106 - "password.rs"
+Cohesion: 0.15
+Nodes (3): verify_password(), login_handler(), LoginRequest
 
-### Community 107 - "RubricEvaluationUpdate"
-Cohesion: 0.18
-Nodes (8): RubricEvaluationUpdate, VivaWsClientMessage, Awareness, RubricEvaluation, VivaWsServerMessage, Awareness, Error, RubricEvaluation
+### Community 107 - "test_auth_gateway.rs"
+Cohesion: 0.17
+Nodes (10): hash_password(), encode_access_token(), encode_refresh_token(), test_access_jwt_generation_claims_and_expiration(), test_argon2id_password_hashing(), test_auth_http_login_refresh_logout_flow(), test_health_endpoints(), test_refresh_token_family_rotation_and_replay_protection() (+2 more)
 
 ### Community 108 - "Running Custom Playwright Code"
 Cohesion: 0.15
@@ -572,9 +564,13 @@ Nodes (13): Clipboard, Complex Workflows, Error Handling, File Downloads, Frames
 Cohesion: 0.17
 Nodes (12): 4.10 Quotes & Testimonials, 4.11 Page Theme Lock (Light / Dark Mode Consistency), 4.1 Typography, 4.2 Color Calibration, 4.3 Layout Diversification, 4.4 Materiality, Shadows, Cards, 4.5 Interactive UI States, 4.6 Data & Form Patterns (+4 more)
 
-### Community 111 - "github-release-notes.cjs"
-Cohesion: 0.16
-Nodes (17): buildGithubReleaseNotesIr(), changedFragmentPaths(), classifyGroup(), compareUrl(), cp, FIXED_GROUPS, formatBullet(), loadFragmentsFromRange() (+9 more)
+### Community 110 - "token.rs"
+Cohesion: 0.21
+Nodes (5): ACCESS_TOKEN_EXPIRATION_SECONDS, decode_refresh_token(), DEFAULT_JWT_SECRET, REFRESH_TOKEN_EXPIRATION_SECONDS, RefreshTokenClaims
+
+### Community 111 - "ast.rs"
+Cohesion: 0.29
+Nodes (5): is_comment(), is_identifier(), is_literal(), StructuralToken, walk_ast()
 
 ### Community 112 - "test_secret_masking.rs"
 Cohesion: 0.15
@@ -593,7 +589,7 @@ Cohesion: 0.22
 Nodes (8): 1. System Topology & Ingress, 2. Worker Engine & Sandbox Isolation, 3. Data Persistence & Caching, 4. Authentication, Security & RBAC, 5. Anti-Abuse & Rate Limiting, 6. Frontend & Design Token Constraints, 7. Out of Scope (Hard Constraints), Core Architecture Invariants
 
 ### Community 116 - "PlagiarismDetector"
-Cohesion: 0.28
+Cohesion: 0.31
 Nodes (3): MatchedRange, PlagiarismDetector, PlagiarismReport
 
 ### Community 117 - "2. Production 4-Phase Execution Roadmap (Phases 29–32)"
@@ -605,12 +601,12 @@ Cohesion: 0.22
 Nodes (8): Architecture, Constraints, Conventions, Developer Profile, GSD Workflow Enforcement, Project, Project Skills, Technology Stack
 
 ### Community 119 - "2. Phase-by-Phase Roadmap (Phases 25–28)"
-Cohesion: 0.22
-Nodes (9): 1. Architectural Mandate & Anti-Slop Discipline, 2. Phase-by-Phase Roadmap (Phases 25–28), 3. Milestone v4.2 Verification & Acceptance Criteria Matrix, "Apple Design System Overhaul (`docs/DESIGN-apple.md`), Zero-Slop Visual Engineering & Functional Portal Parity", PART V: MILESTONE v4.2 ARCHITECTURAL BLUEPRINT (Phases 25–28) [SUPERSEDED BY v4.3], Phase 25: Routing Bug Fix, Apple Design Tokens & `/campus` Gallery Overhaul (+ Apple Store Configurator `/campus/register`), Phase 26: Apple-Grade Institutional Login, Sidebar Shell & Complete Admin/Faculty Dashboards (Zero Placeholders), Phase 27: Apple-Grade Student Dashboard, 6-Stage Lab Workspace, Read-Only Review & 4-Tab Analytics (+1 more)
+Cohesion: 0.25
+Nodes (8): 1. Architectural Mandate & Anti-Slop Discipline, 2. Phase-by-Phase Roadmap (Phases 25–28), 3. Milestone v4.2 Verification & Acceptance Criteria Matrix, "Apple Design System Overhaul (`docs/DESIGN-apple.md`), Zero-Slop Visual Engineering & Functional Portal Parity", PART V: MILESTONE v4.2 ARCHITECTURAL BLUEPRINT (Phases 25–28) [SUPERSEDED BY v4.3], Phase 26: Apple-Grade Institutional Login, Sidebar Shell & Complete Admin/Faculty Dashboards (Zero Placeholders), Phase 27: Apple-Grade Student Dashboard, 6-Stage Lab Workspace, Read-Only Review & 4-Tab Analytics, Phase 28: Apple Developer / WWDC-Style Hackathon Hub (`/hackathons` & `/hackathons/:slug`)
 
 ### Community 120 - "`cli.cjs extract`"
-Cohesion: 0.22
-Nodes (7): changeset/ — release-notes tooling, `cli.cjs extract`, Examples, Exit codes, Flags, Output shape, Version validation
+Cohesion: 0.15
+Nodes (8): changeset/ — release-notes tooling, `cli.cjs extract`, Examples, Exit codes, Flags, Output shape, Version validation, ErrorBoundary
 
 ### Community 121 - "9. AI TELLS (Forbidden Patterns)"
 Cohesion: 0.25
@@ -621,15 +617,15 @@ Cohesion: 0.25
 Nodes (7): Execution Workflow, Image-to-Code Engineering Protocol, Objective, Step 1: Visual Deconstruction (Do Not Write Code Yet), Step 2: Design Token & Library Mapping, Step 3: High-Fidelity Implementation, Step 4: Visual Self-Audit Checklist
 
 ### Community 123 - "Advanced Mocking with run-code"
-Cohesion: 0.22
-Nodes (8): Advanced Mocking with run-code, CLI Route Commands, Conditional Response Based on Request, Delayed Response, Modify Real Response, Request Mocking, Simulate Network Failures, URL Patterns
+Cohesion: 0.40
+Nodes (5): Advanced Mocking with run-code, Conditional Response Based on Request, Delayed Response, Modify Real Response, Simulate Network Failures
 
-### Community 124 - "lint.cjs"
-Cohesion: 0.18
-Nodes (14): evaluateLint(), { ExitError, runMain }, findPrFieldDrift(), isFragment(), isUserFacing(), LINT_REASON, main(), { parseFragment } (+6 more)
+### Community 124 - "RiskSeverity"
+Cohesion: 0.28
+Nodes (7): RiskScore, RiskSeverity, Critical, Elevated, Low, calculate_risk_score(), test_proctor_risk_score_aggregation()
 
 ### Community 125 - "DbPool"
-Cohesion: 0.18
+Cohesion: 0.27
 Nodes (3): check_health(), create_connection_pool(), DbPool
 
 ### Community 126 - "APPENDICES - Real Source-Backed Reference Material"
@@ -648,13 +644,13 @@ Nodes (7): 3.A Stack, 3.B State, 3.C Icons, 3.D Emoji Policy, 3. DEFAULT ARCHITE
 Cohesion: 0.29
 Nodes (7): 6.A Hardware Acceleration, 6.B Reduced Motion (mandatory), 6.C Dark Mode (mandatory for any consumer-facing page), 6.D Core Web Vitals Targets, 6.E DOM Cost, 6.F Z-Index Restraint, 6. PERFORMANCE & ACCESSIBILITY GUARDRAILS
 
-### Community 130 - ""Rust Core & Rspack Migration — High-Throughput Kernel Sandboxing & Complete Backend Re-architecture""
-Cohesion: 0.22
-Nodes (9): 1. Executive Architectural Scope & High-Throughput Topology, 2. Crate Boundaries & Cargo Workspace Architecture, 3. Compiler Invariants & Hardware Constraints, 5. Milestone v4.0 Acceptance Criteria Summary Table, Acceptance Criteria for Milestone v2.3 Execution, Detailed Crate Responsibilities & Invariants, PART III: MILESTONE v4.0 ARCHITECTURAL BLUEPRINT, Performance Objectives & Architectural Motivations (+1 more)
+### Community 130 - "Local Storage"
+Cohesion: 0.25
+Nodes (8): Advanced: Multiple Operations, Clear All localStorage, Delete Single Item, Get Single Value, List All localStorage Items, Local Storage, Set JSON Value, Set Value
 
-### Community 131 - "AssessmentStatus"
-Cohesion: 0.33
-Nodes (6): AssessmentStatus, Active, Closed, Draft, GracePeriod, Scheduled
+### Community 131 - "cgroups.rs"
+Cohesion: 0.25
+Nodes (5): DEFAULT_CGROUP_ROOT, DEFAULT_CPU_MAX_QUOTA, DEFAULT_MEMORY_HIGH_BYTES, DEFAULT_MEMORY_MAX_BYTES, DEFAULT_SWAP_MAX_BYTES
 
 ### Community 132 - "12. THE BLOCK LIBRARY (Contract - Implementations Land Here Iteratively)"
 Cohesion: 0.40
@@ -732,53 +728,53 @@ Nodes (4): 7. DIAL DEFINITIONS (Technical Reference), DESIGN_VARIANCE (Level 1-1
 Cohesion: 0.50
 Nodes (3): Cloud-Judge V2 Vision & Feature Requirements, Commercial & Competition Features, Core Capabilities
 
-### Community 153 - "Attaching to a Running Browser"
+### Community 153 - "exit-code-registry.cjs"
+Cohesion: 0.29
+Nodes (4): ADR-3889, CODE_TO_NAME, EXIT_CODES, NAME_TO_CODE
+
+### Community 154 - "Session Storage"
+Cohesion: 0.33
+Nodes (6): Clear sessionStorage, Delete Single Item, Get Single Value, List All sessionStorage Items, Session Storage, Set Value
+
+### Community 155 - "2. Generate"
 Cohesion: 0.40
-Nodes (5): Attach by channel name, Attach via browser extension, Attach via CDP endpoint, Attaching to a Running Browser, Detach
+Nodes (5): 2.1 Inputs, 2.2 Generate one scenario, 2.3 Generate multiple scenarios, 2.4 Run generated tests, 2. Generate
 
-### Community 155 - "1. Planning"
-Cohesion: 0.40
-Nodes (5): 1.1 Prerequisite: workspace, 1.2 Prerequisite: seed test, 1.3 Explore the app, 1.4 Write the spec file, 1. Planning
+### Community 156 - "2. Clean-Slate Purge & 4-Phase Execution Roadmap (Phases 29–32)"
+Cohesion: 0.18
+Nodes (11): 1. Visual Invariants: Unified Refero Linear Midnight (`docs/DESIGN.md`), 2. Clean-Slate Purge & 4-Phase Execution Roadmap (Phases 29–32), 3. Milestone v4.3 Verification & Acceptance Criteria Matrix, PART VI: MILESTONE v4.3 ARCHITECTURAL BLUEPRINT (Phases 29–32), Phase 25: Routing Bug Fix, Apple Design Tokens & `/campus` Gallery Overhaul (+ Apple Store Configurator `/campus/register`), Phase 29: The Great Purge, `App.tsx` Repair, Consumer Polish & CSS Reset [COMPLETED], Phase 30: Production Linear-Native Hackathon Platform (`/hackathons`, `/hackathons/:slug` & Rust Backend Persistence) [COMPLETED], Phase 31: Production Multi-Tenant Campus Portal — Real Org Provisioning, Auth & Role-Gated Linear Shell (`/campus/*`) [COMPLETED] (+3 more)
 
-### Community 156 - "ErrorBoundary"
-Cohesion: 0.22
-Nodes (6): 2. Clean-Slate Purge & 4-Phase Execution Roadmap (Phases 29–32), Phase 29: The Great Purge, `App.tsx` Repair, Consumer Polish & CSS Reset [COMPLETED], Phase 30: Production Linear-Native Hackathon Platform (`/hackathons`, `/hackathons/:slug` & Rust Backend Persistence) [COMPLETED], Phase 31: Production Multi-Tenant Campus Portal — Real Org Provisioning, Auth & Role-Gated Linear Shell (`/campus/*`) [COMPLETED], Phase 32: Real Telemetry-Driven Campus Analytics, 6-Stage Lab Execution Engine & E2E Playwright Verification, ErrorBoundary
-
-### Community 157 - "CampusRole"
+### Community 157 - "Phase 2: Web Design Guidelines & Typography Audit"
 Cohesion: 0.50
-Nodes (4): CampusRole, Instructor, OrgAdmin, Student
+Nodes (4): 2.1 Concentric Border-Radii Audit & Mathematical Enforcement, 2.2 Tabular Figures & Numerical Stability (`font-variant-numeric: tabular-nums`), 2.3 Optical Alignment, Icon-Text Pairings & Contrast Audit, Phase 2: Web Design Guidelines & Typography Audit
 
 ### Community 158 - "deserialize"
-Cohesion: 0.24
-Nodes (7): health_handler(), HealthResponse, get_problem_catalog(), get_problem_handler(), list_problems_handler(), Problem, TestCaseItem
+Cohesion: 0.10
+Nodes (8): ProblemDetails, health_handler(), HealthResponse, get_problem_catalog(), get_problem_handler(), list_problems_handler(), Problem, TestCaseItem
 
-### Community 159 - "MembershipStatus"
+### Community 159 - "Phase 4: Autonomous Playwright & DevTools Verification [COMPLETED]"
 Cohesion: 0.50
-Nodes (4): MembershipStatus, Active, Invited, Suspended
-
-### Community 160 - "Track D: High-Performance Kernel Sandbox & Plagiarism Engine (Phases 6–8)"
-Cohesion: 0.50
-Nodes (4): Phase 6: Linux cgroups v2 Resource Controller & Namespace Isolation (`judge-worker`) [COMPLETED], Phase 7: Seccomp-BPF Strict Filters & Multi-Language Sandboxed Runners [COMPLETED], Phase 8: High-Performance AST Winnowing & Plagiarism Engine [COMPLETED], Track D: High-Performance Kernel Sandbox & Plagiarism Engine (Phases 6–8)
+Nodes (4): 4.1 Verification Strategy, 4.2 Route Coverage Matrix, 4.3 Automated Verification Harness, Phase 4: Autonomous Playwright & DevTools Verification [COMPLETED]
 
 ## Knowledge Gaps
-- **111 isolated node(s):** `ADR-0894`, `ADR-1244`, `ADR-0857`, `ADR-2782`, `ADR-0959` (+106 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1189 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **111 isolated node(s):** `ADR-0894`, `ADR-0857`, `ADR-0959`, `ADR-1016`, `ADR-1244` (+106 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1207 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `GatewayError` connect `GatewayError` to `judge-core/src/lib.rs`, `users.rs`, `test_auth_gateway.rs`, `DbError`, `subscriptions.rs`, `RubricEvaluationUpdate`, `cockpit.rs`, `contests.rs`, `auth.rs`, `routes/submission.rs`, `StatusCode`, `deserialize`, `hackathons.rs`, `AppState`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **What connects `ADR-0894`, `ADR-1244`, `ADR-0857` to the rest of the system?**
+- **Why does `playwright` connect `verify-local-runtime.mjs` to `frontend/package.json`?**
+  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+- **What connects `ADR-0894`, `ADR-0857`, `ADR-0959` to the rest of the system?**
   _111 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `judge-gateway/src/lib.rs` be split into smaller, more focused modules?**
-  _Cohesion score 0.025440517151496193 - nodes in this community are weakly interconnected._
-- **Why does `playwright` connect `verify-local-runtime.mjs` to `frontend/package.json`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Should `CampusLabRoomPage.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.1076923076923077 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.023989898989898988 - nodes in this community are weakly interconnected._
+- **Why does `GatewayError` connect `GatewayError` to `routes/assessment.rs`, `DomainError`, `password.rs`, `test_auth_gateway.rs`, `token.rs`, `DbError`, `RubricEvaluationUpdate`, `cockpit.rs`, `contests.rs`, `subscriptions.rs`, `auth.rs`, `routes/submission.rs`, `campus.rs`, `users.rs`, `hackathons.rs`, `RequireInstructor`, `deserialize`, `TokenStore`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **Should `cli.cjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.11088709677419355 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.05223880597014925 - nodes in this community are weakly interconnected._
 - **Should `judge-core/src/lib.rs` be split into smaller, more focused modules?**
-  _Cohesion score 0.0603921568627451 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09879032258064516 - nodes in this community are weakly interconnected._
+- **Should `ProblemWorkspacePage.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.05389876880984952 - nodes in this community are weakly interconnected._
