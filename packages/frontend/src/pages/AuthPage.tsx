@@ -105,7 +105,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
             await migrateGuestSubmissions(guestSubs);
             clearGuestSubmissions();
           } catch (migrateErr) {
-            console.warn('Guest history migration failed:', migrateErr);
+            console.debug('Guest history migration failed:', migrateErr);
           }
         }
       }
@@ -298,30 +298,30 @@ export const AuthPage: React.FC<AuthPageProps> = ({ mode: initialMode }) => {
           )}
         </p>
 
-        {/* Institutional Campus Gateway Card */}
+        {/* Institutional Campus Gateway Card (Refero Linear Midnight: #141517 surface, #23252a border, 12px radius) */}
         <div className="auth-institutional-gateway" id="auth-campus-gateway">
           <div className="auth-inst-header">
             <span className="auth-inst-badge">
               <GraduationCap size={14} />
-              <span>Campus Edition</span>
+              <span>Higher Education</span>
             </span>
-            <h3 className="auth-inst-title">🏛️ AlgoCeleris for Universities & Engineering Colleges</h3>
+            <h3 className="auth-inst-title">AlgoCeleris for Universities & Colleges</h3>
             <p className="auth-inst-subtitle">
               Access your institution's private programming labs, PAT assessments, and AI mentor portal.
             </p>
           </div>
           <button
             type="button"
-            className="btn btn-primary auth-inst-btn"
+            className="auth-inst-btn"
             onClick={() => navigate('/campus')}
             id="btn-campus-portal"
           >
-            <span>Enter University Campus Portal</span>
+            <span>Enter Institution Portal</span>
             <ArrowRight size={14} />
           </button>
           <div className="auth-inst-foot">
             <Link to="/campus/register" className="auth-inst-link" id="link-campus-register">
-              Register & Provision a New Institution &rarr;
+              Provision a New Institution →
             </Link>
           </div>
         </div>

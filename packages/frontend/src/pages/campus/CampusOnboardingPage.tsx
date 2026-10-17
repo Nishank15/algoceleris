@@ -1,610 +1,859 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  GraduationCap,
+  provisionCampusOrg,
+  CampusProvisionRequest,
+  setAccessToken,
+} from '../../services/api';
+import { saveCampusSession } from '../../services/campusSession';
+import {
   Building2,
   CheckCircle2,
-  CreditCard,
-  Sparkles,
   ArrowRight,
   ArrowLeft,
-  Shield,
-  Users,
-  Check,
-  Globe,
-  Mail,
-  Lock,
-  User,
-  Zap,
+  AlertCircle,
 } from 'lucide-react';
-
-interface TierOption {
-  id: 'department' | 'enterprise';
-  title: string;
-  badge?: string;
-  priceInr: string;
-  priceUsd: string;
-  period: string;
-  description: string;
-  features: string[];
-  isPopular?: boolean;
-}
-
-const LICENSE_TIERS: TierOption[] = [
-  {
-    id: 'department',
-    title: 'Department License',
-    priceInr: '₹14,999',
-    priceUsd: '$199',
-    period: 'per semester',
-    description: 'Perfect for individual computer science departments and specialized courses.',
-    features: [
-      'Up to 500 enrolled students',
-      'Up to 10 faculty accounts',
-      '6-Stage Progressive Coding Labs',
-      'Automated Test Case Evaluation',
-      'Section-locked Sandbox Workspaces',
-      'Standard CSV Roster Upload',
-    ],
-  },
-  {
-    id: 'enterprise',
-    title: 'Campus Enterprise License',
-    badge: 'MOST POPULAR',
-    isPopular: true,
-    priceInr: '₹49,999',
-    priceUsd: '$699',
-    period: 'per semester',
-    description: 'Complete university-wide infrastructure with live proctoring & AI tutoring.',
-    features: [
-      'Unlimited students & sections',
-      'Unlimited faculty seats',
-      'AI Mentor Tutor (Gemini Powered)',
-      'Live WebSocket Proctor Cockpit',
-      '1-on-1 CRDT Viva Grading Rooms',
-      'Tree-sitter AST Plagiarism Engine',
-      'Course Learning Outcome (CLO) Analytics',
-      'Custom University Domain & Co-Branding',
-      '24/7 Priority SLA & Dedicated Account Manager',
-    ],
-  },
-];
 
 export const CampusOnboardingPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [formData, setFormData] = useState({
+    orgName: '',
+    orgSlug: '',
+    allowedDomains: '',
+    expectedStudents: 500,
+    tier: 'Enterprise Campus',
+    adminName: '',
+    adminEmail: '',
+    adminPassword: '',
+    confirmPassword: '',
+  });
 
-  // Step 1: Organization & Admin State
-  const [orgName, setOrgName] = useState('Vellore Institute of Technology, Chennai');
-  const [orgSlug, setOrgSlug] = useState('vit-chennai');
-  const [allowedDomains, setAllowedDomains] = useState('@vitstudent.ac.in, @vit.ac.in');
-  const [adminName, setAdminName] = useState('Dr. Saravanan P');
-  const [adminEmail, setAdminEmail] = useState('admin@vit.ac.in');
-  const [password, setPassword] = useState('Admin@2026!');
-  const [accentColor, setAccentColor] = useState('#2563eb');
-  const [logoUrl, setLogoUrl] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [provisionedResult, setProvisionedResult] = useState<{
+    orgSlug: string;
+    orgName: string;
+    adminEmail: string;
+    portalUrl: string;
+  } | null>(null);
 
-  // Step 2: License Tier Selection
-  const [selectedTier, setSelectedTier] = useState<'department' | 'enterprise'>('enterprise');
-  const [billingCurrency, setBillingCurrency] = useState<'INR' | 'USD'>('INR');
-
-  // Step 3: Checkout State
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi' | 'invoice'>('card');
-  const [cardNumber, setCardNumber] = useState('4242 •••• •••• 4242');
-  const [cardExpiry, setCardExpiry] = useState('12/28');
-  const [cardCvc, setCardCvc] = useState('999');
-  const [isProvisioning, setIsProvisioning] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Auto-slug generator
-  const handleNameChange = (name: string) => {
-    setOrgName(name);
-    const generated = name
+  // Auto-generate slug from name if slug hasn't been manually edited
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    const generatedSlug = val
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 32);
-    setOrgSlug(generated || 'my-university');
+      .replace(/^-+|-+$/g, '');
+    setFormData((prev) => ({
+      ...prev,
+      orgName: val,
+      orgSlug: generatedSlug,
+    }));
   };
 
-  const handleFillDemo = () => {
-    setOrgName('Vellore Institute of Technology, Chennai');
-    setOrgSlug('vit-chennai');
-    setAllowedDomains('@vitstudent.ac.in, @vit.ac.in');
-    setAdminName('Dr. Saravanan P');
-    setAdminEmail('saravanan.p@vit.ac.in');
-    setPassword('VitAdmin2026#');
-    setAccentColor('#2563eb');
-  };
-
-  const handleStep1Submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orgName.trim() || !orgSlug.trim() || !adminEmail.trim() || !password) {
-      setError('Please fill in all required fields.');
-      return;
+  const validateStep1 = () => {
+    if (!formData.orgName.trim()) {
+      setErrorMessage('Institution name is required.');
+      return false;
     }
-    setError(null);
-    setCurrentStep(2);
+    if (!formData.orgSlug.trim()) {
+      setErrorMessage('Institution slug identifier is required.');
+      return false;
+    }
+    if (!formData.allowedDomains.trim()) {
+      setErrorMessage('At least one institutional email domain is required (e.g. university.edu).');
+      return false;
+    }
+    setErrorMessage(null);
+    return true;
   };
 
-  const handleStep2Submit = () => {
-    setCurrentStep(3);
+  const validateStep2 = () => {
+    if (!formData.tier) {
+      setErrorMessage('Please select a deployment tier.');
+      return false;
+    }
+    setErrorMessage(null);
+    return true;
   };
 
-  const handleFinalProvision = async () => {
-    setIsProvisioning(true);
-    setError(null);
+  const validateStep3 = () => {
+    if (!formData.adminName.trim()) {
+      setErrorMessage('Lead Administrator full name is required.');
+      return false;
+    }
+    if (!formData.adminEmail.trim() || !formData.adminEmail.includes('@')) {
+      setErrorMessage('Valid institutional administrator email is required.');
+      return false;
+    }
+    if (!formData.adminPassword || formData.adminPassword.length < 8) {
+      setErrorMessage('Master password must be at least 8 characters long.');
+      return false;
+    }
+    if (formData.adminPassword !== formData.confirmPassword) {
+      setErrorMessage('Passwords do not match.');
+      return false;
+    }
+    setErrorMessage(null);
+    return true;
+  };
 
-    const payload = {
-      name: orgName.trim(),
-      slug: orgSlug.trim().toLowerCase(),
-      allowed_domains: allowedDomains.split(',').map((d) => d.trim()).filter(Boolean),
-      admin_name: adminName.trim(),
-      admin_email: adminEmail.trim(),
-      password,
-      accent_color: accentColor,
-      tier: selectedTier,
-      billing_currency: billingCurrency,
+  const handleNext = () => {
+    if (step === 1 && validateStep1()) {
+      setStep(2);
+    } else if (step === 2 && validateStep2()) {
+      setStep(3);
+    }
+  };
+
+  const handleBack = () => {
+    setErrorMessage(null);
+    if (step === 2) setStep(1);
+    if (step === 3) setStep(2);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep3()) return;
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    const domains = formData.allowedDomains
+      .split(',')
+      .map((d) => d.trim().replace(/^@/, ''))
+      .filter((d) => d.length > 0);
+
+    const payload: CampusProvisionRequest = {
+      org_name: formData.orgName.trim(),
+      org_slug: formData.orgSlug.trim(),
+      admin_name: formData.adminName.trim(),
+      admin_email: formData.adminEmail.trim(),
+      admin_password: formData.adminPassword,
+      tier: formData.tier,
+      allowed_domains: domains,
+      expected_students: Number(formData.expectedStudents) || 500,
+      payment_ref: 'CAMPUS_PROVISION_DIRECT',
     };
 
     try {
-      // Provision via backend gateway (with fallback simulation for resilience)
-      const res = await fetch('/api/v1/campus/orgs/provision', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      }).catch(() => null);
+      const resp = await provisionCampusOrg(payload);
 
-      // Save tenant configuration locally for instant offline UI testability
-      const storedTenants = JSON.parse(localStorage.getItem('algoceleris_campus_tenants') || '{}');
-      storedTenants[payload.slug] = {
-        ...payload,
-        provisioned_at: new Date().toISOString(),
-        status: 'active',
-      };
-      localStorage.setItem('algoceleris_campus_tenants', JSON.stringify(storedTenants));
+      // Authenticate active session with received real token
+      setAccessToken(resp.access_token);
+      saveCampusSession({
+        role: 'org_admin',
+        orgSlug: resp.org_slug,
+        orgName: resp.org_name,
+        userId: resp.user.user_id,
+        name: resp.user.username,
+        loginId: resp.user.email,
+        regNumber: resp.user.reg_number || 'ADM-001',
+        department: 'Institutional Administration',
+        initials: resp.user.username.slice(0, 2).toUpperCase(),
+        token: resp.access_token,
+        cohortId: resp.user.cohort_id,
+        cohortName: resp.user.cohort_name,
+      });
 
-      // Simulate 750ms provision completion
-      await new Promise((resolve) => setTimeout(resolve, 750));
+      setProvisionedResult({
+        orgSlug: resp.org_slug,
+        orgName: resp.org_name,
+        adminEmail: resp.admin_email,
+        portalUrl: `/campus/${resp.org_slug}/admin/dashboard`,
+      });
 
-      // Route to the co-branded login portal
-      navigate(`/campus/${payload.slug}/login?registered=true`);
+      setStep(4);
     } catch (err: any) {
-      setError(err?.message || 'Provisioning failed. Please retry.');
-      setIsProvisioning(false);
+      console.error('Provisioning failed:', err);
+      setErrorMessage(err.message || 'Tenant provisioning failed. Please verify unique slug.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="campus-onboarding-page">
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#08090a',
+        color: '#ffffff',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        padding: '48px 24px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
       {/* Top Header */}
-      <header className="onboarding-top-bar">
-        <Link to="/campus" className="campus-brand">
-          <div className="campus-brand-icon">
-            <GraduationCap size={18} />
-          </div>
-          <div className="campus-brand-text">
-            <span className="brand-name">AlgoCeleris</span>
-            <span className="brand-edition">Campus Setup</span>
-          </div>
+      <div style={{ maxWidth: '680px', width: '100%', marginBottom: '32px' }}>
+        <Link
+          to="/campus"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: '#8a8f98',
+            textDecoration: 'none',
+            fontSize: '13px',
+            marginBottom: '20px',
+          }}
+        >
+          <ArrowLeft size={14} /> Back to Campus Directory
         </Link>
 
-        <div className="onboarding-steps-indicator">
-          <div className={`step-item ${currentStep >= 1 ? 'active' : ''} ${currentStep > 1 ? 'completed' : ''}`}>
-            <span className="step-num">{currentStep > 1 ? <Check size={12} /> : '1'}</span>
-            <span className="step-label">Organization</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <div
+            style={{
+              padding: '6px',
+              borderRadius: '6px',
+              background: 'rgba(228, 242, 34, 0.1)',
+              color: '#e4f222',
+              display: 'flex',
+            }}
+          >
+            <Building2 size={20} />
           </div>
-          <div className="step-divider" />
-          <div className={`step-item ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-            <span className="step-num">{currentStep > 2 ? <Check size={12} /> : '2'}</span>
-            <span className="step-label">License Tier</span>
-          </div>
-          <div className="step-divider" />
-          <div className={`step-item ${currentStep === 3 ? 'active' : ''}`}>
-            <span className="step-num">3</span>
-            <span className="step-label">Checkout</span>
-          </div>
+          <h1 style={{ fontSize: '26px', fontWeight: 590, margin: 0, letterSpacing: '-0.02em' }}>
+            Institution Provisioning Wizard
+          </h1>
         </div>
+        <p style={{ color: '#8a8f98', fontSize: '14px', margin: 0 }}>
+          Deploy a dedicated, domain-whitelisted AlgoCeleris virtual lab cluster for your university.
+        </p>
 
-        <button type="button" onClick={handleFillDemo} className="onboarding-demo-fill-btn" title="Autofill VIT Chennai demo parameters">
-          <Zap size={13} />
-          <span>Autofill Demo</span>
-        </button>
-      </header>
-
-      {/* Main Container */}
-      <main className="onboarding-main">
-        <div className="onboarding-card">
-          {error && (
-            <div className="onboarding-error-banner">
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* STEP 1: Institution & Admin Setup */}
-          {currentStep === 1 && (
-            <form onSubmit={handleStep1Submit} className="onboarding-step-form">
-              <div className="step-heading-group">
-                <span className="step-badge-pill">Step 1 of 3</span>
-                <h1 className="step-title">Institution Identity & Domain Configuration</h1>
-                <p className="step-subtitle">
-                  Configure your university tenant slug, official student email domains, and master admin account.
-                </p>
-              </div>
-
-              <div className="form-grid-2col">
-                <div className="form-field-group">
-                  <label className="field-label" htmlFor="org-name">
-                    Institution / University Name *
-                  </label>
-                  <div className="input-with-icon">
-                    <Building2 size={15} className="input-icon" />
-                    <input
-                      id="org-name"
-                      type="text"
-                      className="field"
-                      placeholder="e.g. Vellore Institute of Technology, Chennai"
-                      value={orgName}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      required
-                    />
-                  </div>
+        {/* Step Progression Bar */}
+        {step < 4 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginTop: '24px',
+              borderBottom: '1px solid #23252a',
+              paddingBottom: '16px',
+            }}
+          >
+            {[
+              { num: 1, label: 'Identity & Whitelist' },
+              { num: 2, label: 'Plan & Tier' },
+              { num: 3, label: 'Lead Admin' },
+            ].map((s) => (
+              <div
+                key={s.num}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: step === s.num ? '#ffffff' : step > s.num ? '#22c55e' : '#62666d',
+                  fontSize: '12px',
+                  fontWeight: 510,
+                }}
+              >
+                <div
+                  style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    background:
+                      step === s.num
+                        ? '#e4f222'
+                        : step > s.num
+                        ? '#22c55e'
+                        : '#141517',
+                    color: step === s.num ? '#08090a' : '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontFamily: 'JetBrains Mono, monospace',
+                  }}
+                >
+                  {step > s.num ? '✓' : s.num}
                 </div>
-
-                <div className="form-field-group">
-                  <label className="field-label" htmlFor="org-slug">
-                    Tenant Subdomain / URL Slug *
-                  </label>
-                  <div className="input-with-icon">
-                    <Globe size={15} className="input-icon" />
-                    <input
-                      id="org-slug"
-                      type="text"
-                      className="field"
-                      placeholder="vit-chennai"
-                      value={orgSlug}
-                      onChange={(e) => setOrgSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-                      required
-                    />
-                  </div>
-                  <span className="field-hint">
-                    Portal address: <code>/campus/{orgSlug || 'my-university'}/login</code>
-                  </span>
-                </div>
+                <span>{s.label}</span>
+                {s.num < 3 && <span style={{ color: '#23252a', margin: '0 4px' }}>—</span>}
               </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-              <div className="form-field-group">
-                <label className="field-label" htmlFor="org-domains">
-                  Authorized Student / Faculty Email Domains *
+      {/* Main Form Container */}
+      <div
+        style={{
+          maxWidth: '680px',
+          width: '100%',
+          background: '#0f1011',
+          border: '1px solid #23252a',
+          borderRadius: '12px',
+          padding: '36px',
+          boxSizing: 'border-box',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        {errorMessage && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'rgba(235, 87, 87, 0.1)',
+              border: '1px solid rgba(235, 87, 87, 0.3)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              color: '#eb5757',
+              fontSize: '13px',
+              marginBottom: '24px',
+            }}
+          >
+            <AlertCircle size={16} />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* STEP 1: Institution Identity & Domain Whitelist */}
+        {step === 1 && (
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
+              1. Institutional Identity & Domain Whitelisting
+            </h3>
+            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+              Specify the university credentials and student email domains permitted to register and evaluate code.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Institution / University Full Name *
                 </label>
-                <div className="input-with-icon">
-                  <Mail size={15} className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="e.g. Vellore Institute of Technology, Chennai"
+                  value={formData.orgName}
+                  onChange={handleNameChange}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '11px 14px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Tenant Slug Identifier (Permanent Subpath) *
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span
+                    style={{
+                      background: '#141517',
+                      border: '1px solid #23252a',
+                      borderRight: 'none',
+                      borderRadius: '6px 0 0 6px',
+                      padding: '11px 12px',
+                      color: '#62666d',
+                      fontSize: '12px',
+                      fontFamily: 'JetBrains Mono, monospace',
+                    }}
+                  >
+                    /campus/
+                  </span>
                   <input
-                    id="org-domains"
                     type="text"
-                    className="field"
-                    placeholder="@vitstudent.ac.in, @vit.ac.in"
-                    value={allowedDomains}
-                    onChange={(e) => setAllowedDomains(e.target.value)}
-                    required
+                    placeholder="vit-chennai"
+                    value={formData.orgSlug}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        orgSlug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''),
+                      })
+                    }
+                    style={{
+                      width: '100%',
+                      background: '#161718',
+                      border: '1px solid #23252a',
+                      borderRadius: '0 6px 6px 0',
+                      padding: '11px 14px',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      fontFamily: 'JetBrains Mono, monospace',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
                   />
                 </div>
-                <span className="field-hint">Comma-separated email suffixes permitted for institutional SSO / roster login.</span>
-              </div>
-
-              <div className="form-divider-line" />
-
-              <div className="form-grid-3col">
-                <div className="form-field-group">
-                  <label className="field-label" htmlFor="admin-name">
-                    Dean / Master Admin Name *
-                  </label>
-                  <div className="input-with-icon">
-                    <User size={15} className="input-icon" />
-                    <input
-                      id="admin-name"
-                      type="text"
-                      className="field"
-                      placeholder="Dr. Saravanan P"
-                      value={adminName}
-                      onChange={(e) => setAdminName(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-field-group">
-                  <label className="field-label" htmlFor="admin-email">
-                    Admin Email Address *
-                  </label>
-                  <div className="input-with-icon">
-                    <Mail size={15} className="input-icon" />
-                    <input
-                      id="admin-email"
-                      type="email"
-                      className="field"
-                      placeholder="admin@vit.ac.in"
-                      value={adminEmail}
-                      onChange={(e) => setAdminEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="form-field-group">
-                  <label className="field-label" htmlFor="admin-password">
-                    Admin Password *
-                  </label>
-                  <div className="input-with-icon">
-                    <Lock size={15} className="input-icon" />
-                    <input
-                      id="admin-password"
-                      type="password"
-                      className="field"
-                      placeholder="••••••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
+                <div style={{ fontSize: '11px', color: '#62666d', marginTop: '4px' }}>
+                  Only lowercase alphanumeric characters and hyphens allowed.
                 </div>
               </div>
 
-              <div className="step-actions-row">
-                <Link to="/campus" className="btn btn-secondary back-btn">
-                  <ArrowLeft size={14} />
-                  <span>Cancel</span>
-                </Link>
-
-                <button type="submit" className="btn btn-primary next-btn">
-                  <span>Continue to License Selection</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* STEP 2: License Tier Selection */}
-          {currentStep === 2 && (
-            <div className="onboarding-step-form">
-              <div className="step-heading-group">
-                <span className="step-badge-pill">Step 2 of 3</span>
-                <h1 className="step-title">Select Institutional License Plan</h1>
-                <p className="step-subtitle">
-                  Choose the license model suited for your department or campus. Upgrade or add seats anytime.
-                </p>
-
-                <div className="currency-toggle-wrapper">
-                  <button
-                    type="button"
-                    className={`curr-btn ${billingCurrency === 'INR' ? 'active' : ''}`}
-                    onClick={() => setBillingCurrency('INR')}
-                  >
-                    INR (₹)
-                  </button>
-                  <button
-                    type="button"
-                    className={`curr-btn ${billingCurrency === 'USD' ? 'active' : ''}`}
-                    onClick={() => setBillingCurrency('USD')}
-                  >
-                    USD ($)
-                  </button>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Allowed Student & Faculty Domains (Comma-Separated) *
+                </label>
+                <input
+                  type="text"
+                  placeholder="vitstudent.ac.in, vit.ac.in"
+                  value={formData.allowedDomains}
+                  onChange={(e) => setFormData({ ...formData, allowedDomains: e.target.value })}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '11px 14px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                <div style={{ fontSize: '11px', color: '#62666d', marginTop: '4px' }}>
+                  Any student logging in with an email matching these domains will be authenticated into this tenant.
                 </div>
               </div>
 
-              <div className="tiers-selection-grid">
-                {LICENSE_TIERS.map((tier) => {
-                  const isSelected = selectedTier === tier.id;
-                  const price = billingCurrency === 'INR' ? tier.priceInr : tier.priceUsd;
-                  return (
-                    <div
-                      key={tier.id}
-                      className={`tier-card ${isSelected ? 'selected' : ''}`}
-                      onClick={() => setSelectedTier(tier.id)}
-                    >
-                      {tier.badge && <span className="tier-top-badge">{tier.badge}</span>}
-                      <div className="tier-header">
-                        <h3 className="tier-title">{tier.title}</h3>
-                        <p className="tier-description">{tier.description}</p>
-                      </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Estimated Active Student Enrollment
+                </label>
+                <input
+                  type="number"
+                  min="50"
+                  max="50000"
+                  value={formData.expectedStudents}
+                  onChange={(e) => setFormData({ ...formData, expectedStudents: Number(e.target.value) })}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '11px 14px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+            </div>
 
-                      <div className="tier-price-box">
-                        <span className="tier-price">{price}</span>
-                        <span className="tier-period">/ {tier.period}</span>
-                      </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '32px' }}>
+              <button
+                type="button"
+                onClick={handleNext}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  padding: '11px 22px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 590,
+                  cursor: 'pointer',
+                }}
+              >
+                Proceed to Tier Selection <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
 
-                      <div className="tier-features-list">
-                        {tier.features.map((feat, idx) => (
-                          <div key={idx} className="tier-feature-item">
-                            <CheckCircle2 size={15} className="feat-check" />
-                            <span>{feat}</span>
-                          </div>
-                        ))}
-                      </div>
+        {/* STEP 2: Deployment Tier & Capacity */}
+        {step === 2 && (
+          <div>
+            <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
+              2. Select Deployment Tier & Capacity
+            </h3>
+            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+              Choose the architectural sizing for your university's sandboxed worker daemons and cohort limits.
+            </p>
 
-                      <button
-                        type="button"
-                        className={`btn tier-select-btn ${isSelected ? 'btn-primary' : 'btn-secondary'}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedTier(tier.id);
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {[
+                {
+                  tier: 'Enterprise Campus',
+                  tag: 'Recommended for Universities',
+                  desc: 'Unlimited cohorts, dedicated 256MB cgroup worker nodes, full ABET/NBA CLO automated attainment, and Tree-sitter AST anti-cheat.',
+                  seats: '1,000+ Students · 50 Faculty',
+                },
+                {
+                  tier: 'Department Tier',
+                  tag: 'For Academic Departments',
+                  desc: 'Up to 10 cohorts, pooled worker execution, real-time proctoring telemetry, and automated rubric grading.',
+                  seats: 'Up to 500 Students · 20 Faculty',
+                },
+                {
+                  tier: 'Pilot Trial',
+                  tag: '30-Day Department Trial',
+                  desc: 'Single cohort evaluation sandbox with 100 student seats and basic lab authoring suite.',
+                  seats: '100 Students · 2 Faculty',
+                },
+              ].map((item) => (
+                <div
+                  key={item.tier}
+                  onClick={() => setFormData({ ...formData, tier: item.tier })}
+                  style={{
+                    background: formData.tier === item.tier ? '#161718' : '#141517',
+                    border: `1px solid ${formData.tier === item.tier ? '#e4f222' : '#23252a'}`,
+                    borderRadius: '8px',
+                    padding: '18px',
+                    cursor: 'pointer',
+                    transition: 'border-color 0.15s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <div
+                        style={{
+                          width: '16px',
+                          height: '16px',
+                          borderRadius: '50%',
+                          border: `2px solid ${formData.tier === item.tier ? '#e4f222' : '#62666d'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         }}
                       >
-                        {isSelected ? '✓ Selected Plan' : 'Select Plan'}
-                      </button>
+                        {formData.tier === item.tier && (
+                          <div
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              background: '#e4f222',
+                            }}
+                          />
+                        )}
+                      </div>
+                      <span style={{ fontSize: '15px', fontWeight: 590, color: '#ffffff' }}>
+                        {item.tier}
+                      </span>
                     </div>
-                  );
-                })}
+
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        color: formData.tier === item.tier ? '#e4f222' : '#8a8f98',
+                        border: '1px solid #23252a',
+                      }}
+                    >
+                      {item.tag}
+                    </span>
+                  </div>
+
+                  <p style={{ color: '#8a8f98', fontSize: '12px', margin: '0 0 10px 26px', lineHeight: 1.4 }}>
+                    {item.desc}
+                  </p>
+                  <div style={{ marginLeft: '26px', fontSize: '11px', color: '#62666d', fontFamily: 'JetBrains Mono, monospace' }}>
+                    {item.seats}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
+              <button
+                type="button"
+                onClick={handleBack}
+                style={{
+                  background: 'transparent',
+                  color: '#8a8f98',
+                  border: '1px solid #23252a',
+                  padding: '11px 18px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  padding: '11px 22px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 590,
+                  cursor: 'pointer',
+                }}
+              >
+                Configure Administrator <ArrowRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: Lead Administrator Credentials */}
+        {step === 3 && (
+          <form onSubmit={handleSubmit}>
+            <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
+              3. Lead Administrator Credentials
+            </h3>
+            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+              This account will have full `org_admin` privileges to create academic cohorts, upload rosters, and manage faculty licenses.
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Administrator Full Name *
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Dr. Saravanan P"
+                  value={formData.adminName}
+                  onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '11px 14px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
               </div>
 
-              <div className="step-actions-row">
-                <button type="button" onClick={() => setCurrentStep(1)} className="btn btn-secondary back-btn">
-                  <ArrowLeft size={14} />
-                  <span>Back</span>
-                </button>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  Administrator Official Email *
+                </label>
+                <input
+                  type="email"
+                  placeholder="admin.cse@vit.ac.in"
+                  value={formData.adminEmail}
+                  onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '11px 14px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
 
-                <button type="button" onClick={handleStep2Submit} className="btn btn-primary next-btn">
-                  <span>Proceed to Checkout</span>
-                  <ArrowRight size={14} />
-                </button>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                    Master Password (min 8 chars) *
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="••••••••••••"
+                    value={formData.adminPassword}
+                    onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#161718',
+                      border: '1px solid #23252a',
+                      borderRadius: '6px',
+                      padding: '11px 14px',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                    Confirm Master Password *
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="••••••••••••"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    style={{
+                      width: '100%',
+                      background: '#161718',
+                      border: '1px solid #23252a',
+                      borderRadius: '6px',
+                      padding: '11px 14px',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
               </div>
             </div>
-          )}
 
-          {/* STEP 3: Checkout & Auto-Provision */}
-          {currentStep === 3 && (
-            <div className="onboarding-step-form">
-              <div className="step-heading-group">
-                <span className="step-badge-pill">Step 3 of 3</span>
-                <h1 className="step-title">Order Review & Tenant Activation</h1>
-                <p className="step-subtitle">
-                  Confirm your university setup details and activate your institutional sandbox partition.
-                </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '32px' }}>
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                style={{
+                  background: 'transparent',
+                  color: '#8a8f98',
+                  border: '1px solid #23252a',
+                  padding: '11px 18px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                }}
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  padding: '11px 24px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 590,
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  opacity: isSubmitting ? 0.7 : 1,
+                }}
+              >
+                {isSubmitting ? 'Provisioning Tenant Mesh...' : 'Deploy University Tenant Portal →'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* STEP 4: Success Confirmation */}
+        {step === 4 && provisionedResult && (
+          <div style={{ textAlign: 'center', padding: '16px 0' }}>
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                background: 'rgba(34, 197, 94, 0.12)',
+                border: '1px solid rgba(34, 197, 94, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#22c55e',
+                margin: '0 auto 20px auto',
+              }}
+            >
+              <CheckCircle2 size={32} />
+            </div>
+
+            <h2 style={{ fontSize: '24px', fontWeight: 590, margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
+              {provisionedResult.orgName} Provisioned!
+            </h2>
+            <p style={{ color: '#8a8f98', fontSize: '14px', maxWidth: '480px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
+              Your institutional tenant is online. A default 2026 cohort has been provisioned and your administrative JWT has been issued.
+            </p>
+
+            <div
+              style={{
+                background: '#141517',
+                border: '1px solid #23252a',
+                borderRadius: '8px',
+                padding: '16px',
+                textAlign: 'left',
+                marginBottom: '28px',
+                fontSize: '13px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: '#8a8f98' }}>Tenant Slug:</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#e4f222' }}>
+                  /{provisionedResult.orgSlug}
+                </span>
               </div>
-
-              <div className="checkout-review-summary">
-                <div className="review-block">
-                  <span className="review-label">Institution:</span>
-                  <span className="review-val font-semibold">{orgName}</span>
-                </div>
-                <div className="review-block">
-                  <span className="review-label">Subdomain:</span>
-                  <span className="review-val font-mono">/campus/{orgSlug}/login</span>
-                </div>
-                <div className="review-block">
-                  <span className="review-label">Selected Tier:</span>
-                  <span className="review-val text-accent font-semibold">
-                    {selectedTier === 'enterprise' ? 'Campus Enterprise (Unlimited)' : 'Department License (500 Seats)'}
-                  </span>
-                </div>
-                <div className="review-block">
-                  <span className="review-label">Total Due Now:</span>
-                  <span className="review-val text-large font-bold">
-                    {billingCurrency === 'INR'
-                      ? selectedTier === 'enterprise'
-                        ? '₹49,999'
-                        : '₹14,999'
-                      : selectedTier === 'enterprise'
-                      ? '$699'
-                      : '$199'}
-                  </span>
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: '#8a8f98' }}>Administrator Login:</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ffffff' }}>
+                  {provisionedResult.adminEmail}
+                </span>
               </div>
-
-              {/* Simulated Payment Gateway Card */}
-              <div className="simulated-gateway-box">
-                <div className="gateway-tabs">
-                  <button
-                    type="button"
-                    className={`gw-tab ${paymentMethod === 'card' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('card')}
-                  >
-                    <CreditCard size={14} />
-                    <span>Credit / Debit Card (Stripe)</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`gw-tab ${paymentMethod === 'upi' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('upi')}
-                  >
-                    <span>UPI / NetBanking (Razorpay)</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`gw-tab ${paymentMethod === 'invoice' ? 'active' : ''}`}
-                    onClick={() => setPaymentMethod('invoice')}
-                  >
-                    <span>Institutional PO / Invoice</span>
-                  </button>
-                </div>
-
-                {paymentMethod === 'card' && (
-                  <div className="card-input-simulation">
-                    <div className="form-field-group">
-                      <label className="field-label">Card Number</label>
-                      <input
-                        type="text"
-                        className="field font-mono"
-                        value={cardNumber}
-                        onChange={(e) => setCardNumber(e.target.value)}
-                      />
-                    </div>
-                    <div className="form-grid-2col">
-                      <div className="form-field-group">
-                        <label className="field-label">Valid Thru</label>
-                        <input
-                          type="text"
-                          className="field font-mono"
-                          value={cardExpiry}
-                          onChange={(e) => setCardExpiry(e.target.value)}
-                        />
-                      </div>
-                      <div className="form-field-group">
-                        <label className="field-label">CVC / CVV</label>
-                        <input
-                          type="password"
-                          className="field font-mono"
-                          value={cardCvc}
-                          onChange={(e) => setCardCvc(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {paymentMethod === 'upi' && (
-                  <div className="upi-simulation">
-                    <p className="text-secondary text-sm">
-                      Razorpay Virtual Account & QR Code generated automatically upon activation. Instant bank clearance.
-                    </p>
-                  </div>
-                )}
-
-                {paymentMethod === 'invoice' && (
-                  <div className="invoice-simulation">
-                    <p className="text-secondary text-sm">
-                      30-day net payment terms for recognized universities. Purchase order invoice will be emailed to{' '}
-                      <strong>{adminEmail}</strong>.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="step-actions-row">
-                <button
-                  type="button"
-                  onClick={() => setCurrentStep(2)}
-                  className="btn btn-secondary back-btn"
-                  disabled={isProvisioning}
-                >
-                  <ArrowLeft size={14} />
-                  <span>Back</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleFinalProvision}
-                  className="btn btn-primary activate-btn"
-                  disabled={isProvisioning}
-                  id="btn-complete-provision"
-                >
-                  {isProvisioning ? (
-                    <span>Provisioning Tenant & Sandboxes...</span>
-                  ) : (
-                    <>
-                      <span>Complete Payment & Activate Campus</span>
-                      <ArrowRight size={14} />
-                    </>
-                  )}
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: '#8a8f98' }}>Kernel Status:</span>
+                <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
+                  cgroups v2 Isolated
+                </span>
               </div>
             </div>
-          )}
-        </div>
-      </main>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                type="button"
+                onClick={() => navigate(`/campus/${provisionedResult.orgSlug}/admin/dashboard`)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: 590,
+                  cursor: 'pointer',
+                }}
+              >
+                Enter Admin Portal Console →
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigate(`/campus/${provisionedResult.orgSlug}/login`)}
+                style={{
+                  background: '#161718',
+                  color: '#d0d6e0',
+                  border: '1px solid #23252a',
+                  padding: '12px 20px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                }}
+              >
+                Test Institutional Login
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
 export default CampusOnboardingPage;

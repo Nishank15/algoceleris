@@ -3,8 +3,8 @@
 **Role:** Systems Architect (`@architect`)  
 **Status:** PROPOSED & RATIFIED  
 **Target Platform:** AlgoCeleris / Cloud-Judge V2  
-**Current Milestone Focus:** **Milestone v4.1 — Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform**  
-**Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]** | **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture [COMPLETED]**  
+**Current Milestone Focus:** **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset (`docs/DESIGN.md`), Multi-Tenant Campus Portal & Hackathon Hub Rebuild (Phases 29–32) [COMPLETED]**  
+**Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]** | **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture [COMPLETED]** | **Milestone v4.1 — Isolated Multi-Tenant Campus Portal, 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform [COMPLETED]** | **Milestone v4.2 — Apple Design System Overhaul [SUPERSEDED BY v4.3]** | **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset & Multi-Tenant Campus Engine [COMPLETED]**  
 **Operational Invariant:** Read-only planning artifact; zero production code modified during blueprinting.
 
 ---
@@ -18,7 +18,9 @@ graph LR
     v2_2["✅ v2.2 Shipped<br/>PostgreSQL, RedisBloom,<br/>RBAC & Theme Inversion"] --> v2_3["✅ v2.3 Shipped<br/>Frontend Polish, Relative Telemetry,<br/>Typography & Playwright Audit"]
     v2_3 --> v3_0["✅ v3.0 Shipped<br/>AlgoCeleris Campus:<br/>Multi-Tenant Assessments, Proctoring & Viva"]
     v3_0 --> v4_0["✅ v4.0 Shipped<br/>Rust Core & Rspack Migration:<br/>Kernel Sandbox & Axum Re-architecture"]
-    v4_0 --> v4_1["🚀 v4.1 Active<br/>Campus LPilot Isolation &<br/>Full-Stack Hackathons"]
+    v4_0 --> v4_1["✅ v4.1 Shipped<br/>Campus Portal &<br/>Full-Stack Hackathons"]
+    v4_1 --> v4_2["⚠️ v4.2 Superseded<br/>Apple Design System Overhaul &<br/>Zero-Slop Parity"]
+    v4_2 --> v4_3["🚀 v4.3 Active<br/>Clean-Slate Linear Reset,<br/>Campus & Hackathon Rebuild"]
 ```
 
 | Milestone | Scope & Themes | Key Invariants | Target Phases |
@@ -26,7 +28,9 @@ graph LR
 | **v2.3** *(Completed)* | **Frontend Polish, Visual Stability & Automated UI Audit** | Verified relative WS origins, concentric border-radii, tabular-nums, responsive workspace tabs, and headless Playwright crawl across 7 routes and 2 viewports. | Phases 1–4 [COMPLETED] |
 | **v3.0** *(Completed)* | **AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal** | Enterprise multi-tenancy (`organizations`, `cohorts`), assignment & exam lifecycle engine, deadline gatekeepers, late penalty calculator, secret test suites, real-time proctoring telemetry mesh, and live Yjs CRDT multiplayer viva rooms. | Phases 5–15 [COMPLETED] |
 | **v4.0** *(Completed)* | **Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture** | Rsbuild/Rspack cutover, modular Rust workspace (`crates/`), cgroups v2 + seccomp-bpf sandboxing, Tree-sitter AST winnowing, Axum 0.8 + Tower + Tokio, `yrs` CRDT viva sync, and HAProxy Strangler-Fig cutover. | 18 Phases across Tracks A–G [COMPLETED] |
-| **v4.1** *(Active)* | **Isolated Multi-Tenant Campus Portal (LPilot Architecture), 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform** | Navbar decoupling (`Hackathons` in, `Campus` out), `/auth/login` institutional gateway card, `/campus` LPilot landing & 3-step onboarding wizard, co-branded split-screen login, strict 3-tier sidebar (`student`/`faculty`/`org_admin`), 6-stage progressive lab room with section-locked code, 4-tab student analytics, and full-stack Hackathons catalog + Command Center with Axum routes. | Phases 19–24 |
+| **v4.1** *(Completed)* | **Isolated Multi-Tenant Campus Portal, 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform** | Navbar decoupling (`Hackathons` in, `Campus` out), `/auth/login` institutional gateway card, `/campus` landing & 3-step onboarding wizard, co-branded split-screen login, strict 3-tier sidebar (`student`/`faculty`/`org_admin`), 6-stage progressive lab room with section-locked code, 4-tab student analytics, and full-stack Hackathons catalog + Command Center with Axum routes. | Phases 19–24 [COMPLETED] |
+| **v4.2** *(Superseded)* | **[SUPERSEDED BY v4.3] Apple Design System Overhaul (`docs/DESIGN-apple.md`), Zero-Slop Visual Engineering & Functional Portal Parity** | Superseded by v4.3 clean-slate reset back to canonical Refero Linear Midnight tokens. | Phases 25–28 [SUPERSEDED BY v4.3] |
+| **v4.3** *(Active)* | **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset (`docs/DESIGN.md`), Real Rust-Backed Multi-Tenant Campus Portal & Full-Stack Hackathon Platform (Phases 29–32)** | Purge legacy/buggy campus and hackathon files, eliminate `.apple-*` and `.lpilot-*` CSS bloat, restore Refero Linear Midnight tokens (`#08090a`, `#0f1011`, `#141517`, `#23252a`, `#e4f222`), repair `App.tsx`, build high-density Hackathon hub with real Rust backend persistence (`/hackathons`, `/hackathons/:slug`), rebuild Campus portal with 6-stage progressive lab room and real dynamic analytics aggregation, zero hardcoded analytics, zero "Demo" buttons, and execute end-to-end Playwright crawl with 0 errors. | Phases 29–32 |
 
 ---
 
@@ -1061,6 +1065,167 @@ crates/
 | **Phase 22** | 6-Stage Progressive Lab Room (`CampusLabRoomPage.tsx`) | 6 workflow stages active, section-locked Monaco editor functional, PDF upload simulation | `npm --prefix packages/frontend run build` |
 | **Phase 23** | 4-Tab Student Learning Analytics + Faculty/Admin Dashboards | Recharts rendering 4 tabs, faculty cohort overview and admin roster functional | `npm --prefix packages/frontend run build` |
 | **Phase 24** | Consumer Hackathons Catalog, 5-Tab Command Center, Rust Axum `/api/v1/hackathons/*` | Full hackathon lifecycle functional, Rust backend check passes | `cargo check --workspace && npm --prefix packages/frontend run build` |
+
+---
+
+# PART V: MILESTONE v4.2 ARCHITECTURAL BLUEPRINT (Phases 25–28) [SUPERSEDED BY v4.3]
+## "Apple Design System Overhaul (`docs/DESIGN-apple.md`), Zero-Slop Visual Engineering & Functional Portal Parity"
+
+> **NOTE:** Milestone v4.2 and its specification have been explicitly superseded by Milestone v4.3. All Apple design tokens, `.apple-*` styles, and associated experiments have been retired in favor of the canonical Refero Linear Midnight design system (`docs/DESIGN.md`).
+
+### 1. Architectural Mandate & Anti-Slop Discipline
+- **Design System Authority:** `docs/DESIGN-apple.md` is the sole design authority for the platform overhaul.
+- **Strict Color Tokens:** Action Blue (`#0066cc`), Focus Blue (`#0071e3`), Sky Link Blue (`#2997ff` on dark tiles), Ink (`#1d1d1f`), Canvas White (`#ffffff`), Canvas Parchment (`#f5f5f7`), Dark Tiles (`#272729`, `#2a2a2c`, `#252527`), and True Black (`#000000`).
+- **Forbidden Patterns:** No `#e4f222` (neon acid lime) in `/campus/*` or `/hackathons/*`; no multi-color decorative gradients; zero references to "LPilot" (rebranded to **AlgoCeleris**); zero dummy placeholder views (`CampusPlaceholderWorkspace.tsx` replaced with real functional views).
+- **Signature Apple Drop Shadow:** Exactly one drop shadow used across the entire platform: `rgba(0, 0, 0, 0.22) 3px 5px 30px` applied exclusively to product imagery resting on a surface.
+
+---
+
+### 2. Phase-by-Phase Roadmap (Phases 25–28)
+
+#### Phase 25: Routing Bug Fix, Apple Design Tokens & `/campus` Gallery Overhaul (+ Apple Store Configurator `/campus/register`)
+- **Navigation Fix (`App.tsx` & `AuthPage.tsx`)**: Implement `ScrollToTop` on location changes to eliminate blank-screen navigation glitches; restyle Institutional Gateway card on `AuthPage.tsx` with clean Apple tokens.
+- **Apple Product Gallery (`CampusLandingPage.tsx`)**: 44px `#000000` global nav, 52px sticky frosted sub-nav (`backdrop-filter: saturate(180%) blur(20px)`), alternating full-bleed tiles (Tile 1: `#000000` dark hero with 56px SF Pro Display headline, Action Blue pill CTAs, and interactive MacBook-style lab workspace frame with signature shadow; Tile 2: `#f5f5f7` parchment with 6-card `#ffffff` 18px-radius Bento grid; Tile 3: `#272729` dark university directory with pill search input; Apple multi-column footer).
+- **Apple Store Hardware Configurator (`CampusOnboardingPage.tsx`)**: Left sticky live portal preview + right scrollable 3-step configurator (`1. Configure institution`, `2. Select campus license` with 18px cards and `2px solid #0071e3` selection ring, `3. Payment & activation`) + bottom 64px frosted floating-sticky bar with `#0066cc` pill CTA.
+
+#### Phase 26: Apple-Grade Institutional Login, Sidebar Shell & Complete Admin/Faculty Dashboards (Zero Placeholders)
+- **Apple Institutional Login (`CampusLoginPage.tsx`)**: Segmented Apple pill role switcher (`Student` | `Faculty` | `Admin`), clean 17px inputs, `#0066cc` action pill, and refined demo credentials bar.
+- **Sidebar & Full Functionality (`CampusSidebarLayout.tsx`, `CampusAdminDashboard.tsx`, `CampusFacultyDashboard.tsx`)**: macOS / Apple Developer style sidebar (`#161617` / `#f5f5f7`), live faculty & student roster table, license & seat allocation view, cgroups v2 / seccomp-bpf telemetry audit, and Tree-sitter AST plagiarism matrix. Delete `CampusPlaceholderWorkspace.tsx`.
+
+#### Phase 27: Apple-Grade Student Dashboard, 6-Stage Lab Workspace, Read-Only Review & 4-Tab Analytics
+- **Student Dashboard & Lab Lists (`CampusStudentDashboard.tsx`, `CampusLabsListPage.tsx`)**: 18px radius cards, Action Blue pill buttons, Pearl capsule secondary actions, zero neon-yellow.
+- **6-Stage Lab Workspace (`CampusLabRoomPage.tsx`)**: Frosted 52px sub-nav, stage pills, Xcode-inspired section-locked code workspace, pseudocode scratchpad, flowchart PDF uploader, and completion checklist.
+- **Analytics & Review (`CampusAnalyticsPage.tsx`, `CampusLabReviewPage.tsx`)**: Apple palette charts (`#0066cc`, `#2997ff`, `#30d158`, `#ff9f0a`), 18px cards, and 40px SF Pro Display KPI typography.
+
+#### Phase 28: Apple Developer / WWDC-Style Hackathon Hub (`/hackathons` & `/hackathons/:slug`)
+- **Hackathons Catalog (`HackathonsPage.tsx`)**: WWDC-inspired dark hero tile (`#000000`), 56px SF Pro Display headline (`"DevsHouse '26. Build for the real world."`), tabular countdown, prize pool badge, and 18px-radius event cards.
+- **Command Center (`HackathonDetailPage.tsx`)**: Sticky 52px frosted sub-nav, 5 clean tabs (`Overview`, `Tracks`, `Team Lobby`, `Qualifier & Submit`, `Showcase`), 18px-radius track bounty cards, team code generator (`FLOW-26`), and rubric leaderboard.
+
+---
+
+### 3. Milestone v4.2 Verification & Acceptance Criteria Matrix
+
+| Phase | Deliverable | Target Acceptance Criteria | Verification Command |
+|---|---|---|---|
+| **Phase 25** | Navigation fix, Apple tokens, `/campus` gallery & `/campus/register` configurator | Zero blank screens, `#0066cc` pills, MacBook preview frame, 3-step configurator | `npm --prefix packages/frontend run build && graphify update .` |
+| **Phase 26** | Apple `/campus/:orgSlug/login`, macOS sidebar, full Admin & Faculty views | All placeholders removed, roster table & AST matrix live, role switching verified | `npm --prefix packages/frontend run build` |
+| **Phase 27** | Apple student dashboard, 6-stage lab room, review & Recharts palette | 18px radius cards, section-locked editor, Apple chart colors, zero neon slop | `npm --prefix packages/frontend run build` |
+| **Phase 28** | Apple WWDC-style hackathon catalog & 5-tab Command Center | 56px SF Pro typography, 52px frosted sub-nav, clean submission portal | `cargo check --workspace && npm --prefix packages/frontend run build` |
+
+---
+
+# PART VI: MILESTONE v4.3 ARCHITECTURAL BLUEPRINT (Phases 29–32)
+## "Unified Refero Linear Midnight Design System (`docs/DESIGN.md`), Real Rust-Backed Multi-Tenant Campus Portal & Full-Stack Hackathon Platform"
+
+**Role:** Principal Systems & UI Architect (`@architect`) & Implementation Lead (`@implementation-worker`)  
+**Single Source of Visual Truth:** `docs/DESIGN.md`, `docs/variables.css`, and `packages/frontend/src/theme.ts` (Refero Linear Midnight)  
+**Target Milestone:** **Milestone v4.3 (Phases 29–32)**  
+**Strict Production Invariant:** ZERO hardcoded analytics, ZERO `"Demo"` buttons, ZERO `"Autofill Demo"` pills, and ZERO static mock arrays in React components. Every metric, lab submission, MCQ score, AI mentor interaction, CLO attainment percentage, roster table, and hackathon project MUST be persisted in and computed by the Rust Axum backend (`crates/judge-gateway` + `crates/judge-db`).
+
+---
+
+### 1. Visual Invariants: Unified Refero Linear Midnight (`docs/DESIGN.md`)
+
+Every page across both the Consumer Platform and the Institutional Campus Portal MUST use the exact same design system defined in `docs/DESIGN.md` and `docs/variables.css`:
+
+1. **Surface Palette (Linear Midnight & Light Inversion):**
+   - `--bg-canvas` / `--color-void`: `#08090a` (Bedrock Void canvas)
+   - `--bg-surface` / `--color-carbon`: `#0f1011` (Obsidian / Carbon surface)
+   - `--bg-elevated` / `--color-obsidian`: `#141517` / `#161718` (Carbon Card / Modal Surface)
+   - `--bg-glass`: `rgba(15, 16, 17, 0.78)` with `backdrop-filter: blur(12px)`
+   - `--border-subtle` / `--color-graphite`: `#23252a` (1px solid Graphite Hairline)
+   - `--border-focus`: `#3e4149`
+2. **Typography & Numeric Discipline:**
+   - **UI & Display:** `'Inter', -apple-system, BlinkMacSystemFont, sans-serif` with tight tracking (`-0.02em` to `-0.03em` on headings).
+   - **Code, Metrics, Timers & IDs:** `'JetBrains Mono', monospace` with mandatory `font-variant-numeric: tabular-nums`.
+3. **Accent & Semantic Tokens (Single Unified Grammar):**
+   - `--accent-primary` / `--color-acid-lime`: `#e4f222` (Acid Lime — primary high-contrast CTA fill with `#08090a` dark ink text, matching the main landing page).
+   - `--status-success` / `--color-pulse-green`: `#22c55e` / `#27a644` (Emerald — Accepted / Evaluated / Online).
+   - `--status-warning`: `#f59e0b` (Amber — Medium / Grace Period / Pending).
+   - `--status-danger` / `--color-coral-red`: `#ef4444` / `#eb5757` (Coral Red — Hard / Violation / Cutoff).
+   - **ZERO** Apple blue (`#0066cc`), **ZERO** LPilot royal blue (`#1e3a8a`), and **ZERO** purple AI-slop gradients anywhere in the repository.
+4. **Geometry & Concentric Radii:**
+   - Outer Cards: `border-radius: 10px–12px` (`--radius-cards`), `1px solid var(--border-subtle)`, zero drop-shadow in resting state.
+   - Inner Inputs / Buttons / Pills: `border-radius: 6px` (`--radius-buttons`, `--radius-inputs`), compact `32px–36px` height, `13px` font-size, `500` weight, `150ms ease` transitions.
+
+---
+
+### 2. Clean-Slate Purge & 4-Phase Execution Roadmap (Phases 29–32)
+
+#### Phase 29: The Great Purge, `App.tsx` Repair, Consumer Polish & CSS Reset [COMPLETED]
+1. **Delete Legacy/Buggy Spec & Component Files:**
+   - Deleted `docs/MILESTONE_V4_1_SPEC.md`, `docs/MILESTONE_V4_2_SPEC.md`, and `docs/DESIGN-apple.md`.
+   - Deleted ALL existing files inside `packages/frontend/src/pages/campus/`.
+   - Deleted `packages/frontend/src/components/CampusSidebarLayout.tsx`.
+   - Deleted `packages/frontend/src/pages/HackathonsPage.tsx` and `HackathonDetailPage.tsx`.
+2. **Purge CSS Bloat in `packages/frontend/src/index.css`:**
+   - Stripped out all `.apple-*` and `.lpilot-*` CSS rules appended during v4.1/v4.2 (~4,900 lines purged).
+   - Fixed `/problems` table header collision (`STATUSTITLE`) via strict 5-column CSS Grid: `grid-template-columns: 64px minmax(260px, 3.5fr) minmax(200px, 2.5fr) 120px 110px; gap: 16px; align-items: center;`.
+3. **Fix `App.tsx` & Consumer Pages:**
+   - Repaired `packages/frontend/src/App.tsx` with clean `ErrorBoundary`, `ScrollToTop`, and minimal Linear placeholder views.
+   - Fixed `/contests` (`ContestsPage.tsx`) with full 1200px centered 2-column Linear layout.
+   - Restyled `/auth/login` (`AuthPage.tsx`) Institutional Gateway card in Refero Linear Midnight.
+
+---
+
+#### Phase 30: Production Linear-Native Hackathon Platform (`/hackathons`, `/hackathons/:slug` & Rust Backend Persistence) [COMPLETED]
+1. **Rust Axum Backend (`crates/judge-gateway/src/routes/hackathons.rs` & `state.rs`):**
+   - Persist hackathons, registrations, teams, teammate matchmaking listings, and project submissions in backend state (`AppState`):
+     * `GET /api/v1/hackathons` — Returns live/upcoming/past hackathons with dynamically computed participant & team counts.
+     * `GET /api/v1/hackathons/{slug}` — Returns full event spec, tracks, live teams, matchmaking profiles, and ranked project submissions.
+     * `POST /api/v1/hackathons/{slug}/register` — Registers the authenticated user for the hackathon.
+     * `POST /api/v1/hackathons/{slug}/teams` — Creates a team (generating a unique 6-char invite code) or joins an existing team by invite code, persisting membership in backend state.
+     * `POST /api/v1/hackathons/{slug}/submissions` — Persists a new project submission (`title`, `tagline`, `track`, `github_url`, `demo_url`, `architecture_url`) and computes rubric scores.
+     * `POST /api/v1/hackathons/{slug}/submissions/{id}/upvote` — Increments project upvote count in real time.
+2. **Frontend (`HackathonsPage.tsx` & `HackathonDetailPage.tsx`):**
+   - Fetch all data from `/api/v1/hackathons` and `/api/v1/hackathons/:slug` via `packages/frontend/src/services/api.ts`.
+   - Zero hardcoded mock arrays in React components, zero "Demo" labels.
+   - 5-Tab Command Center (`01 Overview & Schedule`, `02 Tracks & Bounties`, `03 Team Lobby & Matchmaking`, `04 Qualifier & Project Submission`, `05 Project Showcase & Standings`) mutates real backend state and re-fetches live data on team creation, project submission, and upvoting.
+
+---
+
+#### Phase 31: Production Multi-Tenant Campus Portal — Real Org Provisioning, Auth & Role-Gated Linear Shell (`/campus/*`) [COMPLETED]
+1. **Rust Axum Backend (`crates/judge-gateway/src/routes/campus.rs` & `auth.rs`):**
+   - Real institutional authentication and tenant provisioning endpoints:
+     * `GET /api/v1/campus/orgs` — Lists registered universities with real student/faculty seat counts.
+     * `POST /api/v1/campus/orgs/provision` — Creates a new `OrganizationRecord`, default `CohortRecord`, and `org_admin` user account, returning a real JWT access token.
+     * `POST /api/v1/campus/auth/login` — Authenticates institutional users against `:orgSlug` with role selection (`Student`, `Faculty`, `Administrator`).
+     * `POST /api/v1/campus/orgs/{org_slug}/roster` & `GET /api/v1/campus/orgs/{org_slug}/roster` — Real CRUD and batch import.
+2. **Frontend (`CampusLandingPage.tsx`, `CampusOnboardingPage.tsx`, `CampusLoginPage.tsx`, `CampusSidebarLayout.tsx`):**
+   - ZERO `"Demo"` or `"Autofill Demo"` buttons anywhere.
+   - `CampusLandingPage.tsx` (`/campus`) fetches the live institution directory from `GET /api/v1/campus/orgs`.
+   - `CampusOnboardingPage.tsx` (`/campus/register`) submits the 3-step provisioning form to `POST /api/v1/campus/orgs/provision`.
+   - `CampusLoginPage.tsx` (`/campus/:orgSlug/login`) authenticates against `POST /api/v1/campus/auth/login`.
+   - `CampusSidebarLayout.tsx` renders a strict role-gated Linear sidebar (`240px`), interactive Institution Switcher dropdown, clickable breadcrumbs, working Theme Toggle, and real session logout.
+
+---
+
+#### Phase 32: Real Telemetry-Driven Campus Analytics, 6-Stage Lab Execution Engine & E2E Playwright Verification
+1. **Rust Axum Backend — Real Lab Execution & Live Analytics Aggregation (`crates/judge-gateway/src/routes/campus.rs`):**
+   - Real backend endpoints that record every student action and dynamically compute all dashboard KPIs and 4-tab analytics:
+     * `GET /api/v1/campus/{org_slug}/labs` — Returns active and completed 6-stage labs and PAT tests with real submission status and scores.
+     * `GET /api/v1/campus/{org_slug}/labs/{lab_id}` — Returns the 6-stage lab specification.
+     * `POST /api/v1/campus/{org_slug}/labs/{lab_id}/activity` — Telemetry ingestion endpoint for active time, code runs, AI questions, and MCQs.
+     * `POST /api/v1/campus/{org_slug}/labs/{lab_id}/submit` — Evaluates and finalizes lab submission, updating student score and CLO attainment.
+     * `GET /api/v1/campus/{org_slug}/analytics/student` — Dynamic real analytics computed directly from backend state!
+     * `GET /api/v1/campus/{org_slug}/admin/audit` — Returns real kernel sandbox telemetry and Tree-sitter AST plagiarism metrics.
+2. **Frontend Workspaces (`CampusStudentDashboard.tsx`, `CampusLabsListPage.tsx`, `CampusLabRoomPage.tsx`, `CampusLabReviewPage.tsx`, `CampusAnalyticsPage.tsx`, `CampusFacultyDashboard.tsx`, `CampusAdminDashboard.tsx`):**
+   - 100% of KPI cards and Recharts datasets fetch from `GET /api/v1/campus/{org_slug}/analytics/student` and `GET /api/v1/campus/{org_slug}/labs`. Zero hardcoded numbers in JSX!
+   - `CampusLabRoomPage.tsx` dispatches real code runs, logs AI Mentor hints, grades MCQs, tracks real stage completion, and submits without dummy buttons.
+3. **End-to-End Playwright Verification (`scripts/verify-v43-linear-reset.mjs`):**
+   - Verifies dynamic incrementing of backend metrics upon code runs and submissions.
+   - Verifies zero `"Demo"` buttons exist anywhere in the DOM, zero console errors occur, and all transitions render instantaneously.
+
+---
+
+### 3. Milestone v4.3 Verification & Acceptance Criteria Matrix
+
+| Phase | Deliverable | Target Acceptance Criteria | Verification Command |
+|---|---|---|---|
+| **Phase 29** | Legacy file deletion, `.apple-*` & `.lpilot-*` CSS purge, `App.tsx` repair, `/problems` & `/contests` & `/auth/login` polish [COMPLETED] | Zero build errors, clean Refero Linear Midnight tokens, no CSS collisions | `npm --prefix packages/frontend run build && graphify update .` |
+| **Phase 30** | Production Linear-Native Hackathons Catalog & 5-Tab Command Center with Rust Backend Persistence [COMPLETED] | Dynamic participant counts, 6-char team code generation, project submission into showcase, real upvoting API, zero demo buttons, zero compilation errors | `cargo check --workspace && npm --prefix packages/frontend run build` |
+| **Phase 31** | Fresh Campus B2B Landing, 3-Step Onboarding Wizard, Institutional Login & 3-Tier Sidebar Shell [COMPLETED] | Real org provisioning, JWT auth, role-gated sidebar, interactive tenant switcher, zero demo autofill buttons | `cargo check --workspace && npm --prefix packages/frontend run build` |
+| **Phase 32** | 6-Stage Progressive Lab Room, Student/Faculty/Admin Workspaces, Real Dynamic Analytics Aggregation & E2E Playwright Suite [COMPLETED] | Real code execution telemetry, dynamic analytics endpoints, zero mock numbers, end-to-end Playwright crawl passes with 0 errors | `node scripts/verify-v43-linear-reset.mjs && cargo check --workspace` |
 
 ---
 *Authored by Systems Architect (`@architect`) — Cloud-Judge V2 Planning Artifact.*

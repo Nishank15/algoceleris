@@ -55,18 +55,29 @@ pub use assessment::{
     SubmitAssessmentResponse, UpdateAssessmentStatusRequest,
 };
 pub use campus::{
-    batch_ingest_members_handler, create_cohort_handler, create_organization_handler,
-    get_cohort_roster_handler, get_organization_handler, BatchIngestRequest, BatchIngestResponse,
-    BatchMemberItem, CohortResponse, CreateCohortRequest, CreateOrganizationRequest,
-    OrganizationResponse, RosterMemberResponse,
+    add_org_roster_member_handler, batch_ingest_members_handler, campus_login_handler,
+    create_campus_lab_handler, create_cohort_handler, create_organization_handler,
+    get_campus_admin_audit_handler, get_campus_lab_detail_handler, get_campus_labs_handler,
+    get_cohort_roster_handler, get_org_roster_by_slug_handler, get_organization_handler,
+    get_student_analytics_handler, list_organizations_handler, provision_organization_handler,
+    record_campus_lab_activity_handler, submit_campus_lab_handler, ActivityCategoryItem,
+    ActivityPoint, AddRosterMemberRequest, BatchIngestRequest, BatchIngestResponse,
+    BatchMemberItem, BloomDistributionItem, CampusAdminAuditResponse, CampusLoginRequest,
+    CampusLoginResponse, CampusOrgSummary, CampusProvisionRequest, CampusProvisionResponse,
+    CampusUserProfile, CloAttainmentItem, CodeRunTrendItem, CohortResponse, CreateCohortRequest,
+    CreateLabRequest, CreateOrganizationRequest, ErrorDistributionItem, LabActivityRequest,
+    LabActivityResponse, LabDetailResponse, LabSummaryResponse, LabsQuery, MarksProgressionItem,
+    OrganizationResponse, RecentSubmissionItem, RosterMemberResponse, RosterQuery,
+    StudentAnalyticsResponse, SubmitLabRequest, SubmitLabResponse, TimeSpentLabItem,
 };
 pub mod hackathons;
 pub use hackathons::{
     create_or_join_team_handler, get_hackathon_detail_handler, list_hackathons_handler,
-    provision_organization_handler, register_hackathon_handler, submit_hackathon_project_handler,
-    CampusProvisionRequest, CampusProvisionResponse, HackathonDetailResponse,
+    register_hackathon_handler, submit_hackathon_project_handler,
+    upvote_hackathon_submission_handler, HackathonDetailResponse, HackathonMatchmakerItem,
     HackathonMilestoneItem, HackathonRegisterRequest, HackathonRegisterResponse,
     HackathonShowcaseItem, HackathonSubmissionRequest, HackathonSubmissionResponse,
-    HackathonSummary, HackathonTeamRequest, HackathonTeamResponse, HackathonTrackItem,
+    HackathonSummary, HackathonTeamItem, HackathonTeamRequest, HackathonTeamResponse,
+    HackathonTrackItem, HackathonUpvoteResponse,
 };
 pub use health::{health_handler, HealthResponse};

@@ -217,23 +217,24 @@ export const ProblemsPage: React.FC = () => {
         <div className="catalog-table-wrapper" role="table" aria-label="Problems Catalog">
           {/* Header Row: 5 separate columns strictly matching row grid */}
           <div
-            className="catalog-header-row"
+            className="catalog-header-row problem-table-header"
             role="row"
             style={{
               display: 'grid',
-              gridTemplateColumns: '48px minmax(260px, 4fr) minmax(200px, 2.5fr) 110px 100px',
+              gridTemplateColumns: '64px minmax(260px, 3.5fr) minmax(200px, 2.5fr) 120px 110px',
+              gap: '16px',
               width: '100%',
               alignItems: 'center',
             }}
           >
-            {/* Header Column 1: Status (own 48px column) */}
+            {/* Header Column 1: Status (own 64px column) */}
             <div
               className="catalog-col col-status"
               role="columnheader"
               style={{
-                width: '48px',
-                minWidth: '48px',
-                maxWidth: '48px',
+                width: '64px',
+                minWidth: '64px',
+                maxWidth: '64px',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -273,7 +274,7 @@ export const ProblemsPage: React.FC = () => {
             <div
               className="catalog-col col-acceptance"
               role="columnheader"
-              style={{ width: '110px' }}
+              style={{ width: '120px' }}
               onClick={() => handleSort('acceptance')}
             >
               <div className="th-sort-wrapper">
@@ -286,7 +287,7 @@ export const ProblemsPage: React.FC = () => {
             <div
               className="catalog-col col-difficulty"
               role="columnheader"
-              style={{ width: '100px', display: 'flex', justifyContent: 'center' }}
+              style={{ width: '110px', display: 'flex', justifyContent: 'center' }}
               onClick={() => handleSort('difficulty')}
             >
               <div className="th-sort-wrapper">
@@ -322,24 +323,25 @@ export const ProblemsPage: React.FC = () => {
                 return (
                   <div
                     key={problem.id}
-                    className="catalog-row"
+                    className="catalog-row problem-table-row"
                     role="row"
                     style={{
                       display: 'grid',
-                      gridTemplateColumns: '48px minmax(260px, 4fr) minmax(200px, 2.5fr) 110px 100px',
+                      gridTemplateColumns: '64px minmax(260px, 3.5fr) minmax(200px, 2.5fr) 120px 110px',
+                      gap: '16px',
                       width: '100%',
                       alignItems: 'center',
                     }}
                     onClick={() => navigate(`/problems/${problem.id}`)}
                   >
-                    {/* Row Column 1: Status (own 48px column) */}
+                    {/* Row Column 1: Status (own 64px column) */}
                     <div
                       className="catalog-col col-status"
                       role="cell"
                       style={{
-                        width: '48px',
-                        minWidth: '48px',
-                        maxWidth: '48px',
+                        width: '64px',
+                        minWidth: '64px',
+                        maxWidth: '64px',
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
@@ -406,22 +408,22 @@ export const ProblemsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Row Column 4: Acceptance (110px tabular-nums) */}
+                    {/* Row Column 4: Acceptance (120px tabular-nums) */}
                     <div
                       className="catalog-col col-acceptance"
                       role="cell"
-                      style={{ width: '110px' }}
+                      style={{ width: '120px' }}
                     >
                       <span className="acceptance-rate-mono">
                         {problem.acceptanceRate.toFixed(1)}%
                       </span>
                     </div>
 
-                    {/* Row Column 5: Difficulty (100px, centered/right aligned) */}
+                    {/* Row Column 5: Difficulty (110px, centered) */}
                     <div
                       className="catalog-col col-difficulty"
                       role="cell"
-                      style={{ width: '100px', display: 'flex', justifyContent: 'center' }}
+                      style={{ width: '110px', display: 'flex', justifyContent: 'center' }}
                     >
                       <span className={`catalog-diff-badge diff-${problem.difficulty.toLowerCase()}`}>
                         {problem.difficulty}

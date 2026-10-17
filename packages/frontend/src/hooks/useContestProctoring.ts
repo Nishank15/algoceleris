@@ -62,7 +62,7 @@ export function useContestProctoring({
           onStrikeLimitReached(result.strike_count);
         }
       } catch (err) {
-        console.warn('Failed to report proctoring event to backend:', err);
+        console.debug('Failed to report proctoring event to backend:', err);
         // Fallback local strike counter
         setStrikeCount((prev) => {
           const next = prev + 1;
@@ -85,7 +85,7 @@ export function useContestProctoring({
       setIsFullscreen(true);
       setIsWarningModalOpen(false);
     } catch (err) {
-      console.warn('Fullscreen request failed:', err);
+      console.debug('Fullscreen request failed:', err);
     }
   }, []);
 
@@ -96,7 +96,7 @@ export function useContestProctoring({
       }
       setIsFullscreen(false);
     } catch (err) {
-      console.warn('Exit fullscreen failed:', err);
+      console.debug('Exit fullscreen failed:', err);
     }
   }, []);
 

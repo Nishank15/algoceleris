@@ -32,9 +32,13 @@ export function setAccessToken(token: string | null): void {
   inMemoryAccessToken = token;
 }
 
+const SESSION_FLAG = 'algoceleris_has_session';
 let refreshPromise: Promise<string | null> | null = null;
 
 async function doSilentRefresh(): Promise<string | null> {
+  if (typeof window !== 'undefined' && localStorage.getItem(SESSION_FLAG) !== 'true') {
+    return null;
+  }
   if (refreshPromise) return refreshPromise;
   refreshPromise = (async () => {
     try {
@@ -49,9 +53,13 @@ async function doSilentRefresh(): Promise<string | null> {
           setAccessToken(data.access_token);
           return data.access_token;
         }
+      } else {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(SESSION_FLAG);
+        }
       }
-    } catch (err) {
-      console.warn('Silent refresh network error:', err);
+    } catch {
+      // Silent error handling for initial guest visits
     } finally {
       refreshPromise = null;
     }
@@ -225,7 +233,7 @@ export function subscribeSubmissionStream(
     };
 
     socket.onerror = (err) => {
-      console.warn('Submission WebSocket error:', err);
+      console.debug('Submission WebSocket error:', err);
       if (onError) onError(err);
     };
 
@@ -357,6 +365,22 @@ export async function requestAIDebug(
   }
 }
 
+export async function aiDebug(req: any): Promise<any> {
+  const payload: any = {
+    user_id: req.user_id || 'campus-student',
+    language: req.language || 'cpp',
+    source_code: req.code || req.source_code || '// code',
+    problem_title: req.problem_title || req.problem_slug || 'Algorithm Problem',
+    problem_description: req.problem_description || 'Analyze solution code and optimize.',
+    error_diagnostics: req.error_message || null,
+  };
+  const res: any = await requestAIDebug(payload);
+  return {
+    ...res,
+    suggestions: res.suggestions || (res.hint ? [res.hint] : [res.fix_explanation || 'Check syntax and logic.']),
+  };
+}
+
 export async function listContests(): Promise<ContestDetails[]> {
   const response = await fetchWithFallback('/api/v1/contests');
   return response.json();
@@ -400,7 +424,7 @@ export function subscribeContestLeaderboard(
     };
 
     socket.onerror = (err) => {
-      console.warn('Contest Leaderboard WebSocket error:', err);
+      console.debug('Contest Leaderboard WebSocket error:', err);
       if (onError) onError(err);
     };
 
@@ -500,14 +524,30 @@ export async function authSignup(payload: {
   return data;
 }
 
-export async function authRefresh(): Promise<AuthTokenResponse> {
-  const response = await fetchWithFallback('/api/v1/auth/refresh', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  const data: AuthTokenResponse = await response.json();
-  setAccessToken(data.access_token);
-  return data;
+export async function authRefresh(): Promise<AuthTokenResponse | null> {
+  if (typeof window !== 'undefined' && localStorage.getItem(SESSION_FLAG) !== 'true') {
+    return null;
+  }
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/api/v1/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(SESSION_FLAG);
+      }
+      setAccessToken(null);
+      return null;
+    }
+    const data: AuthTokenResponse = await response.json();
+    setAccessToken(data.access_token);
+    return data;
+  } catch {
+    setAccessToken(null);
+    return null;
+  }
 }
 
 export async function authLogout(): Promise<{ status: string; message: string }> {
@@ -624,4 +664,814 @@ export async function migrateGuestSubmissions(submissions: GuestSubmissionItem[]
   }
   return response.json();
 }
+
+// ---------------------------------------------------------------------------
+// Hackathons API
+// ---------------------------------------------------------------------------
+
+export interface HackathonSummary {
+  id: string;
+  slug: string;
+  title: string;
+  tagline: string;
+  host: string;
+  mode: string;
+  location: string;
+  prize_pool: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  registered_count: number;
+  tracks: string[];
+  is_flagship: boolean;
+}
+
+export interface HackathonTrackItem {
+  id: string;
+  title: string;
+  description: string;
+  prize: string;
+  problem_statement: string;
+  sponsor?: string;
+}
+
+export interface HackathonMilestoneItem {
+  phase: number;
+  title: string;
+  date: string;
+  status: string;
+  description: string;
+}
+
+export interface HackathonShowcaseItem {
+  id: string;
+  team_name: string;
+  project_title: string;
+  tagline: string;
+  track: string;
+  github_url: string;
+  live_url?: string;
+  demo_video_url?: string;
+  architecture_deck_url?: string;
+  upvotes: number;
+  rubric_score: number;
+  tech_stack: string[];
+}
+
+export interface HackathonTeamItem {
+  id: string;
+  team_name: string;
+  invite_code: string;
+  members: string[];
+  track?: string;
+}
+
+export interface HackathonMatchmakerItem {
+  id: string;
+  name: string;
+  role: string;
+  skills: string[];
+  looking_for: string;
+  contact: string;
+}
+
+export interface HackathonDetailResponse {
+  id: string;
+  slug: string;
+  title: string;
+  tagline: string;
+  host: string;
+  mode: string;
+  location: string;
+  prize_pool: string;
+  status: string;
+  start_date: string;
+  end_date: string;
+  registered_count: number;
+  tracks: HackathonTrackItem[];
+  milestones: HackathonMilestoneItem[];
+  rules: string[];
+  eligibility: string;
+  teams: HackathonTeamItem[];
+  matchmaking: HackathonMatchmakerItem[];
+  showcase: HackathonShowcaseItem[];
+}
+
+export interface HackathonRegisterRequest {
+  participant_name: string;
+  email: string;
+  university_or_org?: string;
+  track_preference?: string;
+}
+
+export interface HackathonRegisterResponse {
+  registration_id: string;
+  hackathon_slug: string;
+  status: string;
+  registered_count: number;
+  message: string;
+}
+
+export interface HackathonTeamRequest {
+  action: 'create' | 'join';
+  team_name?: string;
+  invite_code?: string;
+  member_name: string;
+  member_email: string;
+  track?: string;
+}
+
+export interface HackathonTeamResponse {
+  team_id: string;
+  team_name: string;
+  invite_code: string;
+  members_count: number;
+  members: string[];
+  message: string;
+}
+
+export interface HackathonSubmissionRequest {
+  project_title: string;
+  tagline: string;
+  track: string;
+  team_name: string;
+  github_url: string;
+  live_url?: string;
+  demo_video_url?: string;
+  architecture_deck_url?: string;
+}
+
+export interface HackathonSubmissionResponse {
+  submission_id: string;
+  project_id: string;
+  project_title: string;
+  status: string;
+  submitted_at: string;
+  rubric_score: number;
+  message: string;
+}
+
+export interface HackathonUpvoteResponse {
+  id: string;
+  upvotes: number;
+  message: string;
+}
+
+export async function listHackathons(): Promise<HackathonSummary[]> {
+  const response = await fetchWithFallback('/api/v1/hackathons');
+  if (!response.ok) {
+    throw new Error('Failed to load hackathons');
+  }
+  return response.json();
+}
+
+export async function getHackathonDetail(slug: string): Promise<HackathonDetailResponse> {
+  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load hackathon '${slug}'`);
+  }
+  return response.json();
+}
+
+export async function registerHackathon(
+  slug: string,
+  data: HackathonRegisterRequest
+): Promise<HackathonRegisterResponse> {
+  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to register: ${err}`);
+  }
+  return response.json();
+}
+
+export async function createOrJoinHackathonTeam(
+  slug: string,
+  data: HackathonTeamRequest
+): Promise<HackathonTeamResponse> {
+  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/teams`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Team operation failed: ${err}`);
+  }
+  return response.json();
+}
+
+export async function submitHackathonProject(
+  slug: string,
+  data: HackathonSubmissionRequest
+): Promise<HackathonSubmissionResponse> {
+  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/submissions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Project submission failed: ${err}`);
+  }
+  return response.json();
+}
+
+export async function upvoteHackathonSubmission(
+  slug: string,
+  id: string
+): Promise<HackathonUpvoteResponse> {
+  const response = await fetchWithFallback(
+    `/api/v1/hackathons/${encodeURIComponent(slug)}/submissions/${encodeURIComponent(id)}/upvote`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Upvote failed: ${err}`);
+  }
+  return response.json();
+}
+
+// --- Phase 31: Multi-Tenant Campus & Institutional Auth ---
+
+export interface CampusOrgSummary {
+  id: string;
+  name: string;
+  slug: string;
+  domain_whitelist: string[];
+  tier: string;
+  student_count: number;
+  faculty_count: number;
+  created_at: string;
+}
+
+export interface CampusProvisionRequest {
+  org_name: string;
+  org_slug: string;
+  admin_name: string;
+  admin_email: string;
+  admin_password?: string;
+  tier: string;
+  allowed_domains: string[];
+  expected_students?: number;
+  payment_ref?: string;
+}
+
+export interface CampusUserProfile {
+  user_id: string;
+  username: string;
+  email: string;
+  role: string;
+  org_id: string;
+  org_slug: string;
+  org_name: string;
+  reg_number: string;
+  cohort_id?: string | null;
+  cohort_name?: string | null;
+}
+
+export interface CampusProvisionResponse {
+  org_id: string;
+  org_name: string;
+  org_slug: string;
+  portal_url: string;
+  tier: string;
+  admin_email: string;
+  status: string;
+  message: string;
+  provisioned_at: string;
+  access_token: string;
+  user: CampusUserProfile;
+}
+
+export interface CampusLoginRequest {
+  org_slug: string;
+  identifier: string;
+  password: string;
+  role: 'student' | 'faculty' | 'org_admin';
+}
+
+export interface CampusLoginResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  user: CampusUserProfile;
+}
+
+export interface RosterMemberResponse {
+  id: string;
+  user_id: string;
+  username: string;
+  name?: string;
+  email: string;
+  role: string;
+  status: string;
+  cohort_id?: string | null;
+  reg_number?: string;
+  department?: string;
+  created_at: string;
+}
+
+export interface AddRosterMemberRequest {
+  email: string;
+  username?: string;
+  name?: string;
+  role?: string;
+  cohort_id?: string;
+  reg_number?: string;
+  department?: string;
+}
+
+export async function listCampusOrgs(): Promise<CampusOrgSummary[]> {
+  const response = await fetchWithFallback('/api/v1/campus/orgs');
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to list organizations: ${err}`);
+  }
+  return response.json();
+}
+
+export async function provisionCampusOrg(
+  data: CampusProvisionRequest
+): Promise<CampusProvisionResponse> {
+  const response = await fetchWithFallback('/api/v1/campus/orgs/provision', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Provisioning failed: ${err}`);
+  }
+  return response.json();
+}
+
+export async function campusLogin(
+  data: CampusLoginRequest
+): Promise<CampusLoginResponse> {
+  const response = await fetchWithFallback('/api/v1/campus/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Institutional login failed: ${err}`);
+  }
+  return response.json();
+}
+
+export async function getCampusOrgRoster(
+  orgSlug: string,
+  role?: string,
+  cohortId?: string
+): Promise<RosterMemberResponse[]> {
+  const params = new URLSearchParams();
+  if (role) params.set('role', role);
+  if (cohortId) params.set('cohort_id', cohortId);
+  const q = params.toString() ? `?${params.toString()}` : '';
+  const response = await fetchWithFallback(
+    `/api/v1/campus/orgs/${encodeURIComponent(orgSlug)}/roster${q}`
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to fetch roster: ${err}`);
+  }
+  return response.json();
+}
+
+export async function addCampusOrgRosterMember(
+  orgSlug: string,
+  data: AddRosterMemberRequest
+): Promise<RosterMemberResponse> {
+  const response = await fetchWithFallback(
+    `/api/v1/campus/orgs/${encodeURIComponent(orgSlug)}/roster`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to add roster member: ${err}`);
+  }
+  return response.json();
+}
+
+// =========================================================================
+// PHASE 32: 6-STAGE LAB EXECUTION ENGINE & REAL ANALYTICS CONTRACTS
+// =========================================================================
+
+export interface WorkedDemoSpec {
+  title: string;
+  description: string;
+  code: string;
+  language: string;
+  expected_output: string;
+}
+
+export interface McqQuestionSpec {
+  id: number;
+  question: string;
+  options: string[];
+  correct_option: number;
+  explanation: string;
+}
+
+export interface PracticeProblemSpec {
+  id: number;
+  title: string;
+  category: 'debugging' | 'problem_solving';
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  marks: number;
+  description: string;
+  sample_input: string;
+  sample_output: string;
+  locked_header: string;
+  initial_code: string;
+  locked_footer: string;
+}
+
+export interface ChallengingProblemSpec {
+  id: number;
+  title: string;
+  difficulty: string;
+  marks: number;
+  description: string;
+  sample_input: string;
+  sample_output: string;
+  starter_code: string;
+  test_cases_count: number;
+  language?: string;
+}
+
+export interface LabRecord {
+  id: string;
+  org_slug: string;
+  course_code: string;
+  course_name: string;
+  title: string;
+  code: string;
+  deadline: string;
+  duration_minutes: number;
+  max_marks: number;
+  status: string;
+  clo: string;
+  description: string;
+  lecture_notes: string;
+  worked_demo: WorkedDemoSpec;
+  led_quiz: McqQuestionSpec[];
+  practice_problems: PracticeProblemSpec[];
+  challenging_problem: ChallengingProblemSpec;
+}
+
+export interface StudentLabProgress {
+  lab_id: string;
+  student_id: string;
+  student_email: string;
+  student_reg_no: string;
+  status: string;
+  current_stage: 'content' | 'demo' | 'led' | 'practice' | 'challenging' | 'submit';
+  active_minutes: number;
+  code_runs_count: number;
+  ai_questions_count: number;
+  mcqs_answered: Record<number, number>;
+  practice_code: Record<number, string>;
+  practice_solved: Record<number, boolean>;
+  challenging_code: string;
+  challenging_solved: boolean;
+  obtained_marks: number;
+  max_marks: number;
+  submitted_at?: string | null;
+  evaluated_at?: string | null;
+  feedback?: string | null;
+  evaluation_feedback?: string | null;
+}
+
+export interface LabSummaryResponse {
+  id: string;
+  org_slug: string;
+  course_code: string;
+  course_name: string;
+  module_code?: string;
+  title: string;
+  code: string;
+  deadline: string;
+  duration_minutes: number;
+  max_marks: number;
+  max_score?: number;
+  status: string;
+  clo: string;
+  description: string;
+  student_status: 'Evaluated' | 'In Progress' | 'Not Started';
+  student_marks?: number | null;
+}
+
+export interface CreateLabRequest {
+  title: string;
+  course_code?: string;
+  course_name?: string;
+  module_code?: string;
+  code?: string;
+  deadline?: string;
+  due_date?: string;
+  duration_minutes?: number;
+  max_marks?: number;
+  max_score?: number;
+  clo?: string;
+  description: string;
+  lecture_notes?: string;
+  worked_demo?: WorkedDemoSpec;
+  led_quiz?: McqQuestionSpec[];
+  practice_problems?: PracticeProblemSpec[];
+  challenging_problem?: ChallengingProblemSpec;
+}
+
+export interface LabDetailResponse {
+  lab: LabRecord;
+  student_progress: StudentLabProgress;
+}
+
+export interface LabActivityRequest {
+  student_id?: string;
+  student_email?: string;
+  event_type: 'RUN_CODE' | 'ASK_AI' | 'LED_SUBMIT' | 'TIME_SPENT' | 'STAGE_CHANGE';
+  stage: string;
+  active_seconds?: number;
+  details?: Record<string, any>;
+}
+
+export interface LabActivityResponse {
+  status: string;
+  code_runs_count: number;
+  ai_questions_count: number;
+  active_minutes: number;
+  current_stage: string;
+}
+
+export interface SubmitLabRequest {
+  student_id?: string;
+  student_email?: string;
+  practice_code?: Record<number, string>;
+  challenging_code?: string;
+  mcq_answers?: Record<number, number>;
+  self_rating?: number;
+  feedback?: string;
+}
+
+export interface SubmitLabResponse {
+  status: string;
+  lab_id: string;
+  obtained_marks: number;
+  max_marks: number;
+  clo: string;
+  feedback: string;
+  evaluated_at: string;
+}
+
+export interface ActivityPoint {
+  date: string;
+  runs: number;
+  ai: number;
+}
+
+export interface ActivityCategoryItem {
+  category: string;
+  count: number;
+  fill: string;
+}
+
+export interface TimeSpentLabItem {
+  lab: string;
+  hours: number;
+}
+
+export interface MarksProgressionItem {
+  submission: string;
+  marks: number;
+}
+
+export interface CodeRunTrendItem {
+  day: string;
+  runs: number;
+  errors: number;
+}
+
+export interface ErrorDistributionItem {
+  error_type: string;
+  count: number;
+}
+
+export interface AiHintCategoryItem {
+  category: string;
+  count: number;
+}
+
+export interface AiSessionTrendItem {
+  session: string;
+  queries: number;
+}
+
+export interface CloAttainmentItem {
+  clo: string;
+  name: string;
+  target: number;
+  attained: number;
+  status: string;
+}
+
+export interface BloomDistributionItem {
+  level: string;
+  percentage: number;
+}
+
+export interface RecentSubmissionItem {
+  lab_id: string;
+  lab_title: string;
+  marks: number;
+  max_marks: number;
+  date: string;
+  status: string;
+}
+
+export interface StudentAnalyticsResponse {
+  student_id: string;
+  student_email: string;
+  student_name: string;
+  reg_number: string;
+  course_code: string;
+  course_name: string;
+  department?: string;
+  active_labs_count: number;
+  completed_labs_count: number;
+  average_marks: number;
+  clo_attainment_percent: number;
+  total_active_minutes: number;
+  code_runs_count: number;
+  submissions_count: number;
+  ai_questions_count: number;
+  avg_ai_latency_ms: number;
+  activity_over_time: ActivityPoint[];
+  activity_breakdown: ActivityCategoryItem[];
+  time_spent_per_lab: TimeSpentLabItem[];
+  marks_progression: MarksProgressionItem[];
+  code_runs_over_time: CodeRunTrendItem[];
+  error_distribution: ErrorDistributionItem[];
+  hints_by_category: AiHintCategoryItem[];
+  ai_queries_trend: AiSessionTrendItem[];
+  cognitive_index: number;
+  clo_attainment: CloAttainmentItem[];
+  bloom_taxonomy_distribution: BloomDistributionItem[];
+  recent_submissions: RecentSubmissionItem[];
+}
+
+export interface SecurityAuditItem {
+  id: string;
+  timestamp: string;
+  event: string;
+  container_id: string;
+  action: string;
+  severity: string;
+}
+
+export interface PlagiarismReportItem {
+  lab_id: string;
+  student_a: string;
+  student_b: string;
+  ast_similarity_score: number;
+  winnowing_fingerprints_matched: number;
+  status: string;
+}
+
+export interface CampusAdminAuditResponse {
+  org_slug: string;
+  cgroups_status: string;
+  seccomp_status: string;
+  active_sandboxes_count: number;
+  sandbox_executions_last_24h: number;
+  security_audit_events: SecurityAuditItem[];
+  plagiarism_scans: PlagiarismReportItem[];
+}
+
+export async function getCampusLabs(
+  orgSlug: string,
+  studentEmail?: string
+): Promise<LabSummaryResponse[]> {
+  const q = studentEmail ? `?student_email=${encodeURIComponent(studentEmail)}` : '';
+  const response = await fetchWithFallback(`/api/v1/campus/${encodeURIComponent(orgSlug)}/labs${q}`);
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to fetch campus labs: ${err}`);
+  }
+  return response.json();
+}
+
+export async function createCampusLab(
+  orgSlug: string,
+  data: CreateLabRequest
+): Promise<LabRecord> {
+  const response = await fetchWithFallback(`/api/v1/campus/${encodeURIComponent(orgSlug)}/labs`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to create lab: ${err}`);
+  }
+  return response.json();
+}
+
+export async function getCampusLabDetail(
+  orgSlug: string,
+  labId: string,
+  studentEmail?: string
+): Promise<LabDetailResponse> {
+  const q = studentEmail ? `?student_email=${encodeURIComponent(studentEmail)}` : '';
+  const response = await fetchWithFallback(
+    `/api/v1/campus/${encodeURIComponent(orgSlug)}/labs/${encodeURIComponent(labId)}${q}`
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to fetch lab detail: ${err}`);
+  }
+  return response.json();
+}
+
+export async function recordCampusLabActivity(
+  orgSlug: string,
+  labId: string,
+  data: LabActivityRequest
+): Promise<LabActivityResponse> {
+  const response = await fetchWithFallback(
+    `/api/v1/campus/${encodeURIComponent(orgSlug)}/labs/${encodeURIComponent(labId)}/activity`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to record lab activity: ${err}`);
+  }
+  return response.json();
+}
+
+export async function submitCampusLab(
+  orgSlug: string,
+  labId: string,
+  data: SubmitLabRequest
+): Promise<SubmitLabResponse> {
+  const response = await fetchWithFallback(
+    `/api/v1/campus/${encodeURIComponent(orgSlug)}/labs/${encodeURIComponent(labId)}/submit`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to submit lab: ${err}`);
+  }
+  return response.json();
+}
+
+export async function getStudentCampusAnalytics(
+  orgSlug: string,
+  studentEmail?: string
+): Promise<StudentAnalyticsResponse> {
+  const q = studentEmail ? `?student_email=${encodeURIComponent(studentEmail)}` : '';
+  const response = await fetchWithFallback(
+    `/api/v1/campus/${encodeURIComponent(orgSlug)}/analytics/student${q}`
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to fetch student campus analytics: ${err}`);
+  }
+  return response.json();
+}
+
+export async function getCampusAdminAudit(
+  orgSlug: string
+): Promise<CampusAdminAuditResponse> {
+  const response = await fetchWithFallback(
+    `/api/v1/campus/${encodeURIComponent(orgSlug)}/admin/audit`
+  );
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`Failed to fetch campus admin audit: ${err}`);
+  }
+  return response.json();
+}
+
 

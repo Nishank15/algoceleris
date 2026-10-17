@@ -13,12 +13,10 @@ export const LinearHeaderNav: React.FC = () => {
   const [latency, setLatency] = useState<number | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Standalone Institutional Campus Platform uses dedicated CampusSidebarLayout, hide consumer header
-  if (location.pathname.startsWith('/campus') || location.pathname.startsWith('/portal')) {
-    return null;
-  }
-
   useEffect(() => {
+    if (location.pathname.startsWith('/campus') || location.pathname.startsWith('/portal')) {
+      return;
+    }
     let cancelled = false;
     const ping = async () => {
       const t0 = performance.now();
@@ -39,7 +37,12 @@ export const LinearHeaderNav: React.FC = () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, []);
+  }, [location.pathname]);
+
+  // Standalone Institutional Campus Platform uses dedicated CampusSidebarLayout, hide consumer header
+  if (location.pathname.startsWith('/campus') || location.pathname.startsWith('/portal')) {
+    return null;
+  }
 
   const linkClass = ({ isActive }: { isActive: boolean }) => `nav-link${isActive ? ' active' : ''}`;
 

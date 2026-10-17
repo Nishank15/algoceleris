@@ -1,4 +1,5 @@
 import { fetchWithFallback, buildWebSocketUrl, getAccessToken } from './api';
+import { getCampusSession } from './campusSession';
 
 export type AssessmentMode = 'EXAM' | 'HOMEWORK' | 'VIVA';
 export type AssessmentStatus = 'DRAFT' | 'SCHEDULED' | 'ACTIVE' | 'GRACE_PERIOD' | 'CLOSED';
@@ -276,7 +277,7 @@ export async function createAssessment(
       return await res.json();
     }
   } catch (err) {
-    console.warn('Campus API createAssessment network error, caching locally:', err);
+    console.debug('Campus API createAssessment network error, caching locally:', err);
   }
 
   // Graceful local emulation when offline/demo
@@ -321,7 +322,7 @@ export async function getAssessment(assessmentId: string): Promise<AssessmentRes
       return await res.json();
     }
   } catch (err) {
-    console.warn('Campus API getAssessment fallback:', err);
+    console.debug('Campus API getAssessment fallback:', err);
   }
 
   if (found) return found;
@@ -350,7 +351,7 @@ export async function listAssessments(cohortId?: string): Promise<AssessmentResp
       }
     }
   } catch (err) {
-    console.warn('Campus API listAssessments fallback:', err);
+    console.debug('Campus API listAssessments fallback:', err);
   }
 
   if (cohortId) {
@@ -422,7 +423,7 @@ export async function submitAssessment(
       return await res.json();
     }
   } catch (err) {
-    console.warn('submitAssessment network error, generating local response:', err);
+    console.debug('submitAssessment network error, generating local response:', err);
   }
 
   // Local fallback for offline/demo simulation
@@ -452,8 +453,8 @@ export function connectProctoringWebSocket(
   onMessage?: (data: any) => void,
   onError?: (err: any) => void
 ): WebSocket {
-  const token = getAccessToken() || '';
-  const wsUrl = buildWebSocketUrl(`/ws/campus/assessments/${assessmentId}/proctor?token=${token}`);
+  const token = getAccessToken() || getCampusSession()?.token || 'campus-demo-token';
+  const wsUrl = buildWebSocketUrl(`/ws/campus/assessments/${encodeURIComponent(assessmentId)}/proctor?token=${encodeURIComponent(token)}`);
   const socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {
@@ -700,7 +701,7 @@ export async function provisionVivaRoom(
       return await res.json();
     }
   } catch (err) {
-    console.warn('provisionVivaRoom network error, generating local room:', err);
+    console.debug('provisionVivaRoom network error, generating local room:', err);
   }
 
   // Local fallback
@@ -735,7 +736,7 @@ export async function fetchProctorEvents(
       if (Array.isArray(data)) return data;
     }
   } catch (err) {
-    console.warn('fetchProctorEvents fallback:', err);
+    console.debug('fetchProctorEvents fallback:', err);
   }
 
   return MOCK_INCIDENT_FEED;
@@ -759,7 +760,7 @@ export async function fetchProctoredStudents(
       if (Array.isArray(data) && data.length > 0) return data;
     }
   } catch (err) {
-    console.warn('fetchProctoredStudents fallback:', err);
+    console.debug('fetchProctoredStudents fallback:', err);
   }
 
   return MOCK_PROCTORED_STUDENTS;
@@ -812,7 +813,7 @@ export async function fetchVivaRoom(roomCode: string): Promise<VivaRoomResponse>
       return await res.json();
     }
   } catch (err) {
-    console.warn(`fetchVivaRoom fallback for ${roomCode}:`, err);
+    console.debug(`fetchVivaRoom fallback for ${roomCode}:`, err);
   }
 
   return {
@@ -840,7 +841,7 @@ export async function updateVivaRubric(
       return await res.json();
     }
   } catch (err) {
-    console.warn(`updateVivaRubric fallback for ${roomCode}:`, err);
+    console.debug(`updateVivaRubric fallback for ${roomCode}:`, err);
   }
 
   return {
@@ -861,8 +862,8 @@ export function connectVivaWebSocket(
   onMessage?: (data: any) => void,
   onError?: (err: any) => void
 ): WebSocket {
-  const token = getAccessToken() || '';
-  const wsUrl = buildWebSocketUrl(`/ws/campus/viva/${roomCode}?token=${token}`);
+  const token = getAccessToken() || getCampusSession()?.token || 'campus-demo-token';
+  const wsUrl = buildWebSocketUrl(`/ws/campus/viva/${encodeURIComponent(roomCode)}?token=${encodeURIComponent(token)}`);
   const socket = new WebSocket(wsUrl);
 
   socket.onopen = () => {

@@ -43,7 +43,7 @@ export const ContestLeaderboardModal: React.FC<ContestLeaderboardModalProps> = (
       setLeaderboard(leaderboardData);
       setLastUpdated(new Date());
     } catch (err) {
-      console.warn('Failed to load contest or leaderboard data:', err);
+      console.debug('Failed to load contest or leaderboard data:', err);
     } finally {
       setIsLoading(false);
     }

@@ -23,7 +23,7 @@ export function recordGuestSubmission(item: GuestSubmissionItem): void {
   try {
     localStorage.setItem(GUEST_SUBMISSIONS_STORAGE_KEY, JSON.stringify(updated));
   } catch (err) {
-    console.warn('Failed to store guest submission in localStorage:', err);
+    console.debug('Failed to store guest submission in localStorage:', err);
   }
 }
 

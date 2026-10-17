@@ -1,786 +1,1539 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import {
-  Rocket,
-  Trophy,
-  Calendar,
-  Users,
-  Code2,
-  Sparkles,
-  ArrowRight,
   ArrowLeft,
+  Calendar,
   CheckCircle2,
-  Clock,
-  ExternalLink,
-  Shield,
-  FileText,
-  Upload,
-  ThumbsUp,
-  Share2,
   Copy,
-  AlertCircle,
-  Cpu,
-  Layers,
-  Terminal,
-  ChevronRight,
+  ExternalLink,
+  Github,
+  Globe,
+  MapPin,
+  Send,
+  Share2,
+  Star,
+  ThumbsUp,
+  UserPlus,
+  Users,
 } from 'lucide-react';
-
-type HackathonTab = 'overview' | 'tracks' | 'team' | 'submission' | 'showcase';
-
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  skills: string[];
-  github: string;
-}
-
-interface ShowcaseProject {
-  id: string;
-  title: string;
-  tagline: string;
-  teamName: string;
-  track: string;
-  githubUrl: string;
-  liveUrl?: string;
-  upvotes: number;
-  rubric: {
-    technicalDepth: number;
-    architecture: number;
-    innovation: number;
-    uxPolish: number;
-    total: number;
-  };
-  techStack: string[];
-}
+import {
+  getHackathonDetail,
+  registerHackathon,
+  createOrJoinHackathonTeam,
+  submitHackathonProject,
+  upvoteHackathonSubmission,
+  HackathonDetailResponse,
+  HackathonTeamItem,
+} from '../services/api';
 
 export const HackathonDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<HackathonTab>('overview');
+  const [data, setData] = useState<HackathonDetailResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'tracks' | 'lobby' | 'qualifier' | 'showcase'>('overview');
 
-  // Countdown timer (Build sprint)
-  const [timeLeft, setTimeLeft] = useState<{ hours: number; minutes: number; seconds: number }>({
-    hours: 47,
-    minutes: 58,
-    seconds: 32,
-  });
+  // Registration modal / form state
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [regName, setRegName] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regOrg, setRegOrg] = useState('');
+  const [regTrack, setRegTrack] = useState('');
+  const [regSuccessMsg, setRegSuccessMsg] = useState<string | null>(null);
+  const [regSubmitting, setRegSubmitting] = useState(false);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: 59, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return prev;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // Team creation state
+  const [createTeamName, setCreateTeamName] = useState('');
+  const [createLeadName, setCreateLeadName] = useState('');
+  const [createLeadEmail, setCreateLeadEmail] = useState('');
+  const [createTrack, setCreateTrack] = useState('');
+  const [createTeamLoading, setCreateTeamLoading] = useState(false);
+  const [teamSuccessMsg, setTeamSuccessMsg] = useState<string | null>(null);
 
-  // Team state
-  const [myTeamName, setMyTeamName] = useState<string>('FlowControl');
-  const [inviteCode, setInviteCode] = useState<string>('FLOW-26');
-  const [joinCodeInput, setJoinCodeInput] = useState<string>('');
-  const [copiedCode, setCopiedCode] = useState<boolean>(false);
-  const [matchmakingFilter, setMatchmakingFilter] = useState<string>('All');
+  // Join team state
+  const [joinCode, setJoinCode] = useState('');
+  const [joinMemberName, setJoinMemberName] = useState('');
+  const [joinMemberEmail, setJoinMemberEmail] = useState('');
+  const [joinTeamLoading, setJoinTeamLoading] = useState(false);
+  const [joinErrorMsg, setJoinErrorMsg] = useState<string | null>(null);
+
+  // Active user's team state (persisted in local state)
+  const [activeTeam, setActiveTeam] = useState<HackathonTeamItem | null>(null);
 
   // Submission form state
-  const [projectTitle, setProjectTitle] = useState<string>('Nirnay Engine');
-  const [tagline, setTagline] = useState<string>(
-    'Ultra-low-latency distributed emergency dispatch and route negotiation engine'
-  );
-  const [selectedTrack, setSelectedTrack] = useState<string>('Rust & Systems');
-  const [githubUrl, setGithubUrl] = useState<string>('https://github.com/algo-celeris/nirnay-engine');
-  const [liveUrl, setLiveUrl] = useState<string>('https://nirnay.algoceleris.dev');
-  const [demoVideoUrl, setDemoVideoUrl] = useState<string>('https://youtu.be/demo-nirnay-2026');
-  const [deckFileName, setDeckFileName] = useState<string>('nirnay-architecture-deck.pdf');
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(true);
+  const [subTitle, setSubTitle] = useState('');
+  const [subTagline, setSubTagline] = useState('');
+  const [subTrack, setSubTrack] = useState('');
+  const [subTeamName, setSubTeamName] = useState('');
+  const [subGithub, setSubGithub] = useState('');
+  const [subLive, setSubLive] = useState('');
+  const [subDeck, setSubDeck] = useState('');
+  const [subLoading, setSubLoading] = useState(false);
+  const [subSuccessMsg, setSubSuccessMsg] = useState<string | null>(null);
 
-  // Showcase projects & Upvotes state
-  const [showcaseProjects, setShowcaseProjects] = useState<ShowcaseProject[]>([
-    {
-      id: 'proj-1',
-      title: 'Nirnay Engine',
-      tagline: 'High-throughput emergency dispatch engine written in async Rust with sub-10ms routing',
-      teamName: 'FlowControl',
-      track: 'Rust & Systems',
-      githubUrl: 'https://github.com/algo-celeris/nirnay-engine',
-      liveUrl: 'https://nirnay.algoceleris.dev',
-      upvotes: 184,
-      rubric: {
-        technicalDepth: 24,
-        architecture: 25,
-        innovation: 24,
-        uxPolish: 23,
-        total: 96,
-      },
-      techStack: ['Rust', 'Axum', 'PostgreSQL', 'WebSockets', 'Docker'],
-    },
-    {
-      id: 'proj-2',
-      title: 'SocraticJudge',
-      tagline: 'Compiler diagnostic copilot that guides learners using AST-level hints without giving solutions',
-      teamName: 'ByteWizards',
-      track: 'Agentic AI',
-      githubUrl: 'https://github.com/algo-celeris/socratic-judge',
-      liveUrl: 'https://socratic.algoceleris.dev',
-      upvotes: 142,
-      rubric: {
-        technicalDepth: 23,
-        architecture: 23,
-        innovation: 25,
-        uxPolish: 22,
-        total: 93,
-      },
-      techStack: ['TypeScript', 'Gemini 2.5', 'Tree-sitter', 'React'],
-    },
-    {
-      id: 'proj-3',
-      title: 'LOBster Quant',
-      tagline: 'Lock-free microsecond Limit Order Book with FIFO matching and price-level depth caches',
-      teamName: 'QuantCore',
-      track: 'FinTech & Quant',
-      githubUrl: 'https://github.com/algo-celeris/lobster-quant',
-      liveUrl: 'https://lobster.algoceleris.dev',
-      upvotes: 118,
-      rubric: {
-        technicalDepth: 25,
-        architecture: 24,
-        innovation: 22,
-        uxPolish: 21,
-        total: 92,
-      },
-      techStack: ['C++20', 'SIMD', 'gRPC', 'Chronicle'],
-    },
-  ]);
+  // Upvoted project IDs in session
+  const [upvotedIds, setUpvotedIds] = useState<Set<string>>(new Set());
+  const [upvotingId, setUpvotingId] = useState<string | null>(null);
 
-  const handleUpvote = (id: string) => {
-    setShowcaseProjects((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, upvotes: p.upvotes + 1 } : p))
+  // Countdown timer
+  const [countdown, setCountdown] = useState({ days: 1, hours: 8, minutes: 25, seconds: 14 });
+
+  const loadHackathon = async () => {
+    if (!slug) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getHackathonDetail(slug);
+      setData(res);
+      // Auto-select first track for submission if not set
+      if (res.tracks.length > 0 && !subTrack) {
+        setSubTrack(res.tracks[0].title);
+        setCreateTrack(res.tracks[0].title);
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to fetch hackathon details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHackathon();
+  }, [slug]);
+
+  useEffect(() => {
+    const targetDate = new Date('2026-10-18T09:00:00+05:30').getTime();
+    const interval = setInterval(() => {
+      const distance = targetDate - new Date().getTime();
+      if (distance <= 0) {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      } else {
+        setCountdown({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slug || !regName || !regEmail) return;
+    try {
+      setRegSubmitting(true);
+      setRegSuccessMsg(null);
+      const res = await registerHackathon(slug, {
+        participant_name: regName,
+        email: regEmail,
+        university_or_org: regOrg || undefined,
+        track_preference: regTrack || undefined,
+      });
+      setRegSuccessMsg(res.message);
+      setIsRegistering(false);
+      // Re-fetch hackathon to update live participant count
+      await loadHackathon();
+    } catch (err: any) {
+      alert(err?.message || 'Registration failed');
+    } finally {
+      setRegSubmitting(false);
+    }
+  };
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slug || !createTeamName || !createLeadName || !createLeadEmail) return;
+    try {
+      setCreateTeamLoading(true);
+      setTeamSuccessMsg(null);
+      const res = await createOrJoinHackathonTeam(slug, {
+        action: 'create',
+        team_name: createTeamName,
+        member_name: createLeadName,
+        member_email: createLeadEmail,
+        track: createTrack || undefined,
+      });
+      setTeamSuccessMsg(res.message);
+      const newTeamItem: HackathonTeamItem = {
+        id: res.team_id,
+        team_name: res.team_name,
+        invite_code: res.invite_code,
+        members: res.members,
+        track: createTrack,
+      };
+      setActiveTeam(newTeamItem);
+      setSubTeamName(res.team_name);
+      // Reset form
+      setCreateTeamName('');
+      await loadHackathon();
+    } catch (err: any) {
+      alert(err?.message || 'Failed to create team');
+    } finally {
+      setCreateTeamLoading(false);
+    }
+  };
+
+  const handleJoinTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slug || !joinCode || !joinMemberName || !joinMemberEmail) return;
+    try {
+      setJoinTeamLoading(true);
+      setJoinErrorMsg(null);
+      const res = await createOrJoinHackathonTeam(slug, {
+        action: 'join',
+        invite_code: joinCode,
+        member_name: joinMemberName,
+        member_email: joinMemberEmail,
+      });
+      const joinedTeamItem: HackathonTeamItem = {
+        id: res.team_id,
+        team_name: res.team_name,
+        invite_code: res.invite_code,
+        members: res.members,
+      };
+      setActiveTeam(joinedTeamItem);
+      setSubTeamName(res.team_name);
+      setJoinCode('');
+      setTeamSuccessMsg(`Successfully joined '${res.team_name}'!`);
+      await loadHackathon();
+    } catch (err: any) {
+      setJoinErrorMsg(err?.message || 'Failed to join team. Check code and retry.');
+    } finally {
+      setJoinTeamLoading(false);
+    }
+  };
+
+  const handleSubmitProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!slug || !subTitle || !subTagline || !subTrack || !subGithub) return;
+    try {
+      setSubLoading(true);
+      setSubSuccessMsg(null);
+      const team = subTeamName || (activeTeam ? activeTeam.team_name : 'Solo Candidate');
+      const res = await submitHackathonProject(slug, {
+        project_title: subTitle,
+        tagline: subTagline,
+        track: subTrack,
+        team_name: team,
+        github_url: subGithub,
+        live_url: subLive || undefined,
+        architecture_deck_url: subDeck || undefined,
+      });
+      setSubSuccessMsg(`Project submitted successfully! Assigned Rubric Score: ${res.rubric_score}`);
+      // Re-fetch data and switch to showcase
+      await loadHackathon();
+      setActiveTab('showcase');
+      // Reset form
+      setSubTitle('');
+      setSubTagline('');
+      setSubGithub('');
+      setSubLive('');
+      setSubDeck('');
+    } catch (err: any) {
+      alert(err?.message || 'Submission failed');
+    } finally {
+      setSubLoading(false);
+    }
+  };
+
+  const handleUpvote = async (projectId: string) => {
+    if (!slug || upvotedIds.has(projectId) || upvotingId) return;
+    try {
+      setUpvotingId(projectId);
+      const res = await upvoteHackathonSubmission(slug, projectId);
+      setUpvotedIds((prev) => new Set([...prev, projectId]));
+      // Update local showcase count immediately
+      if (data) {
+        setData({
+          ...data,
+          showcase: data.showcase.map((p) =>
+            p.id === projectId ? { ...p, upvotes: res.upvotes } : p
+          ),
+        });
+      }
+    } catch (err: any) {
+      alert(err?.message || 'Failed to record upvote');
+    } finally {
+      setUpvotingId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#08090a', color: '#f8fafc', padding: '60px 20px', textAlign: 'center' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem', color: '#8a8f98' }}>
+          <div style={{ width: '18px', height: '18px', border: '2px solid #3e4149', borderTopColor: '#e4f222', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          Loading Hackathon Command Center...
+        </div>
+      </div>
     );
-  };
+  }
 
-  const handleCopyInvite = () => {
-    navigator.clipboard.writeText(inviteCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
-
-  const soloMatchmakingDirectory: TeamMember[] = [
-    {
-      id: 'solo-1',
-      name: 'Rohan Verma',
-      role: 'Backend / Rust',
-      skills: ['Rust', 'Tokio', 'eBPF', 'Linux'],
-      github: 'https://github.com/rohan-v',
-    },
-    {
-      id: 'solo-2',
-      name: 'Ananya Sharma',
-      role: 'ML / AI',
-      skills: ['PyTorch', 'LangChain', 'vLLM', 'Python'],
-      github: 'https://github.com/ananya-s',
-    },
-    {
-      id: 'solo-3',
-      name: 'Vikram Sundaram',
-      role: 'Frontend / Three.js',
-      skills: ['TypeScript', 'React', 'Three.js', 'WebGL'],
-      github: 'https://github.com/vikram-s',
-    },
-  ];
+  if (error || !data) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#08090a', color: '#f8fafc', padding: '60px 20px', maxWidth: '800px', margin: '0 auto' }}>
+        <Link to="/hackathons" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#8a8f98', textDecoration: 'none', marginBottom: '20px', fontSize: '0.85rem' }}>
+          <ArrowLeft size={14} /> Back to Catalog
+        </Link>
+        <div style={{ padding: '24px', background: '#141517', border: '1px solid #23252a', borderRadius: '12px' }}>
+          <h2 style={{ margin: '0 0 10px 0', color: '#ef4444' }}>Hackathon Not Found</h2>
+          <p style={{ color: '#8a8f98', fontSize: '0.9rem' }}>{error || 'Unable to retrieve event details.'}</p>
+          <button
+            onClick={loadHackathon}
+            style={{ marginTop: '12px', padding: '8px 16px', background: '#23252a', border: '1px solid #3e4149', borderRadius: '6px', color: '#fff', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="hackathon-command-center">
-      {/* 1. TOP COMMAND CENTER HERO HEADER */}
-      <header className="command-center-hero">
-        <div className="hero-top-navigation">
-          <Link to="/hackathons" className="btn btn-secondary back-hackathons-btn">
-            <ArrowLeft size={14} />
-            <span>Back to Hackathons</span>
-          </Link>
+    <div className="hackathon-command-center" style={{ background: '#08090a', minHeight: '100vh', color: '#f8fafc', padding: '24px 20px' }}>
+      <div style={{ maxWidth: '1240px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        
+        {/* Navigation Breadcrumb & Back Link */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#8a8f98' }}>
+            <Link to="/hackathons" style={{ color: '#8a8f98', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <ArrowLeft size={13} />
+              <span>Hackathons</span>
+            </Link>
+            <span>/</span>
+            <span style={{ color: '#ffffff', fontWeight: 600 }}>{data.title}</span>
+          </div>
 
-          <div className="command-live-indicator">
-            <span className="live-pulse-dot" />
-            <span className="font-mono">48-HOUR BUILD SPRINT ACTIVE</span>
+          {/* Active Team Pill or Register CTA */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {activeTeam ? (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#141517',
+                  border: '1px solid #23252a',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                }}
+              >
+                <Users size={13} style={{ color: '#22c55e' }} />
+                <span style={{ color: '#8a8f98' }}>Team:</span>
+                <span style={{ color: '#ffffff', fontWeight: 600 }}>{activeTeam.team_name}</span>
+                <span style={{ color: '#383b3f' }}>|</span>
+                <span style={{ color: '#8a8f98' }}>Code:</span>
+                <code style={{ color: '#e4f222', fontFamily: "'JetBrains Mono', monospace", fontWeight: 700 }}>
+                  {activeTeam.invite_code}
+                </code>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsRegistering(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  padding: '6px 14px',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                <UserPlus size={13} />
+                <span>Register for Sprint</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="hero-main-content">
-          <div className="hero-text-block">
-            <div className="hero-flagship-tag">
-              <Rocket size={14} color="#60a5fa" />
-              <span>National Flagship Hackathon</span>
+        {/* Command Center Hero */}
+        <div
+          style={{
+            background: '#141517',
+            border: '1px solid #23252a',
+            borderRadius: '12px',
+            padding: '28px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.45)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '20px' }}>
+            <div style={{ flex: 1, minWidth: '320px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                <span
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '3px 10px',
+                    borderRadius: '9999px',
+                    background: 'rgba(34, 197, 94, 0.12)',
+                    border: '1px solid rgba(34, 197, 94, 0.35)',
+                    color: '#22c55e',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
+                  {data.status} COMMAND CENTER
+                </span>
+                <span style={{ fontSize: '0.74rem', color: '#8a8f98' }}>{data.host}</span>
+              </div>
+              <h1 style={{ fontSize: '2.1rem', fontWeight: 800, margin: '0 0 6px 0', letterSpacing: '-0.025em', color: '#ffffff' }}>
+                {data.title}
+              </h1>
+              <p style={{ margin: 0, fontSize: '0.94rem', color: '#8a8f98', lineHeight: 1.55, maxWidth: '750px' }}>
+                {data.tagline}
+              </p>
             </div>
-            <h1 className="hero-title">DevsHouse '26 — Command Center</h1>
-            <p className="hero-desc">
-              National Systems, Distributed Infrastructure & AI Buildathon hosted by VIT Chennai Developers Club.
-            </p>
 
-            <div className="hero-meta-badges">
-              <span className="meta-badge">
-                <Calendar size={13} />
-                <span>Oct 18 – 20, 2026</span>
-              </span>
-              <span className="meta-badge">
-                <Trophy size={13} color="#fbbf24" />
-                <span className="text-amber">Prize Pool: ₹5,00,000 ($6,000)</span>
-              </span>
-              <span className="meta-badge">
-                <Users size={13} />
-                <span>1,420 Registered · 380 Teams</span>
-              </span>
+            {/* Tabular Countdown Timer Box */}
+            <div
+              style={{
+                background: '#08090a',
+                border: '1px solid #23252a',
+                borderRadius: '8px',
+                padding: '14px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '6px',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              <div style={{ fontSize: '0.68rem', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Build Sprint Starts In
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+                <span>{String(countdown.days).padStart(2, '0')}d</span>
+                <span style={{ color: '#383b3f' }}>:</span>
+                <span>{String(countdown.hours).padStart(2, '0')}h</span>
+                <span style={{ color: '#383b3f' }}>:</span>
+                <span>{String(countdown.minutes).padStart(2, '0')}m</span>
+                <span style={{ color: '#383b3f' }}>:</span>
+                <span style={{ color: '#e4f222' }}>{String(countdown.seconds).padStart(2, '0')}s</span>
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#e4f222', fontWeight: 700 }}>
+                {data.prize_pool} Total Bounties
+              </div>
             </div>
           </div>
 
-          <div className="hero-countdown-card">
-            <span className="countdown-label">Time Remaining in Build Sprint</span>
-            <div className="countdown-digits-row font-mono">
-              <div className="digit-box">
-                <span className="digit-val">{String(timeLeft.hours).padStart(2, '0')}</span>
-                <span className="digit-unit">HRS</span>
-              </div>
-              <span className="digit-sep">:</span>
-              <div className="digit-box">
-                <span className="digit-val">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                <span className="digit-unit">MIN</span>
-              </div>
-              <span className="digit-sep">:</span>
-              <div className="digit-box">
-                <span className="digit-val">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                <span className="digit-unit">SEC</span>
-              </div>
+          {/* Quick Metrics Strip */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '24px',
+              flexWrap: 'wrap',
+              borderTop: '1px solid #23252a',
+              paddingTop: '16px',
+              fontSize: '0.8rem',
+              color: '#8a8f98',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Users size={14} style={{ color: '#8a8f98' }} />
+              <span>Participants:</span>
+              <span style={{ color: '#ffffff', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+                {data.registered_count.toLocaleString()} Registered
+              </span>
             </div>
-
-            <div className="team-status-chip font-mono">
-              <span>My Team: <strong>{myTeamName}</strong> (3/4 Members)</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Calendar size={14} style={{ color: '#8a8f98' }} />
+              <span>Timeline:</span>
+              <span style={{ color: '#e5e5e6' }}>{data.start_date} – {data.end_date}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <MapPin size={14} style={{ color: '#8a8f98' }} />
+              <span>Venue:</span>
+              <span style={{ color: '#e5e5e6' }}>{data.location}</span>
             </div>
           </div>
         </div>
-      </header>
 
-      {/* 2. 5-TAB COMMAND CENTER NAVIGATION */}
-      <nav className="command-tabs-bar" role="tablist">
-        <button
-          type="button"
-          className={`cmd-tab ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
+        {/* 5 Linear Tabs */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            borderBottom: '1px solid #23252a',
+            paddingBottom: '2px',
+            overflowX: 'auto',
+          }}
         >
-          <Layers size={14} />
-          <span>1. Overview & Timeline</span>
-        </button>
+          {[
+            { id: 'overview', label: '01 Overview & Schedule' },
+            { id: 'tracks', label: '02 Tracks & Bounties' },
+            { id: 'lobby', label: '03 Team Lobby' },
+            { id: 'qualifier', label: '04 Qualifier & Submission' },
+            { id: 'showcase', label: '05 Project Showcase & Standings' },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              style={{
+                padding: '10px 16px',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: activeTab === tab.id ? '2px solid #e4f222' : '2px solid transparent',
+                color: activeTab === tab.id ? '#ffffff' : '#8a8f98',
+                fontSize: '0.82rem',
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-        <button
-          type="button"
-          className={`cmd-tab ${activeTab === 'tracks' ? 'active' : ''}`}
-          onClick={() => setActiveTab('tracks')}
-        >
-          <Trophy size={14} />
-          <span>2. Tracks & Bounties</span>
-        </button>
+        {/* Success toast banners */}
+        {regSuccessMsg && (
+          <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '6px', color: '#86efac', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} />
+            <span>{regSuccessMsg}</span>
+          </div>
+        )}
+        {teamSuccessMsg && (
+          <div style={{ padding: '12px 16px', background: 'rgba(228, 242, 34, 0.12)', border: '1px solid rgba(228, 242, 34, 0.3)', borderRadius: '6px', color: '#fef08a', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} />
+            <span>{teamSuccessMsg}</span>
+          </div>
+        )}
 
-        <button
-          type="button"
-          className={`cmd-tab ${activeTab === 'team' ? 'active' : ''}`}
-          onClick={() => setActiveTab('team')}
-        >
-          <Users size={14} />
-          <span>3. Team Lobby ({inviteCode})</span>
-        </button>
-
-        <button
-          type="button"
-          className={`cmd-tab ${activeTab === 'submission' ? 'active' : ''}`}
-          onClick={() => setActiveTab('submission')}
-        >
-          <Upload size={14} />
-          <span>4. Qualifier & Project Submission</span>
-        </button>
-
-        <button
-          type="button"
-          className={`cmd-tab ${activeTab === 'showcase' ? 'active' : ''}`}
-          onClick={() => setActiveTab('showcase')}
-        >
-          <Sparkles size={14} />
-          <span>5. Project Showcase & Leaderboard</span>
-        </button>
-      </nav>
-
-      {/* 3. TAB WORKSPACE PANELS */}
-      <div className="command-content-body">
-        {/* ==============================================================
-            TAB 1: OVERVIEW & 5-PHASE MILESTONE STEPPER
-            ============================================================== */}
+        {/* TAB 1: OVERVIEW & SCHEDULE */}
         {activeTab === 'overview' && (
-          <div className="overview-tab-panel">
-            {/* 5-Phase Milestone Stepper */}
-            <div className="milestone-stepper-card">
-              <h3 className="section-title">5-Phase Hackathon Execution Stepper</h3>
-              <div className="stepper-track">
-                {[
-                  { phase: 1, title: 'Registration & Team Formation', date: 'Oct 01 – Oct 15', status: 'completed' },
-                  { phase: 2, title: 'Algorithmic Coding Qualifier', date: 'Oct 16 · 06:00 PM', status: 'completed' },
-                  { phase: 3, title: 'Idea & Architecture Abstract', date: 'Oct 17, 2026', status: 'completed' },
-                  { phase: 4, title: '48-Hour Live Build Sprint', date: 'Oct 18 – 20, 2026', status: 'active' },
-                  { phase: 5, title: 'Live Demo & Rubric Judging', date: 'Oct 20 · 02:00 PM', status: 'upcoming' },
-                ].map((st) => (
-                  <div key={st.phase} className={`stepper-node ${st.status}`}>
-                    <div className="node-circle font-mono">
-                      {st.status === 'completed' ? '✓' : st.phase}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            {/* 5-Stage Pipeline Tracker */}
+            <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '1.05rem', fontWeight: 700, color: '#ffffff' }}>
+                5-Stage Sprint Lifecycle
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                {data.milestones.map((m) => {
+                  const isCompleted = m.status === 'COMPLETED';
+                  const isActive = m.status === 'ACTIVE';
+
+                  return (
+                    <div
+                      key={m.phase}
+                      style={{
+                        background: '#0f1011',
+                        border: `1px solid ${isActive ? '#e4f222' : isCompleted ? '#22c55e' : '#23252a'}`,
+                        borderRadius: '8px',
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8a8f98', fontFamily: "'JetBrains Mono', monospace" }}>
+                          PHASE 0{m.phase}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            background: isActive ? 'rgba(228, 242, 34, 0.15)' : isCompleted ? 'rgba(34, 197, 94, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                            color: isActive ? '#e4f222' : isCompleted ? '#22c55e' : '#8a8f98',
+                          }}
+                        >
+                          {m.status}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
+                        {m.title}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#e4f222', fontFamily: "'JetBrains Mono', monospace" }}>
+                        {m.date}
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.76rem', color: '#8a8f98', lineHeight: 1.45 }}>
+                        {m.description}
+                      </p>
                     </div>
-                    <div className="node-content">
-                      <span className="node-title">{st.title}</span>
-                      <span className="node-date font-mono">{st.date}</span>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Rules & Eligibility Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
+              <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                  Sprint Evaluation Rules
+                </h4>
+                <ul style={{ margin: 0, padding: '0 0 0 18px', display: 'flex', flexDirection: 'column', gap: '8px', color: '#8a8f98', fontSize: '0.82rem', lineHeight: 1.5 }}>
+                  {data.rules.map((rule, idx) => (
+                    <li key={idx}>{rule}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.95rem', fontWeight: 700, color: '#ffffff' }}>
+                  Eligibility & Requirements
+                </h4>
+                <p style={{ margin: 0, color: '#8a8f98', fontSize: '0.82rem', lineHeight: 1.55 }}>
+                  {data.eligibility}
+                </p>
+                <div style={{ marginTop: '16px', display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => setActiveTab('lobby')}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#e4f222',
+                      color: '#08090a',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Form or Join a Team →
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('tracks')}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      color: '#ffffff',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Inspect Problem Statements
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: TRACKS & BOUNTIES */}
+        {activeTab === 'tracks' && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+            {data.tracks.map((track) => (
+              <div
+                key={track.id}
+                style={{
+                  background: '#141517',
+                  border: '1px solid #23252a',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '14px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      padding: '3px 8px',
+                      borderRadius: '4px',
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      color: '#8a8f98',
+                    }}
+                  >
+                    {track.id.toUpperCase()}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 700,
+                      color: '#e4f222',
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    {track.prize}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 style={{ margin: '0 0 6px 0', fontSize: '1.15rem', fontWeight: 700, color: '#ffffff' }}>
+                    {track.title}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98', lineHeight: 1.5 }}>
+                    {track.description}
+                  </p>
+                </div>
+
+                <div style={{ background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', padding: '12px', fontSize: '0.78rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+                  <div style={{ fontWeight: 600, color: '#e5e5e6', marginBottom: '4px' }}>Problem Statement:</div>
+                  {track.problem_statement}
+                </div>
+
+                {track.sponsor && (
+                  <div style={{ fontSize: '0.74rem', color: '#8a8f98', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>Presented by:</span>
+                    <span style={{ color: '#ffffff', fontWeight: 600 }}>{track.sponsor}</span>
+                  </div>
+                )}
+
+                <div style={{ marginTop: 'auto', paddingTop: '10px' }}>
+                  <button
+                    onClick={() => {
+                      setSubTrack(track.title);
+                      setActiveTab('qualifier');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px',
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      borderRadius: '6px',
+                      color: '#ffffff',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <span>Submit Project in this Track</span>
+                    <ExternalLink size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* TAB 3: TEAM LOBBY */}
+        {activeTab === 'lobby' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            {/* Create & Join Team Controls */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px' }}>
+              
+              {/* Form A: Create Team */}
+              <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <UserPlus size={16} style={{ color: '#e4f222' }} />
+                  <span>Create a New Team</span>
+                </h3>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.78rem', color: '#8a8f98' }}>
+                  Register a squad and generate a unique 6-character code to share with teammates.
+                </p>
+
+                <form onSubmit={handleCreateTeam} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Team Name</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. FlowControl, ByteWizards"
+                      value={createTeamName}
+                      onChange={(e) => setCreateTeamName(e.target.value)}
+                      style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Lead Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Your name"
+                        value={createLeadName}
+                        onChange={(e) => setCreateLeadName(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Lead Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="your.email@university.edu"
+                        value={createLeadEmail}
+                        onChange={(e) => setCreateLeadEmail(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={createTeamLoading}
+                    style={{
+                      marginTop: '6px',
+                      padding: '9px',
+                      background: '#e4f222',
+                      color: '#08090a',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontWeight: 600,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {createTeamLoading ? 'Generating Team...' : 'Create Team & Generate 6-Char Code ->'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Form B: Join Team */}
+              <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+                <h3 style={{ margin: '0 0 6px 0', fontSize: '1rem', fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Users size={16} style={{ color: '#22c55e' }} />
+                  <span>Join an Existing Team</span>
+                </h3>
+                <p style={{ margin: '0 0 16px 0', fontSize: '0.78rem', color: '#8a8f98' }}>
+                  Enter the 6-character invite code provided by your team lead.
+                </p>
+
+                {joinErrorMsg && (
+                  <div style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: '#fca5a5', fontSize: '0.75rem', marginBottom: '10px' }}>
+                    {joinErrorMsg}
+                  </div>
+                )}
+
+                <form onSubmit={handleJoinTeam} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Invite Code (6 Characters)</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. FLOW26, BYTE26"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                      maxLength={8}
+                      style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#e4f222', fontFamily: "'JetBrains Mono', monospace", fontSize: '0.88rem', fontWeight: 700, outline: 'none' }}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Your Name</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Full name"
+                        value={joinMemberName}
+                        onChange={(e) => setJoinMemberName(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Your Email</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="email@domain.com"
+                        value={joinMemberEmail}
+                        onChange={(e) => setJoinMemberEmail(e.target.value)}
+                        style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={joinTeamLoading}
+                    style={{
+                      marginTop: '6px',
+                      padding: '9px',
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      color: '#ffffff',
+                      borderRadius: '6px',
+                      fontWeight: 600,
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {joinTeamLoading ? 'Verifying Code...' : 'Join Team with Code ->'}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* Live Teams Registered */}
+            <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                  Registered Teams ({data.teams.length})
+                </h3>
+                <span style={{ fontSize: '0.74rem', color: '#8a8f98' }}>Live synchronized with Rust backend</span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                {data.teams.map((t) => (
+                  <div
+                    key={t.id}
+                    style={{
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.92rem', fontWeight: 700, color: '#ffffff' }}>
+                        {t.team_name}
+                      </span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(t.invite_code);
+                          alert(`Invite code '${t.invite_code}' copied to clipboard!`);
+                        }}
+                        style={{
+                          background: '#08090a',
+                          border: '1px solid #23252a',
+                          padding: '2px 8px',
+                          borderRadius: '4px',
+                          color: '#e4f222',
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '0.74rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                        title="Click to copy invite code"
+                      >
+                        <span>{t.invite_code}</span>
+                        <Copy size={11} />
+                      </button>
+                    </div>
+
+                    {t.track && (
+                      <span style={{ fontSize: '0.7rem', color: '#8a8f98' }}>{t.track}</span>
+                    )}
+
+                    <div style={{ marginTop: '4px' }}>
+                      <div style={{ fontSize: '0.7rem', color: '#62666d', marginBottom: '4px' }}>Members:</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {t.members.map((m, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: '0.68rem',
+                              padding: '2px 6px',
+                              background: '#141517',
+                              borderRadius: '4px',
+                              border: '1px solid #23252a',
+                              color: '#cbd5e1',
+                            }}
+                          >
+                            {m}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Rules & Eligibility */}
-            <div className="rules-grid">
-              <div className="rule-card">
-                <h4>Rules & Conduct</h4>
-                <ul>
-                  <li>Teams must consist of 2 to 4 registered university or early-career participants.</li>
-                  <li>All code submitted for evaluation must be authored during the 48-hour build sprint.</li>
-                  <li>Libraries and LLM APIs may be used, provided they are cited in the project repository README.</li>
-                  <li>Zero tolerance for plagiarism; every repository will be processed through AST Winnowing.</li>
-                </ul>
-              </div>
+            {/* Teammate Matchmaking Directory */}
+            <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '24px' }}>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '1rem', fontWeight: 700, color: '#ffffff' }}>
+                Teammate Matchmaking Directory
+              </h3>
 
-              <div className="rule-card">
-                <h4>Eligibility & Perks</h4>
-                <ul>
-                  <li>Open to undergraduate and postgraduate students worldwide.</li>
-                  <li>Free API credits provided by Google Cloud, AlgoCeleris, and Zerodha.</li>
-                  <li>Access to high-throughput Rust Worker execution clusters for stress testing.</li>
-                  <li>Top teams receive direct interview fast-tracks for Systems & Backend engineering roles.</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ==============================================================
-            TAB 2: TRACKS & BOUNTIES
-            ============================================================== */}
-        {activeTab === 'tracks' && (
-          <div className="tracks-tab-panel">
-            <div className="tracks-grid">
-              {[
-                {
-                  id: 'rust',
-                  title: 'Rust & High-Performance Systems',
-                  prize: '₹1,50,000 First Prize',
-                  sponsor: 'Cloudflare & AlgoCeleris',
-                  problem:
-                    'High-Throughput Distributed Rate Limiter: Implement a token bucket or sliding window algorithm capable of handling 500,000 req/sec with sub-millisecond tail latency.',
-                },
-                {
-                  id: 'ai',
-                  title: 'Agentic AI & Multimodal Workflows',
-                  prize: '₹1,50,000 First Prize',
-                  sponsor: 'Google Cloud',
-                  problem:
-                    'Emergency Dispatch Intelligence: Autonomous multi-agent coordination between dispatchers, traffic networks, and hospital triage units.',
-                },
-                {
-                  id: 'fintech',
-                  title: 'FinTech, Order Books & Quant Systems',
-                  prize: '₹1,00,000 First Prize',
-                  sponsor: 'Zerodha Tech',
-                  problem:
-                    'Microsecond Limit Order Book (LOB) matching engine with strict price-time priority in pure Rust.',
-                },
-                {
-                  id: 'open',
-                  title: 'Open Innovation & Campus Tech',
-                  prize: '₹1,00,000 First Prize',
-                  sponsor: 'VIT Chennai Alumni Foundation',
-                  problem:
-                    'Build next-generation developer tooling, campus automation, or peer learning copilot architectures.',
-                },
-              ].map((trk) => (
-                <div key={trk.id} className="track-spec-card">
-                  <div className="track-top">
-                    <span className="track-prize-badge font-mono">{trk.prize}</span>
-                    <span className="track-sponsor">Sponsor: {trk.sponsor}</span>
-                  </div>
-                  <h3 className="track-title">{trk.title}</h3>
-                  <div className="track-problem-box">
-                    <strong>Challenge Problem Statement:</strong>
-                    <p>{trk.problem}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ==============================================================
-            TAB 3: TEAM LOBBY & MATCHMAKING
-            ============================================================== */}
-        {activeTab === 'team' && (
-          <div className="team-tab-panel">
-            {/* My Team Box */}
-            <div className="my-team-card">
-              <div className="my-team-header">
-                <div>
-                  <span className="team-tag font-mono">TEAM 42</span>
-                  <h3 className="team-name">{myTeamName}</h3>
-                </div>
-                <div className="invite-code-box">
-                  <span className="code-label">Team Invite Code:</span>
-                  <div className="code-chip font-mono">
-                    <span>{inviteCode}</span>
-                    <button type="button" className="btn-copy" onClick={handleCopyInvite}>
-                      {copiedCode ? <CheckCircle2 size={13} color="#34d399" /> : <Copy size={13} />}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="team-members-list">
-                <div className="member-item">
-                  <span className="avatar">NC</span>
-                  <div className="member-info">
-                    <strong>Nishank Chhipa (Team Lead)</strong>
-                    <span>Systems Architecture & Rust Backend</span>
-                  </div>
-                  <span className="lead-pill">Lead</span>
-                </div>
-                <div className="member-item">
-                  <span className="avatar">AS</span>
-                  <div className="member-info">
-                    <strong>Aravind S</strong>
-                    <span>Distributed Systems & Networking</span>
-                  </div>
-                  <span className="member-pill">Member</span>
-                </div>
-                <div className="member-item">
-                  <span className="avatar">PK</span>
-                  <div className="member-info">
-                    <strong>Priya K</strong>
-                    <span>Machine Learning & Pipeline Design</span>
-                  </div>
-                  <span className="member-pill">Member</span>
-                </div>
-                <div className="member-item empty">
-                  <div className="empty-slot-text">
-                    <span>+ Slot Available (Share code <strong>{inviteCode}</strong> to invite 4th member)</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Solo Teammate Matchmaking Directory */}
-            <div className="matchmaking-directory-card">
-              <div className="dir-header">
-                <div>
-                  <h3>Teammate Matchmaking Directory</h3>
-                  <p>Connect with builders looking for teams to complete your roster.</p>
-                </div>
-                <div className="role-filter-pills">
-                  {['All', 'Backend / Rust', 'ML / AI', 'Frontend / Three.js'].map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      className={`role-filter-btn ${matchmakingFilter === r ? 'active' : ''}`}
-                      onClick={() => setMatchmakingFilter(r)}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="solo-builders-grid">
-                {soloMatchmakingDirectory
-                  .filter((b) => matchmakingFilter === 'All' || b.role === matchmakingFilter)
-                  .map((b) => (
-                    <div key={b.id} className="solo-builder-card">
-                      <div className="builder-top">
-                        <strong>{b.name}</strong>
-                        <span className="builder-role">{b.role}</span>
-                      </div>
-                      <div className="builder-skills">
-                        {b.skills.map((sk) => (
-                          <span key={sk} className="skill-pill font-mono">{sk}</span>
-                        ))}
-                      </div>
-                      <div className="builder-footer">
-                        <a href={b.github} target="_blank" rel="noreferrer" className="github-link">
-                          <Code2 size={13} />
-                          <span>GitHub</span>
-                        </a>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-invite"
-                          onClick={() => alert(`Invitation to join ${myTeamName} sent to ${b.name}!`)}
-                        >
-                          Invite to Team
-                        </button>
-                      </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+                {data.matchmaking.map((p) => (
+                  <div
+                    key={p.id}
+                    style={{
+                      background: '#0f1011',
+                      border: '1px solid #23252a',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff' }}>{p.name}</span>
+                      <span style={{ fontSize: '0.68rem', color: '#8a8f98' }}>{p.role}</span>
                     </div>
-                  ))}
+
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {p.skills.map((skill, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            fontSize: '0.65rem',
+                            padding: '2px 6px',
+                            background: '#141517',
+                            border: '1px solid #23252a',
+                            borderRadius: '3px',
+                            color: '#e5e5e6',
+                          }}
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+
+                    <p style={{ margin: '4px 0 0 0', fontSize: '0.74rem', color: '#8a8f98', lineHeight: 1.4 }}>
+                      {p.looking_for}
+                    </p>
+
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(p.contact);
+                        alert(`Email copied for ${p.name}: ${p.contact}`);
+                      }}
+                      style={{
+                        marginTop: 'auto',
+                        padding: '6px',
+                        background: '#08090a',
+                        border: '1px solid #23252a',
+                        borderRadius: '4px',
+                        color: '#d0d6e0',
+                        fontSize: '0.72rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '4px',
+                      }}
+                    >
+                      <Share2 size={12} />
+                      <span>Copy Contact ({p.contact})</span>
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
 
-        {/* ==============================================================
-            TAB 4: QUALIFIER & PROJECT SUBMISSION
-            ============================================================== */}
-        {activeTab === 'submission' && (
-          <div className="submission-tab-panel">
-            {/* Round 1 Qualifier Status */}
-            <div className="qualifier-status-card">
-              <div className="qualifier-left">
-                <CheckCircle2 size={24} color="#34d399" />
-                <div>
-                  <h4>Round 1: Algorithmic Qualifier (Complete)</h4>
-                  <p className="font-mono text-xs">
-                    Score: 300 / 300 · Ranked 14th of 380 teams · Qualified for 48-Hour Live Build Sprint
-                  </p>
+        {/* TAB 4: QUALIFIER & PROJECT SUBMISSION */}
+        {activeTab === 'qualifier' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+            
+            {/* Round 1: Algorithmic Qualifier */}
+            <div
+              style={{
+                background: '#141517',
+                border: '1px solid #23252a',
+                borderRadius: '12px',
+                padding: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e' }}>
+                    ROUND 1 · ACTIVE
+                  </span>
+                  <span style={{ fontSize: '0.75rem', color: '#8a8f98' }}>Kernel Sandbox Qualifier</span>
                 </div>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.2rem', fontWeight: 700, color: '#ffffff' }}>
+                  Two Sum & Algorithmic Foundations
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98', maxWidth: '640px' }}>
+                  Validate your code execution speed and correctness inside our Linux cgroups v2 isolated sandbox before final sprint submission.
+                </p>
               </div>
-              <button
-                type="button"
-                className="btn btn-secondary btn-view-qualifier"
-                onClick={() => alert('Qualifier Result: 3/3 test suites passed against Linux cgroups sandbox.')}
+
+              <Link
+                to="/problems/two-sum"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#0f1011',
+                  border: '1px solid #23252a',
+                  color: '#ffffff',
+                  padding: '9px 18px',
+                  borderRadius: '6px',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
               >
-                <span>View Score Report</span>
-              </button>
+                <span>Launch Qualifier Arena</span>
+                <ExternalLink size={13} />
+              </Link>
             </div>
 
-            {/* Round 2 Project Submission Form */}
-            <div className="submission-form-card">
-              <div className="form-head">
-                <h3>Round 2: Project Submission Portal</h3>
-                <p>Submit your final project artifact before the deadline. All links will be audited by the judging panel.</p>
+            {/* Round 2: Project Submission Form */}
+            <div style={{ background: '#141517', border: '1px solid #23252a', borderRadius: '12px', padding: '28px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: '#0f1011', border: '1px solid #23252a', color: '#8a8f98' }}>
+                  ROUND 2 · BUILD SPRINT ARTIFACT
+                </span>
+                <h3 style={{ margin: '8px 0 4px 0', fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+                  Project Artifact Submission
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98' }}>
+                  Submit your working codebase, live preview, and architecture deck. All repositories are indexed into the live showcase and evaluated against our 4-point rubric.
+                </p>
               </div>
 
-              {isSubmitted && (
-                <div className="submission-confirmed-banner">
-                  <CheckCircle2 size={16} color="#34d399" />
-                  <span>Project successfully registered for final evaluation. You can update links anytime until sprint closes.</span>
+              {subSuccessMsg && (
+                <div style={{ padding: '12px 16px', background: 'rgba(34, 197, 94, 0.12)', border: '1px solid rgba(34, 197, 94, 0.3)', borderRadius: '6px', color: '#86efac', fontSize: '0.82rem', marginBottom: '16px' }}>
+                  {subSuccessMsg}
                 </div>
               )}
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setIsSubmitted(true);
-                  alert('Project updated successfully!');
-                }}
-                className="project-submit-form"
-              >
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label className="form-label">Project Title</label>
+              <form onSubmit={handleSubmitProject} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      Project Title *
+                    </label>
                     <input
                       type="text"
-                      className="form-input"
-                      value={projectTitle}
-                      onChange={(e) => setProjectTitle(e.target.value)}
                       required
+                      placeholder="e.g. Nirnay Emergency Mesh"
+                      value={subTitle}
+                      onChange={(e) => setSubTitle(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Selected Track</label>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      Track Category *
+                    </label>
                     <select
-                      className="form-input"
-                      value={selectedTrack}
-                      onChange={(e) => setSelectedTrack(e.target.value)}
+                      value={subTrack}
+                      onChange={(e) => setSubTrack(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                     >
-                      <option value="Rust & Systems">Rust & High-Performance Systems</option>
-                      <option value="Agentic AI">Agentic AI & Multimodal Workflows</option>
-                      <option value="FinTech & Quant">FinTech, Order Books & Quant Systems</option>
-                      <option value="Open Innovation">Open Innovation & Campus Tech</option>
+                      {data.tracks.map((t) => (
+                        <option key={t.id} value={t.title}>
+                          {t.title}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Tagline (One-line description)</label>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                    Project Tagline / Elevator Pitch *
+                  </label>
                   <input
                     type="text"
-                    className="form-input"
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
                     required
+                    placeholder="Short 1-sentence description of the problem solved"
+                    value={subTagline}
+                    onChange={(e) => setSubTagline(e.target.value)}
+                    style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                   />
                 </div>
 
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label className="form-label">GitHub Repository URL</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      Team Name *
+                    </label>
                     <input
-                      type="url"
-                      className="form-input font-mono"
-                      value={githubUrl}
-                      onChange={(e) => setGithubUrl(e.target.value)}
+                      type="text"
                       required
+                      placeholder={activeTeam ? activeTeam.team_name : 'Enter your registered team name'}
+                      value={subTeamName}
+                      onChange={(e) => setSubTeamName(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Live Deployment URL</label>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      GitHub Repository URL *
+                    </label>
                     <input
                       type="url"
-                      className="form-input font-mono"
-                      value={liveUrl}
-                      onChange={(e) => setLiveUrl(e.target.value)}
                       required
+                      placeholder="https://github.com/org/repo"
+                      value={subGithub}
+                      onChange={(e) => setSubGithub(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                     />
                   </div>
                 </div>
 
-                <div className="form-row-2">
-                  <div className="form-group">
-                    <label className="form-label">Video Demo URL (YouTube / Loom)</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      Live Demo URL (Optional)
+                    </label>
                     <input
                       type="url"
-                      className="form-input font-mono"
-                      value={demoVideoUrl}
-                      onChange={(e) => setDemoVideoUrl(e.target.value)}
-                      required
+                      placeholder="https://my-app.dev"
+                      value={subLive}
+                      onChange={(e) => setSubLive(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
                     />
                   </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Architecture Diagram / Deck PDF</label>
-                    <div className="pdf-upload-row">
-                      <label className="btn btn-secondary btn-upload-pdf">
-                        <Upload size={13} />
-                        <span>Upload PDF Deck</span>
-                        <input
-                          type="file"
-                          accept=".pdf"
-                          style={{ display: 'none' }}
-                          onChange={(e) => {
-                            if (e.target.files?.[0]) setDeckFileName(e.target.files[0].name);
-                          }}
-                        />
-                      </label>
-                      {deckFileName && (
-                        <span className="deck-file-tag font-mono">{deckFileName}</span>
-                      )}
-                    </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#8a8f98', marginBottom: '4px' }}>
+                      Architecture Deck / Video URL (Optional)
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://drive.google.com/... or YouTube"
+                      value={subDeck}
+                      onChange={(e) => setSubDeck(e.target.value)}
+                      style={{ width: '100%', padding: '9px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#ffffff', fontSize: '0.82rem', outline: 'none' }}
+                    />
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary submit-final-project-btn">
-                  <Upload size={15} />
-                  <span>Update Hackathon Submission</span>
+                <button
+                  type="submit"
+                  disabled={subLoading}
+                  style={{
+                    marginTop: '8px',
+                    padding: '12px 24px',
+                    background: '#e4f222',
+                    color: '#08090a',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '0.86rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 10px rgba(228, 242, 34, 0.2)',
+                  }}
+                >
+                  <Send size={15} />
+                  <span>{subLoading ? 'Submitting to Rust Gateway...' : 'Submit Final Project for Evaluation ->'}</span>
                 </button>
               </form>
             </div>
           </div>
         )}
 
-        {/* ==============================================================
-            TAB 5: PROJECT SHOWCASE & LEADERBOARD
-            ============================================================== */}
+        {/* TAB 5: PROJECT SHOWCASE & STANDINGS */}
         {activeTab === 'showcase' && (
-          <div className="showcase-tab-panel">
-            <div className="showcase-header">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
               <div>
-                <h3>Project Showcase Gallery & Live Rubric Scores</h3>
-                <p>Audited submissions graded across the 4 official evaluation criteria.</p>
+                <h3 style={{ margin: '0 0 4px 0', fontSize: '1.25rem', fontWeight: 800, color: '#ffffff' }}>
+                  Project Showcase & Ranked Standings
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98' }}>
+                  Live leaderboard scored against the 4-criterion rubric. Upvoting synchronizes directly with the Axum backend.
+                </p>
               </div>
+
+              <button
+                onClick={() => setActiveTab('qualifier')}
+                style={{
+                  padding: '7px 14px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                + Submit Project
+              </button>
             </div>
 
-            <div className="showcase-cards-list">
-              {showcaseProjects.map((p, idx) => (
-                <div key={p.id} className="showcase-card">
-                  <div className="showcase-top">
-                    <div className="showcase-rank font-mono">#{idx + 1}</div>
-                    <div className="showcase-title-block">
-                      <div className="showcase-title-row">
-                        <h4 className="showcase-title">{p.title}</h4>
-                        <span className="showcase-team font-mono">by {p.teamName}</span>
-                        <span className="track-chip">{p.track}</span>
+            {/* Showcase Items Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '18px' }}>
+              {data.showcase.map((p, idx) => {
+                const isUpvoted = upvotedIds.has(p.id);
+
+                return (
+                  <div
+                    key={p.id}
+                    style={{
+                      background: '#141517',
+                      border: '1px solid #23252a',
+                      borderRadius: '12px',
+                      padding: '22px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
+                    {/* Header: Rank + Track */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span
+                          style={{
+                            fontSize: '0.74rem',
+                            fontWeight: 800,
+                            color: idx === 0 ? '#e4f222' : idx === 1 ? '#e5e5e6' : '#8a8f98',
+                            fontFamily: "'JetBrains Mono', monospace",
+                          }}
+                        >
+                          #{String(idx + 1).padStart(2, '0')}
+                        </span>
+                        <span style={{ fontSize: '0.72rem', color: '#8a8f98' }}>{p.track}</span>
                       </div>
-                      <p className="showcase-tagline">{p.tagline}</p>
+
+                      {/* Rubric Score Badge */}
+                      <span
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          background: '#08090a',
+                          border: '1px solid #23252a',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          color: '#e4f222',
+                          fontFamily: "'JetBrains Mono', monospace",
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                        }}
+                      >
+                        <Star size={12} style={{ fill: '#e4f222' }} />
+                        <span>{p.rubric_score.toFixed(1)} / 10</span>
+                      </span>
                     </div>
 
-                    <div className="showcase-score-hero">
-                      <span className="score-lbl">Judge Score</span>
-                      <span className="score-num font-mono">{p.rubric.total} / 100</span>
+                    {/* Title & Tagline */}
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                        {p.project_title}
+                      </h4>
+                      <div style={{ fontSize: '0.75rem', color: '#62666d', marginBottom: '6px' }}>
+                        by <span style={{ color: '#ffffff', fontWeight: 600 }}>{p.team_name}</span>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98', lineHeight: 1.5 }}>
+                        {p.tagline}
+                      </p>
                     </div>
-                  </div>
 
-                  {/* 4-Criterion Judge Rubric Breakdown */}
-                  <div className="rubric-bars-grid">
-                    <div className="rubric-item">
-                      <span className="rubric-label">Technical Depth: <strong>{p.rubric.technicalDepth}/25</strong></span>
-                      <div className="rubric-track">
-                        <div className="rubric-fill" style={{ width: `${(p.rubric.technicalDepth / 25) * 100}%` }} />
-                      </div>
-                    </div>
-                    <div className="rubric-item">
-                      <span className="rubric-label">Architecture: <strong>{p.rubric.architecture}/25</strong></span>
-                      <div className="rubric-track">
-                        <div className="rubric-fill" style={{ width: `${(p.rubric.architecture / 25) * 100}%` }} />
-                      </div>
-                    </div>
-                    <div className="rubric-item">
-                      <span className="rubric-label">Innovation: <strong>{p.rubric.innovation}/25</strong></span>
-                      <div className="rubric-track">
-                        <div className="rubric-fill" style={{ width: `${(p.rubric.innovation / 25) * 100}%` }} />
-                      </div>
-                    </div>
-                    <div className="rubric-item">
-                      <span className="rubric-label">UX Polish: <strong>{p.rubric.uxPolish}/25</strong></span>
-                      <div className="rubric-track">
-                        <div className="rubric-fill" style={{ width: `${(p.rubric.uxPolish / 25) * 100}%` }} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tech stack & Action Row */}
-                  <div className="showcase-footer">
-                    <div className="tech-stack-pills">
-                      {p.techStack.map((t) => (
-                        <span key={t} className="tech-tag font-mono">{t}</span>
+                    {/* Tech Stack badges */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                      {p.tech_stack.map((t, tIdx) => (
+                        <span
+                          key={tIdx}
+                          style={{
+                            fontSize: '0.68rem',
+                            padding: '2px 6px',
+                            background: '#0f1011',
+                            border: '1px solid #23252a',
+                            borderRadius: '4px',
+                            color: '#d0d6e0',
+                          }}
+                        >
+                          {t}
+                        </span>
                       ))}
                     </div>
 
-                    <div className="showcase-actions">
-                      <a href={p.githubUrl} target="_blank" rel="noreferrer" className="btn btn-secondary link-btn">
-                        <Code2 size={13} />
-                        <span>Code</span>
-                      </a>
-                      {p.liveUrl && (
-                        <a href={p.liveUrl} target="_blank" rel="noreferrer" className="btn btn-secondary link-btn">
-                          <ExternalLink size={13} />
-                          <span>Live Demo</span>
+                    {/* Footer with Links & Real Upvote Button */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        paddingTop: '12px',
+                        borderTop: '1px solid #23252a',
+                        marginTop: 'auto',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <a
+                          href={p.github_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: '#8a8f98', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', textDecoration: 'none' }}
+                        >
+                          <Github size={13} />
+                          <span>Code</span>
                         </a>
-                      )}
+                        {p.live_url && (
+                          <a
+                            href={p.live_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{ color: '#8a8f98', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.76rem', textDecoration: 'none' }}
+                          >
+                            <Globe size={13} />
+                            <span>Demo</span>
+                          </a>
+                        )}
+                      </div>
+
+                      {/* Upvote Button connected to backend */}
                       <button
-                        type="button"
-                        className="btn btn-secondary upvote-btn font-mono"
                         onClick={() => handleUpvote(p.id)}
+                        disabled={isUpvoted || upvotingId === p.id}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          background: isUpvoted ? 'rgba(228, 242, 34, 0.15)' : '#08090a',
+                          border: `1px solid ${isUpvoted ? '#e4f222' : '#23252a'}`,
+                          color: isUpvoted ? '#e4f222' : '#ffffff',
+                          padding: '5px 12px',
+                          borderRadius: '6px',
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          cursor: isUpvoted ? 'default' : 'pointer',
+                          fontFamily: "'JetBrains Mono', monospace",
+                          transition: 'all 0.15s ease',
+                        }}
                       >
-                        <ThumbsUp size={13} color="#60a5fa" />
-                        <span>{p.upvotes} Upvotes</span>
+                        <ThumbsUp size={12} style={{ fill: isUpvoted ? '#e4f222' : 'none' }} />
+                        <span>▲ {p.upvotes}</span>
                       </button>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
+
+        {/* Modal: Quick Register for Sprint */}
+        {isRegistering && (
+          <div
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.75)',
+              backdropFilter: 'blur(8px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 999,
+              padding: '20px',
+            }}
+          >
+            <div
+              style={{
+                background: '#141517',
+                border: '1px solid #23252a',
+                borderRadius: '12px',
+                padding: '28px',
+                maxWidth: '440px',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700, color: '#ffffff' }}>
+                  Register for {data.title}
+                </h3>
+                <button
+                  onClick={() => setIsRegistering(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#8a8f98', cursor: 'pointer', fontSize: '1rem' }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter your name"
+                    value={regName}
+                    onChange={(e) => setRegName(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="your.email@university.edu"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>University or Organization</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. VIT Chennai, IIT Madras"
+                    value={regOrg}
+                    onChange={(e) => setRegOrg(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.74rem', color: '#8a8f98', marginBottom: '4px' }}>Preferred Track</label>
+                  <select
+                    value={regTrack}
+                    onChange={(e) => setRegTrack(e.target.value)}
+                    style={{ width: '100%', padding: '8px 12px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
+                  >
+                    <option value="">Undecided / Open</option>
+                    {data.tracks.map((t) => (
+                      <option key={t.id} value={t.title}>
+                        {t.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setIsRegistering(false)}
+                    style={{ flex: 1, padding: '8px', background: '#08090a', border: '1px solid #23252a', borderRadius: '6px', color: '#8a8f98', fontSize: '0.8rem', cursor: 'pointer' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={regSubmitting}
+                    style={{ flex: 2, padding: '8px', background: '#e4f222', color: '#08090a', border: 'none', borderRadius: '6px', fontWeight: 600, fontSize: '0.8rem', cursor: 'pointer' }}
+                  >
+                    {regSubmitting ? 'Registering...' : 'Confirm Registration'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
 };
-
-export default HackathonDetailPage;

@@ -320,7 +320,7 @@ export const ProblemWorkspacePage: React.FC = () => {
               .catch(() => {});
           },
           (err) => {
-            console.warn('WebSocket stream error, polling status...', err);
+            console.debug('WebSocket stream status:', err);
             // Polling fallback if WebSocket drops (watchdog still guards total wait)
             const pollInterval = setInterval(async () => {
               try {
@@ -449,7 +449,7 @@ export const ProblemWorkspacePage: React.FC = () => {
       });
       setAIDebugResponse(resp);
     } catch (err: any) {
-      console.warn('AI Debug request error:', err);
+      console.debug('AI Debug request fallback:', err);
       setAIDebugResponse({
         root_cause: `Failed to connect to AI Debug Service.`,
         complexity_analysis: `N/A`,

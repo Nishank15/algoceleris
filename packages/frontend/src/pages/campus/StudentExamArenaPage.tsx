@@ -41,7 +41,7 @@ const STARTER_CODES: Record<string, string> = {
     data = input().split()
     if not data:
         return
-    # TODO: Complete problem implementation
+    # Implement solution here
     print("0")
 
 if __name__ == "__main__":
@@ -189,7 +189,7 @@ export const StudentExamArenaPage: React.FC = () => {
       setIsFullscreen(true);
       setFullscreenAlertOpen(false);
     } catch (err) {
-      console.warn('Fullscreen request bypassed:', err);
+      console.debug('Fullscreen request bypassed:', err);
       setIsFullscreen(true);
       setFullscreenAlertOpen(false);
     }
@@ -207,10 +207,10 @@ export const StudentExamArenaPage: React.FC = () => {
         wsRef.current = connectProctoringWebSocket(
           assessment.id,
           (msg) => console.log('Proctor WS message:', msg),
-          (err) => console.warn('Proctor WS error:', err)
+          (err) => console.debug('Proctor WS status:', err)
         );
       } catch (err) {
-        console.warn('Telemetry WS init error:', err);
+        console.debug('Telemetry WS init fallback:', err);
       }
     }
   };
@@ -261,7 +261,17 @@ export const StudentExamArenaPage: React.FC = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('paste', handleWindowPaste);
       if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) {
+        const s = wsRef.current;
+        if (s.readyState === WebSocket.OPEN) {
+          s.close(1000, 'Exam unmounted');
+        } else if (s.readyState === WebSocket.CONNECTING) {
+          s.onopen = () => {
+            s.close(1000, 'Exam unmounted');
+          };
+        }
+        wsRef.current = null;
+      }
     };
   }, [isExamActive, hasAutoSubmitted, sendTelemetry]);
 

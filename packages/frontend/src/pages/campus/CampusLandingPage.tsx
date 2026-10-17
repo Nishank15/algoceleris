@@ -1,376 +1,907 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  GraduationCap,
+  listCampusOrgs,
+  CampusOrgSummary,
+} from '../../services/api';
+import {
   Building2,
-  Shield,
-  Sparkles,
-  Code2,
+  GraduationCap,
   Users,
-  ArrowRight,
-  CheckCircle2,
   Search,
+  ArrowRight,
   BookOpen,
-  Cpu,
+  Terminal,
+  CheckCircle2,
+  Lock,
+  Sparkles,
+  Flame,
   Award,
-  ChevronRight,
-  ExternalLink,
 } from 'lucide-react';
-
-interface InstitutionPreset {
-  name: string;
-  slug: string;
-  domain: string;
-  location: string;
-  accent: string;
-  badge: string;
-}
-
-const FEATURED_INSTITUTIONS: InstitutionPreset[] = [
-  {
-    name: 'Vellore Institute of Technology, Chennai',
-    slug: 'vit-chennai',
-    domain: 'vit-chennai.algoceleris.dev',
-    location: 'Chennai, Tamil Nadu',
-    accent: '#3b82f6',
-    badge: 'VIT Chennai',
-  },
-  {
-    name: 'Indian Institute of Technology, Madras',
-    slug: 'iitm',
-    domain: 'iitm.algoceleris.dev',
-    location: 'Chennai, Tamil Nadu',
-    accent: '#f59e0b',
-    badge: 'IIT Madras',
-  },
-  {
-    name: 'National Institute of Technology, Tiruchirappalli',
-    slug: 'nitt',
-    domain: 'nitt.algoceleris.dev',
-    location: 'Tiruchirappalli, Tamil Nadu',
-    accent: '#10b981',
-    badge: 'NIT Trichy',
-  },
-];
 
 export const CampusLandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedOrg, setSelectedOrg] = useState<string>('vit-chennai');
-  const [customSlug, setCustomSlug] = useState<string>('');
-  const [searchFilter, setSearchFilter] = useState<string>('');
+  const [orgs, setOrgs] = useState<CampusOrgSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLaunchPortal = (orgSlug: string) => {
-    const slug = (orgSlug || 'vit-chennai').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-    navigate(`/campus/${slug}/login`);
-  };
+  useEffect(() => {
+    let isMounted = true;
+    const DEFAULT_ORGS: CampusOrgSummary[] = [
+      {
+        id: '10000000-0000-0000-0000-000000000001',
+        name: 'VIT Chennai',
+        slug: 'vit-chennai',
+        domain_whitelist: ['vitstudent.ac.in', 'vit.ac.in'],
+        tier: 'Enterprise Campus',
+        student_count: 1200,
+        faculty_count: 45,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '10000000-0000-0000-0000-000000000002',
+        name: 'IIT Madras',
+        slug: 'iitm',
+        domain_whitelist: ['smail.iitm.ac.in', 'iitm.ac.in'],
+        tier: 'Enterprise Campus',
+        student_count: 850,
+        faculty_count: 32,
+        created_at: new Date().toISOString(),
+      },
+      {
+        id: '10000000-0000-0000-0000-000000000003',
+        name: 'BITS Pilani',
+        slug: 'bits-pilani',
+        domain_whitelist: ['pilani.bits-pilani.ac.in'],
+        tier: 'Enterprise Campus',
+        student_count: 940,
+        faculty_count: 28,
+        created_at: new Date().toISOString(),
+      },
+    ];
 
-  const handleCustomSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (customSlug.trim()) {
-      handleLaunchPortal(customSlug);
+    async function fetchOrgs() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await listCampusOrgs();
+        if (isMounted) {
+          if (Array.isArray(data) && data.length > 0) {
+            const hasVit = data.some((o) => o.slug === 'vit-chennai');
+            setOrgs(hasVit ? data : [...data, ...DEFAULT_ORGS]);
+          } else {
+            setOrgs(DEFAULT_ORGS);
+          }
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          console.error('Failed to load campus organizations:', err);
+          setError(err.message || 'Unable to connect to campus gateway');
+          setOrgs(DEFAULT_ORGS);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
     }
-  };
+    fetchOrgs();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filteredOrgs = orgs.filter((org) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      org.name.toLowerCase().includes(q) ||
+      org.slug.toLowerCase().includes(q) ||
+      org.domain_whitelist.some((d) => d.toLowerCase().includes(q))
+    );
+  });
 
   return (
-    <div className="campus-landing-page">
-      {/* Top Standalone Institutional Header */}
-      <header className="campus-nav-header">
-        <div className="campus-nav-container">
-          <Link to="/campus" className="campus-brand">
-            <div className="campus-brand-icon">
-              <GraduationCap size={20} />
-            </div>
-            <div className="campus-brand-text">
-              <span className="brand-name">AlgoCeleris</span>
-              <span className="brand-edition">Campus</span>
-            </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#08090a',
+        color: '#ffffff',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}
+    >
+      {/* Top Breadcrumb & Status Ribbon */}
+      <div
+        style={{
+          borderBottom: '1px solid #23252a',
+          background: 'rgba(15, 16, 17, 0.75)',
+          backdropFilter: 'blur(12px)',
+          padding: '12px 32px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '12px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '9999px',
+              background: 'rgba(228, 242, 34, 0.12)',
+              color: '#e4f222',
+              fontWeight: 510,
+              fontSize: '11px',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              border: '1px solid rgba(228, 242, 34, 0.25)',
+            }}
+          >
+            Multi-Tenant Enterprise Mesh
+          </span>
+          <span style={{ color: '#62666d' }}>/</span>
+          <span style={{ color: '#8a8f98' }}>University Lab Operating System & Proctoring Engine</span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#22c55e' }}>
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: '#22c55e',
+                boxShadow: '0 0 8px rgba(34, 197, 94, 0.7)',
+              }}
+            />
+            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
+              CGROUP V2 SANDBOX ONLINE
+            </span>
+          </div>
+          <Link
+            to="/campus/register"
+            style={{
+              color: '#e4f222',
+              textDecoration: 'none',
+              fontWeight: 510,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
+          >
+            Provision Institution <ArrowRight size={13} />
+          </Link>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div
+        style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '72px 24px 48px 24px',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: '#0f1011',
+            border: '1px solid #23252a',
+            padding: '6px 14px',
+            borderRadius: '9999px',
+            fontSize: '12px',
+            color: '#d0d6e0',
+            marginBottom: '28px',
+          }}
+        >
+          <Building2 size={13} style={{ color: '#e4f222' }} />
+          <span>AlgoCeleris Campus v4.3 Architecture</span>
+          <span style={{ color: '#62666d' }}>•</span>
+          <span style={{ color: '#8a8f98' }}>Zero-Latency Multi-Tenant Virtual Labs</span>
+        </div>
+
+        <h1
+          style={{
+            fontSize: '56px',
+            fontWeight: 590,
+            lineHeight: 1.08,
+            letterSpacing: '-0.03em',
+            margin: '0 0 20px 0',
+            color: '#ffffff',
+          }}
+        >
+          The Operating System for <br />
+          <span
+            style={{
+              background: 'linear-gradient(180deg, #ffffff 0%, #8a8f98 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            University Computer Science Labs
+          </span>
+        </h1>
+
+        <p
+          style={{
+            fontSize: '18px',
+            lineHeight: 1.6,
+            color: '#8a8f98',
+            maxWidth: '780px',
+            margin: '0 auto 36px auto',
+            fontWeight: 400,
+          }}
+        >
+          Hardware-isolated Linux cgroup sandboxes, real-time WebSocket test suite streaming,
+          section-locked progressive lab environments, and automated ABET/NBA CLO curriculum
+          attainment tracking built for modern engineering campuses.
+        </p>
+
+        {/* Hero CTAs */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '14px',
+            flexWrap: 'wrap',
+            marginBottom: '64px',
+          }}
+        >
+          <Link
+            to="/campus/register"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#e4f222',
+              color: '#08090a',
+              padding: '13px 26px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 590,
+              textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              transition: 'transform 0.15s ease',
+            }}
+          >
+            Provision University Tenant <ArrowRight size={16} />
           </Link>
 
-          <nav className="campus-nav-links">
-            <a href="#capabilities" className="campus-nav-link">Capabilities</a>
-            <a href="#pedagogy" className="campus-nav-link">LPilot Workflow</a>
-            <a href="#directory" className="campus-nav-link">Directory</a>
-          </nav>
+          <a
+            href="#institutions"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              background: '#0f1011',
+              color: '#d0d6e0',
+              border: '1px solid #23252a',
+              padding: '13px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: 510,
+              textDecoration: 'none',
+            }}
+          >
+            Browse Active Institutions ↓
+          </a>
+        </div>
 
-          <div className="campus-nav-actions">
-            <Link to="/campus/vit-chennai/login" className="btn btn-secondary campus-nav-btn">
-              <span>Sign In</span>
-            </Link>
-            <Link to="/campus/register" className="btn btn-primary campus-cta-btn">
-              <span>Provision University</span>
-              <ArrowRight size={14} />
-            </Link>
+        {/* Core Architectural Telemetry Metric Strip */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '12px',
+            textAlign: 'left',
+            marginBottom: '80px',
+          }}
+        >
+          <div
+            style={{
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              borderRadius: '12px',
+              padding: '20px',
+            }}
+          >
+            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Execution Overhead
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#e4f222', marginBottom: '4px' }}>
+              &lt; 15 ms
+            </div>
+            <div style={{ color: '#62666d', fontSize: '12px' }}>Direct host cgroup isolation with zero Docker cold starts</div>
+          </div>
+
+          <div
+            style={{
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              borderRadius: '12px',
+              padding: '20px',
+            }}
+          >
+            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Sandbox Ceiling
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#ffffff', marginBottom: '4px' }}>
+              256MB / 1 CPU
+            </div>
+            <div style={{ color: '#62666d', fontSize: '12px' }}>Network unshared (`unshare --net`), strict seccomp-bpf</div>
+          </div>
+
+          <div
+            style={{
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              borderRadius: '12px',
+              padding: '20px',
+            }}
+          >
+            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Plagiarism Engine
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#22c55e', marginBottom: '4px' }}>
+              Tree-Sitter AST
+            </div>
+            <div style={{ color: '#62666d', fontSize: '12px' }}>Winnowing algorithm invariant to variable renaming & comments</div>
+          </div>
+
+          <div
+            style={{
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              borderRadius: '12px',
+              padding: '20px',
+            }}
+          >
+            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Academic Integrity
+            </div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#02b8cc', marginBottom: '4px' }}>
+              ABET / NBA
+            </div>
+            <div style={{ color: '#62666d', fontSize: '12px' }}>Automated CLO-1 through CLO-4 attainment matrices</div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Hero Section with Blueprint Grid */}
-      <section className="campus-hero-section">
-        <div className="campus-blueprint-overlay" />
-        <div className="campus-hero-content">
-          <div className="campus-hero-badge">
-            <Sparkles size={13} className="badge-sparkle" />
-            <span>AlgoCeleris Campus · AI Co-Pilot for Programming Labs</span>
+      {/* Institution Directory Section */}
+      <div
+        id="institutions"
+        style={{
+          borderTop: '1px solid #23252a',
+          borderBottom: '1px solid #23252a',
+          background: '#0a0b0c',
+          padding: '64px 24px',
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '20px',
+              marginBottom: '32px',
+            }}
+          >
+            <div>
+              <div
+                style={{
+                  color: '#e4f222',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  marginBottom: '6px',
+                }}
+              >
+                Institutional Portal Directory
+              </div>
+              <h2
+                style={{
+                  fontSize: '28px',
+                  fontWeight: 590,
+                  margin: 0,
+                  letterSpacing: '-0.02em',
+                }}
+              >
+                Select Your Campus Tenant
+              </h2>
+              <p style={{ color: '#8a8f98', fontSize: '14px', margin: '6px 0 0 0' }}>
+                All student, faculty, and administrative sessions are strictly authenticated against their university domain.
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                maxWidth: '360px',
+              }}
+            >
+              <Search
+                size={15}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#62666d',
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Search university name, slug, or domain..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: '#0f1011',
+                  border: '1px solid #23252a',
+                  borderRadius: '8px',
+                  padding: '10px 14px 10px 36px',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
           </div>
 
-          <h1 className="campus-hero-headline">
-            The lab management system built for{' '}
-            <span className="hero-gradient-text">engineering education</span>
-          </h1>
-
-          <p className="campus-hero-subhead">
-            Combines progressive learning workflows, automated evaluation, section-locked code
-            sandboxes, and AI-assisted tutoring into a single platform for faculty and students.
-          </p>
-
-          {/* Tenant Gateway Card */}
-          <div className="campus-tenant-card" id="directory">
-            <div className="tenant-card-header">
-              <Building2 size={16} className="tenant-icon" />
-              <span>Select Your University Campus Portal</span>
+          {/* Error Banner */}
+          {error && (
+            <div
+              style={{
+                background: 'rgba(235, 87, 87, 0.1)',
+                border: '1px solid rgba(235, 87, 87, 0.3)',
+                borderRadius: '8px',
+                padding: '12px 16px',
+                color: '#eb5757',
+                fontSize: '13px',
+                marginBottom: '24px',
+              }}
+            >
+              Gateway connection warning: {error}. Falling back to cached university directory.
             </div>
+          )}
 
-            <div className="tenant-preset-pills">
-              {FEATURED_INSTITUTIONS.map((inst) => {
-                const isSelected = selectedOrg === inst.slug;
-                return (
-                  <button
-                    key={inst.slug}
-                    type="button"
-                    className={`tenant-pill ${isSelected ? 'active' : ''}`}
-                    onClick={() => setSelectedOrg(inst.slug)}
-                    style={{
-                      borderColor: isSelected ? inst.accent : undefined,
-                    }}
-                  >
-                    <span className="pill-dot" style={{ background: inst.accent }} />
-                    <span className="pill-name">{inst.badge}</span>
-                    <span className="pill-domain">({inst.domain})</span>
-                  </button>
-                );
-              })}
+          {/* Organization Grid */}
+          {loading ? (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: '#0f1011',
+                    border: '1px solid #23252a',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    height: '180px',
+                    animation: 'pulse 1.5s infinite ease-in-out',
+                  }}
+                />
+              ))}
             </div>
-
-            <div className="tenant-action-row">
-              <button
-                type="button"
-                className="btn btn-primary tenant-signin-btn"
-                onClick={() => handleLaunchPortal(selectedOrg)}
-                id="btn-sign-in-institution"
+          ) : filteredOrgs.length === 0 ? (
+            <div
+              style={{
+                background: '#0f1011',
+                border: '1px dashed #23252a',
+                borderRadius: '12px',
+                padding: '48px 24px',
+                textAlign: 'center',
+                color: '#8a8f98',
+              }}
+            >
+              <Building2 size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
+              <div style={{ fontSize: '15px', color: '#ffffff', marginBottom: '6px' }}>No universities matching "{searchQuery}"</div>
+              <div style={{ fontSize: '13px', marginBottom: '20px' }}>Would you like to provision a new institution tenant with this name?</div>
+              <Link
+                to="/campus/register"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: '#e4f222',
+                  color: '#08090a',
+                  padding: '9px 18px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 510,
+                  textDecoration: 'none',
+                }}
               >
-                <span>Sign in to Institution Portal</span>
-                <ArrowRight size={16} />
-              </button>
-
-              <Link to="/campus/register" className="btn btn-secondary tenant-register-btn" id="btn-provision-univ">
-                <span>Provision Your University</span>
+                Provision Institution Tenant →
               </Link>
             </div>
+          ) : (
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+                gap: '16px',
+              }}
+            >
+              {filteredOrgs.map((org) => (
+                <div
+                  key={org.id}
+                  style={{
+                    background: '#0f1011',
+                    border: '1px solid #23252a',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'border-color 0.15s ease, transform 0.15s ease',
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '12px',
+                        marginBottom: '12px',
+                      }}
+                    >
+                      <div>
+                        <h3
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 590,
+                            margin: '0 0 4px 0',
+                            color: '#ffffff',
+                            letterSpacing: '-0.015em',
+                          }}
+                        >
+                          {org.name}
+                        </h3>
+                        <span
+                          style={{
+                            fontFamily: 'JetBrains Mono, monospace',
+                            fontSize: '12px',
+                            color: '#8a8f98',
+                          }}
+                        >
+                          /{org.slug}
+                        </span>
+                      </div>
 
-            {/* Custom Slug Lookup */}
-            <form onSubmit={handleCustomSubmit} className="tenant-custom-form">
-              <div className="tenant-custom-input-wrapper">
-                <Search size={14} className="tenant-search-icon" />
-                <input
-                  type="text"
-                  placeholder="Or enter your custom campus slug (e.g. vit-chennai, iitm, srm-ktr)..."
-                  value={customSlug}
-                  onChange={(e) => setCustomSlug(e.target.value)}
-                  className="tenant-custom-input"
-                />
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          color: '#d0d6e0',
+                          border: '1px solid #23252a',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {org.tier}
+                      </span>
+                    </div>
+
+                    {/* Whitelist Domains */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '18px' }}>
+                      {org.domain_whitelist.map((domain) => (
+                        <span
+                          key={domain}
+                          style={{
+                            fontSize: '11px',
+                            fontFamily: 'JetBrains Mono, monospace',
+                            background: 'rgba(35, 37, 42, 0.6)',
+                            color: '#a0a6b2',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            border: '1px solid #23252a',
+                          }}
+                        >
+                          @{domain}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Stats Strip */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '16px',
+                        padding: '10px 14px',
+                        borderRadius: '6px',
+                        background: '#141517',
+                        border: '1px solid #23252a',
+                        fontSize: '12px',
+                        marginBottom: '20px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#d0d6e0' }}>
+                        <GraduationCap size={14} style={{ color: '#e4f222' }} />
+                        <span>
+                          <strong style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                            {org.student_count.toLocaleString()}
+                          </strong>{' '}
+                          Students
+                        </span>
+                      </div>
+
+                      <div style={{ color: '#383b3f' }}>|</div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#d0d6e0' }}>
+                        <Users size={14} style={{ color: '#02b8cc' }} />
+                        <span>
+                          <strong style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                            {org.faculty_count.toLocaleString()}
+                          </strong>{' '}
+                          Faculty
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enter Button */}
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/campus/${org.slug}/login`)}
+                    style={{
+                      width: '100%',
+                      background: '#161718',
+                      color: '#ffffff',
+                      border: '1px solid #23252a',
+                      padding: '11px 16px',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      fontWeight: 510,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      transition: 'background 0.15s ease, border-color 0.15s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = '#e4f222';
+                      e.currentTarget.style.color = '#e4f222';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = '#23252a';
+                      e.currentTarget.style.color = '#ffffff';
+                    }}
+                  >
+                    Enter Institutional Portal <ArrowRight size={14} />
+                  </button>
+                </div>
+              ))}
+
+              {/* Provisioning Teaser Card */}
+              <div
+                style={{
+                  background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
+                  border: '1px dashed #383b3f',
+                  borderRadius: '12px',
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '8px',
+                      background: 'rgba(228, 242, 34, 0.12)',
+                      border: '1px solid rgba(228, 242, 34, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#e4f222',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <Sparkles size={18} />
+                  </div>
+
+                  <h3
+                    style={{
+                      fontSize: '18px',
+                      fontWeight: 590,
+                      margin: '0 0 6px 0',
+                      color: '#ffffff',
+                    }}
+                  >
+                    Provision Your Institution
+                  </h3>
+                  <p style={{ color: '#8a8f98', fontSize: '13px', lineHeight: 1.5, margin: '0 0 16px 0' }}>
+                    Deploy a dedicated single-tenant domain space with custom single sign-on, tailored course cohorts, and dedicated grading workers.
+                  </p>
+                </div>
+
+                <Link
+                  to="/campus/register"
+                  style={{
+                    width: '100%',
+                    background: '#e4f222',
+                    color: '#08090a',
+                    border: 'none',
+                    padding: '11px 16px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 590,
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  Start Provisioning Wizard →
+                </Link>
               </div>
-              <button type="submit" className="tenant-custom-btn" disabled={!customSlug.trim()}>
-                <span>Go</span>
-                <ChevronRight size={13} />
-              </button>
-            </form>
-          </div>
+            </div>
+          )}
         </div>
-      </section>
+      </div>
 
-      {/* 6-Stage LPilot Pedagogical Architecture */}
-      <section className="campus-pedagogy-section" id="pedagogy">
-        <div className="campus-section-container">
-          <div className="section-header-center">
-            <span className="section-eyebrow">Pedagogical Framework</span>
-            <h2 className="section-title">The 6-Stage Progressive Lab Workflow</h2>
-            <p className="section-subtitle">
-              Engineered for accredited engineering curricula (NBA & ABET), guiding students step-by-step
-              from foundational concepts to complex system design.
-            </p>
+      {/* 6-Stage Lab Workflow Breakdown */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '80px 24px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <div
+            style={{
+              color: '#e4f222',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '6px',
+            }}
+          >
+            Academic Rigor & Pedagogy
           </div>
-
-          <div className="pedagogy-grid">
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 01</div>
-              <div className="pedagogy-icon-box">
-                <BookOpen size={20} />
-              </div>
-              <h3 className="pedagogy-title">Content & Theory Notes</h3>
-              <p className="pedagogy-desc">
-                Structured reference documentation and interactive embedded PDFs providing essential
-                theoretical context before coding begins.
-              </p>
-            </div>
-
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 02</div>
-              <div className="pedagogy-icon-box">
-                <Code2 size={20} />
-              </div>
-              <h3 className="pedagogy-title">Demonstration Problems</h3>
-              <p className="pedagogy-desc">
-                Fully worked examples with step-by-step logic traces, annotated algorithmic patterns,
-                and runtime complexity breakdowns.
-              </p>
-            </div>
-
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 03</div>
-              <div className="pedagogy-icon-box">
-                <CheckCircle2 size={20} />
-              </div>
-              <h3 className="pedagogy-title">LED Concept Quizzes</h3>
-              <p className="pedagogy-desc">
-                10-question auto-graded interactive MCQs verifying syntax mastery and edge-case
-                intuition before the student touches the editor.
-              </p>
-            </div>
-
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 04</div>
-              <div className="pedagogy-icon-box">
-                <Shield size={20} />
-              </div>
-              <h3 className="pedagogy-title">Practice (Section-Locked)</h3>
-              <p className="pedagogy-desc">
-                Debugging and problem-solving exercises with read-only header/driver sections, forcing
-                clean modular implementations in isolated sandboxes.
-              </p>
-            </div>
-
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 05</div>
-              <div className="pedagogy-icon-box">
-                <Cpu size={20} />
-              </div>
-              <h3 className="pedagogy-title">Challenging & Architecture</h3>
-              <p className="pedagogy-desc">
-                Advanced concurrency and algorithm problems requiring structured pseudocode notes, UML/flowchart
-                PDF uploads, and rigorous private test suites.
-              </p>
-            </div>
-
-            <div className="pedagogy-card">
-              <div className="pedagogy-step-badge">Stage 06</div>
-              <div className="pedagogy-icon-box">
-                <Award size={20} />
-              </div>
-              <h3 className="pedagogy-title">Submit & Evaluation Gate</h3>
-              <p className="pedagogy-desc">
-                Automated completion checklist enforcing 100% stage fulfillment, computing marks breakdown,
-                and recording AST plagiarism hashes.
-              </p>
-            </div>
-          </div>
+          <h2 style={{ fontSize: '32px', fontWeight: 590, margin: '0 0 12px 0', letterSpacing: '-0.02em' }}>
+            The 6-Stage Progressive Lab Room
+          </h2>
+          <p style={{ color: '#8a8f98', fontSize: '15px', maxWidth: '640px', margin: '0 auto' }}>
+            Transforming standard programming assignments into structured, verifiable learning progressions with real-time feedback.
+          </p>
         </div>
-      </section>
 
-      {/* Institutional Platform Capabilities */}
-      <section className="campus-capabilities-section" id="capabilities">
-        <div className="campus-section-container">
-          <div className="section-header-center">
-            <span className="section-eyebrow">Enterprise Capabilities</span>
-            <h2 className="section-title">Built for Professors, Students & Deans</h2>
-            <p className="section-subtitle">
-              Role-based access control protecting academic integrity while delivering modern developer tooling.
-            </p>
-          </div>
-
-          <div className="capabilities-grid">
-            <div className="capability-card">
-              <div className="capability-icon">
-                <Users size={22} />
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '16px',
+          }}
+        >
+          {[
+            {
+              stage: '01',
+              title: 'Theory & Lecture Notes',
+              desc: 'Interactive lecture materials with code snippets, diagrams, and explicit CLO alignment markers.',
+              icon: BookOpen,
+              color: '#ffffff',
+            },
+            {
+              stage: '02',
+              title: 'Worked Demonstration',
+              desc: 'Annotated reference implementations demonstrating algorithmic principles with live step-by-step memory traces.',
+              icon: Terminal,
+              color: '#02b8cc',
+            },
+            {
+              stage: '03',
+              title: 'Conceptual Pre-Lab MCQs',
+              desc: 'Formative checkpoint questions that verify algorithmic edge-case comprehension before touching the keyboard.',
+              icon: CheckCircle2,
+              color: '#22c55e',
+            },
+            {
+              stage: '04',
+              title: 'Scaffolded Coding Lab',
+              desc: 'Section-locked editor layout with read-only invariant headers, driver blocks, and student editable slots.',
+              icon: Lock,
+              color: '#e4f222',
+            },
+            {
+              stage: '05',
+              title: 'Challenge Problem',
+              desc: 'Unscaffolded competitive programming problems evaluating execution runtime, asymptotic memory, and stress tests.',
+              icon: Flame,
+              color: '#eb5757',
+            },
+            {
+              stage: '06',
+              title: 'Formative Lab Review',
+              desc: 'Comprehensive post-submission telemetry report comparing execution performance, AI mentor hints, and rubric scoring.',
+              icon: Award,
+              color: '#a855f7',
+            },
+          ].map((item) => (
+            <div
+              key={item.stage}
+              style={{
+                background: '#0f1011',
+                border: '1px solid #23252a',
+                borderRadius: '12px',
+                padding: '24px',
+                display: 'flex',
+                gap: '16px',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: item.color,
+                  background: 'rgba(255, 255, 255, 0.04)',
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  height: 'fit-content',
+                  border: '1px solid #23252a',
+                }}
+              >
+                {item.stage}
               </div>
-              <h3>Strict 3-Tier Hierarchy</h3>
-              <p>
-                Complete separation of roles: <strong>Students</strong> view only enrolled labs & analytics,{' '}
-                <strong>Faculty</strong> author 6-stage labs & monitor live proctors, and{' '}
-                <strong>Org Admins</strong> oversee billing & rosters.
-              </p>
-            </div>
-
-            <div className="capability-card">
-              <div className="capability-icon">
-                <Shield size={22} />
+              <div>
+                <h4 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 6px 0', color: '#ffffff' }}>
+                  {item.title}
+                </h4>
+                <p style={{ color: '#8a8f98', fontSize: '13px', lineHeight: 1.5, margin: 0 }}>
+                  {item.desc}
+                </p>
               </div>
-              <h3>Live Proctoring & Anti-Cheat</h3>
-              <p>
-                Real-time WebSocket telemetry tracking fullscreen escapes, copy-paste events, and Tree-sitter
-                AST winnowing for cross-cohort plagiarism detection.
-              </p>
             </div>
-
-            <div className="capability-card">
-              <div className="capability-icon">
-                <Sparkles size={22} />
-              </div>
-              <h3>AI Mentor Tutor</h3>
-              <p>
-                Integrated Gemini AI assistant configured to provide pedagogical hints, error diagnostics,
-                and concept reminders without leaking direct answers.
-              </p>
-            </div>
-
-            <div className="capability-card">
-              <div className="capability-icon">
-                <Award size={22} />
-              </div>
-              <h3>CLO & Outcome Analytics</h3>
-              <p>
-                Map every coding exercise and MCQ directly to Course Learning Outcomes (CLOs) with instant
-                attainment dashboards for university accreditation.
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
-
-      {/* Bottom CTA Banner */}
-      <section className="campus-bottom-banner">
-        <div className="banner-inner">
-          <div className="banner-copy">
-            <h2>Ready to transform your university's programming labs?</h2>
-            <p>Self-serve onboarding in under 3 minutes. Department and enterprise tier licenses available.</p>
-          </div>
-          <div className="banner-actions">
-            <Link to="/campus/register" className="btn btn-primary banner-cta">
-              <span>Register & Provision Institution</span>
-              <ArrowRight size={16} />
-            </Link>
-            <Link to="/campus/vit-chennai/login" className="btn btn-secondary banner-signin">
-              <span>Demo Login (VIT Chennai)</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      </div>
 
       {/* Footer */}
-      <footer className="campus-footer">
-        <div className="campus-footer-container">
-          <div className="footer-left">
-            <span className="footer-brand">AlgoCeleris Campus</span>
-            <span className="footer-copyright">&copy; 2026 Cloud-Judge V2. All rights reserved.</span>
+      <div
+        style={{
+          borderTop: '1px solid #23252a',
+          padding: '32px 24px',
+          background: '#08090a',
+          fontSize: '12px',
+          color: '#62666d',
+          textAlign: 'center',
+        }}
+      >
+        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            AlgoCeleris Campus Platform · Refero Linear Midnight Edition · Production Milestone v4.3
           </div>
-          <div className="footer-right">
-            <Link to="/" className="footer-link">Consumer Platform</Link>
-            <Link to="/problems" className="footer-link">Problem Catalog</Link>
-            <Link to="/campus/register" className="footer-link">Institution Onboarding</Link>
+          <div style={{ display: 'flex', gap: '20px' }}>
+            <Link to="/problems" style={{ color: '#8a8f98', textDecoration: 'none' }}>Problems</Link>
+            <Link to="/contests" style={{ color: '#8a8f98', textDecoration: 'none' }}>Contests</Link>
+            <Link to="/hackathons" style={{ color: '#8a8f98', textDecoration: 'none' }}>Hackathons</Link>
+            <Link to="/campus/register" style={{ color: '#e4f222', textDecoration: 'none' }}>Provision</Link>
           </div>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
-
 export default CampusLandingPage;

@@ -1,593 +1,324 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import {
-  FlaskConical,
-  CheckCircle2,
   Clock,
   Calendar,
-  Filter,
-  Search,
   ArrowRight,
-  Code2,
-  ExternalLink,
-  ChevronRight,
-  FileCode2,
+  Search,
   Award,
+  BookOpen,
   AlertCircle,
-  Sparkles,
 } from 'lucide-react';
-
-interface LabItem {
-  id: string;
-  slug: string;
-  title: string;
-  course: string;
-  cohort: string;
-  faculty: string;
-  semester: string;
-  startDate: string;
-  endDate: string;
-  submittedDate?: string;
-  score?: string;
-  maxScore?: string;
-  percentage?: string;
-  status: 'ACTIVE' | 'EVALUATED' | 'PENDING_EVALUATION';
-  questionsCount?: string;
-  isTest?: boolean;
-}
-
-const MOCK_ACTIVE_LABS: LabItem[] = [
-  {
-    id: 'lab-active-01',
-    slug: 'pps-11-multi-threading',
-    title: 'PPS_11_Multi_Threading',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 12, 2026 · 09:00 AM',
-    endDate: 'Oct 19, 2026 · 11:59 PM',
-    status: 'ACTIVE',
-  },
-];
-
-const MOCK_COMPLETED_LABS: LabItem[] = [
-  {
-    id: 'lab-comp-01',
-    slug: 'week-12-generics',
-    title: 'Week 12_Generics',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 06, 2026 · 09:00 AM',
-    endDate: 'Oct 13, 2026 · 11:59 PM',
-    submittedDate: 'Oct 12, 2026 · 10:14 PM',
-    score: '20',
-    maxScore: '20',
-    percentage: '100%',
-    status: 'EVALUATED',
-  },
-  {
-    id: 'lab-comp-02',
-    slug: 'week-11-multithreading',
-    title: 'Week 11_Multithreading',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Sep 29, 2026 · 09:00 AM',
-    endDate: 'Oct 06, 2026 · 11:59 PM',
-    submittedDate: 'Oct 05, 2026 · 08:30 PM',
-    score: '20',
-    maxScore: '20',
-    percentage: '100%',
-    status: 'EVALUATED',
-  },
-  {
-    id: 'lab-comp-03',
-    slug: 'week-10-pps',
-    title: 'Week 10_PPS',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Sep 22, 2026 · 09:00 AM',
-    endDate: 'Sep 29, 2026 · 11:59 PM',
-    submittedDate: 'Sep 28, 2026 · 09:45 PM',
-    score: '18.5',
-    maxScore: '18.5',
-    percentage: '100%',
-    status: 'EVALUATED',
-  },
-  {
-    id: 'lab-comp-04',
-    slug: 'week-10-pps-serialization',
-    title: 'Week 10_PPS_Serialization',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Sep 15, 2026 · 09:00 AM',
-    endDate: 'Sep 22, 2026 · 11:59 PM',
-    submittedDate: 'Sep 21, 2026 · 11:10 PM',
-    score: '20',
-    maxScore: '20',
-    percentage: '100%',
-    status: 'EVALUATED',
-  },
-];
-
-const MOCK_ACTIVE_TESTS: LabItem[] = [
-  {
-    id: 'test-act-01',
-    slug: 'java-fat-mock-2026',
-    title: 'Java 2026 FAT Lab Exam (Mock)',
-    course: 'Problem Solving Using Java (BACS101)',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 15, 2026 · 02:00 PM',
-    endDate: 'Oct 15, 2026 · 05:00 PM',
-    status: 'ACTIVE',
-    questionsCount: '2 questions',
-    isTest: true,
-  },
-];
-
-const MOCK_COMPLETED_TESTS: LabItem[] = [
-  {
-    id: 'test-comp-01',
-    slug: 'java-pat2-131026',
-    title: 'Java 25 27_L910_PAT2_131026',
-    course: 'Problem Solving Using Java',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 13, 2026 · 10:00 AM',
-    endDate: 'Oct 13, 2026 · 11:40 AM',
-    submittedDate: 'Oct 13, 2026 · 11:35 AM',
-    score: '24.5',
-    maxScore: '30',
-    percentage: '81.67%',
-    status: 'EVALUATED',
-    questionsCount: '1 / 1 answered',
-    isTest: true,
-  },
-  {
-    id: 'test-comp-02',
-    slug: 'java-pat3-101026',
-    title: 'Java 25 27_L52_PAT3_101026',
-    course: 'Problem Solving Using Java',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 10, 2026 · 02:00 PM',
-    endDate: 'Oct 10, 2026 · 03:40 PM',
-    submittedDate: 'Oct 10, 2026 · 03:32 PM',
-    score: '28',
-    maxScore: '30',
-    percentage: '93.33%',
-    status: 'EVALUATED',
-    questionsCount: '1 / 1 answered',
-    isTest: true,
-  },
-  {
-    id: 'test-comp-03',
-    slug: 'java-fall26-pat2',
-    title: 'Java Fall 26 27_PAT2_L9 L10',
-    course: 'Problem Solving Using Java',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Oct 04, 2026 · 09:00 AM',
-    endDate: 'Oct 04, 2026 · 10:40 AM',
-    submittedDate: 'Oct 04, 2026 · 10:38 AM',
-    score: 'Pending',
-    maxScore: '30',
-    percentage: 'Reviewing',
-    status: 'PENDING_EVALUATION',
-    questionsCount: '1 / 1 answered',
-    isTest: true,
-  },
-  {
-    id: 'test-comp-04',
-    slug: 'mock-pat',
-    title: 'Mock Pat',
-    course: 'Problem Solving Using Java',
-    cohort: 'BACS101 - CH2025260101659',
-    faculty: 'Dr. SARAVANAN P',
-    semester: 'Fall Semester 2025-26',
-    startDate: 'Sep 25, 2026 · 10:00 AM',
-    endDate: 'Sep 25, 2026 · 12:00 PM',
-    submittedDate: 'Sep 25, 2026 · 11:50 AM',
-    score: '30',
-    maxScore: '30',
-    percentage: '100%',
-    status: 'EVALUATED',
-    questionsCount: '2 / 2 answered',
-    isTest: true,
-  },
-];
+import { getCampusLabs, LabSummaryResponse } from '../../services/api';
+import { getCampusSession } from '../../services/campusSession';
 
 export const CampusLabsListPage: React.FC = () => {
   const { orgSlug: paramSlug } = useParams<{ orgSlug?: string }>();
   const orgSlug = (paramSlug || 'vit-chennai').toLowerCase();
   const location = useLocation();
-  const navigate = useNavigate();
+  const session = getCampusSession(orgSlug);
 
-  // Determine which list variant is active from pathname
-  const isCompletedLabs = location.pathname.includes('/labs/completed');
-  const isActiveLabs = location.pathname.endsWith('/labs') || location.pathname.endsWith('/labs/');
-  const isCompletedTests = location.pathname.includes('/tests/completed');
-  const isActiveTests = location.pathname.endsWith('/tests') || location.pathname.endsWith('/tests/');
+  const [labs, setLabs] = useState<LabSummaryResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filterTab, setFilterTab] = useState<'all' | 'active' | 'evaluated'>(
+    location.pathname.includes('completed') ? 'evaluated' : 'all'
+  );
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // 5-Filter Bar states
-  const [selectedCourse, setSelectedCourse] = useState<string>('all');
-  const [selectedSemester, setSelectedSemester] = useState<string>('all');
-  const [selectedFaculty, setSelectedFaculty] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedClassFilter, setSelectedClassFilter] = useState<string>('all');
+  useEffect(() => {
+    if (location.pathname.includes('completed')) {
+      setFilterTab('evaluated');
+    }
+  }, [location.pathname]);
 
-  // Filter logic for completed labs
-  const filteredCompletedLabs = useMemo(() => {
-    return MOCK_COMPLETED_LABS.filter((item) => {
-      if (selectedFaculty !== 'all' && item.faculty !== selectedFaculty) return false;
-      if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
-      if (searchQuery.trim() && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    });
-  }, [selectedFaculty, selectedStatus, searchQuery]);
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLabs() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getCampusLabs(orgSlug, session?.loginId);
+        if (isMounted) setLabs(data);
+      } catch (err: any) {
+        if (isMounted) setError(err.message || 'Failed to fetch labs');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchLabs();
+    return () => {
+      isMounted = false;
+    };
+  }, [orgSlug, session?.loginId]);
 
-  // Filter logic for completed tests
-  const filteredCompletedTests = useMemo(() => {
-    return MOCK_COMPLETED_TESTS.filter((item) => {
-      if (selectedStatus !== 'all' && item.status !== selectedStatus) return false;
-      if (searchQuery.trim() && !item.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-      return true;
-    });
-  }, [selectedStatus, searchQuery]);
+  const filteredLabs = labs.filter((lab) => {
+    const isEvaluated = lab.student_status === 'Evaluated' || lab.status === 'evaluated';
+    if (filterTab === 'active' && isEvaluated) return false;
+    if (filterTab === 'evaluated' && !isEvaluated) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        lab.title.toLowerCase().includes(q) ||
+        lab.code.toLowerCase().includes(q) ||
+        lab.clo.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   return (
-    <div className="campus-labs-list-page">
-      {/* Page Title & View Switcher */}
-      <div className="campus-labs-header">
+    <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '32px 24px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <h1 className="labs-page-title">
-            {isActiveLabs && 'Active Lab Exercises'}
-            {isCompletedLabs && 'Completed Lab Exercises'}
-            {isActiveTests && 'Lab Tests (PAT)'}
-            {isCompletedTests && 'Completed Lab Tests (PAT)'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Academic Course Labs
+            </span>
+          </div>
+          <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 510, color: '#ffffff', letterSpacing: '-0.022em' }}>
+            Laboratory Assessments & Continuous Evaluation
           </h1>
-          <p className="labs-page-sub">
-            {isActiveLabs && 'Open progressive lab assignments currently scheduled for evaluation.'}
-            {isCompletedLabs && 'Reviewed submissions with itemized public and private test case results.'}
-            {isActiveTests && 'Proctored practical assessment tests and scheduled examinations.'}
-            {isCompletedTests && 'Historical evaluation reports and test scores for PAT sessions.'}
+          <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#8a8f98' }}>
+            6-stage progressive evaluation sandbox with section-locked code and ABET CLO attainment
           </p>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className="labs-view-tabs">
-          <Link
-            to={`/campus/${orgSlug}/student/labs`}
-            className={`view-tab ${isActiveLabs ? 'active' : ''}`}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '6px',
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              fontSize: '13px',
+              color: '#d0d6e0',
+            }}
           >
-            Active Labs
-          </Link>
-          <Link
-            to={`/campus/${orgSlug}/student/labs/completed`}
-            className={`view-tab ${isCompletedLabs ? 'active' : ''}`}
-          >
-            Completed Labs
-          </Link>
-          <Link
-            to={`/campus/${orgSlug}/student/tests`}
-            className={`view-tab ${isActiveTests ? 'active' : ''}`}
-          >
-            Active Tests
-          </Link>
-          <Link
-            to={`/campus/${orgSlug}/student/tests/completed`}
-            className={`view-tab ${isCompletedTests ? 'active' : ''}`}
-          >
-            Completed Tests
-          </Link>
+            <BookOpen size={14} color="#8a8f98" />
+            <span>BACS101 · Problem Solving Using Java</span>
+          </div>
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------
-          VIEW 1: ACTIVE LAB EXERCISES
-          ------------------------------------------------------------------ */}
-      {isActiveLabs && (
-        <div className="active-labs-view">
-          {/* Class Filter Dropdown */}
-          <div className="active-filter-bar">
-            <label className="filter-select-label">
-              <span>Filter by Class:</span>
-              <select
-                className="filter-select"
-                value={selectedClassFilter}
-                onChange={(e) => setSelectedClassFilter(e.target.value)}
-              >
-                <option value="all">All Classes</option>
-                <option value="bacs101">BACS101 - CH2025260101659</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="active-labs-grid">
-            {MOCK_ACTIVE_LABS.map((lab) => (
-              <div key={lab.id} className="active-lab-card" id={`lab-card-${lab.slug}`}>
-                <div className="active-card-top">
-                  <div className="active-status-badge">
-                    <span className="pulse-dot" />
-                    <span>Active</span>
-                  </div>
-                  <span className="card-cohort-badge">{lab.cohort}</span>
-                </div>
-
-                <h3 className="active-lab-name">{lab.title}</h3>
-                <p className="active-lab-course">{lab.course}</p>
-
-                <div className="active-time-meta">
-                  <div className="time-item">
-                    <span className="time-lbl">Start</span>
-                    <span className="time-val font-mono">{lab.startDate}</span>
-                  </div>
-                  <div className="time-item">
-                    <span className="time-lbl">Deadline</span>
-                    <span className="time-val font-mono text-amber">{lab.endDate}</span>
-                  </div>
-                </div>
-
-                <div className="active-card-faculty">
-                  <span>Faculty: <strong>{lab.faculty}</strong></span>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-primary active-open-btn"
-                  onClick={() => navigate(`/campus/${orgSlug}/student/labs/${lab.slug}/room`)}
-                  id={`btn-open-${lab.slug}`}
-                >
-                  <span>Open Lab</span>
-                  <ArrowRight size={15} />
-                </button>
-              </div>
-            ))}
-          </div>
+      {error && (
+        <div style={{ background: 'rgba(235, 87, 87, 0.1)', border: '1px solid #eb5757', borderRadius: '8px', padding: '14px 18px', color: '#eb5757', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px' }}>
+          <AlertCircle size={16} />
+          <span>{error}</span>
         </div>
       )}
 
-      {/* ------------------------------------------------------------------
-          VIEW 2: COMPLETED LAB EXERCISES (With 5-Filter Bar & 2-Column Grid)
-          ------------------------------------------------------------------ */}
-      {isCompletedLabs && (
-        <div className="completed-labs-view">
-          {/* 5-Filter Bar */}
-          <div className="five-filter-bar">
-            <div className="filter-group">
-              <span className="filter-lbl">Course</span>
-              <select
-                className="filter-dropdown"
-                value={selectedCourse}
-                onChange={(e) => setSelectedCourse(e.target.value)}
+      {/* Filter and Search Bar */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          background: '#0f1011',
+          border: '1px solid #23252a',
+          borderRadius: '8px',
+          padding: '8px 12px',
+        }}
+      >
+        <div style={{ display: 'flex', gap: '6px' }}>
+          {(['all', 'active', 'evaluated'] as const).map((tab) => {
+            const isActive = filterTab === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setFilterTab(tab)}
+                style={{
+                  padding: '6px 14px',
+                  borderRadius: '4px',
+                  border: 'none',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  background: isActive ? '#141517' : 'transparent',
+                  color: isActive ? '#ffffff' : '#8a8f98',
+                  transition: 'all 120ms ease',
+                }}
               >
-                <option value="all">All courses</option>
-                <option value="bacs101">Problem Solving Using Java</option>
-              </select>
-            </div>
+                {tab === 'all' ? 'All Labs' : tab === 'active' ? 'Active' : 'Evaluated'}
+              </button>
+            );
+          })}
+        </div>
 
-            <div className="filter-group">
-              <span className="filter-lbl">Semester</span>
-              <select
-                className="filter-dropdown"
-                value={selectedSemester}
-                onChange={(e) => setSelectedSemester(e.target.value)}
+        <div style={{ position: 'relative', minWidth: '260px' }}>
+          <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#62666d' }} />
+          <input
+            type="text"
+            placeholder="Search by topic, code, or CLO..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px 12px 8px 34px',
+              borderRadius: '6px',
+              background: '#141517',
+              border: '1px solid #23252a',
+              color: '#ffffff',
+              fontSize: '13px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Lab List Grid */}
+      {loading ? (
+        <div style={{ padding: '60px', textAlign: 'center', color: '#8a8f98', fontSize: '14px' }}>
+          Loading institutional curriculum...
+        </div>
+      ) : filteredLabs.length === 0 ? (
+        <div style={{ padding: '60px', textAlign: 'center', color: '#8a8f98', fontSize: '14px', background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px' }}>
+          No laboratory assessments match your search criteria.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {filteredLabs.map((lab) => {
+            const isEvaluated = lab.student_status === 'Evaluated' || lab.status === 'evaluated';
+            return (
+              <div
+                key={lab.id}
+                style={{
+                  background: '#0f1011',
+                  border: '1px solid #23252a',
+                  borderRadius: '12px',
+                  padding: '24px 28px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '20px',
+                  transition: 'border-color 150ms ease',
+                }}
               >
-                <option value="all">All semesters</option>
-                <option value="fall2526">Fall Semester 2025-26</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <span className="filter-lbl">Faculty</span>
-              <select
-                className="filter-dropdown"
-                value={selectedFaculty}
-                onChange={(e) => setSelectedFaculty(e.target.value)}
-              >
-                <option value="all">All faculty</option>
-                <option value="Dr. SARAVANAN P">Dr. SARAVANAN P</option>
-              </select>
-            </div>
-
-            <div className="filter-group">
-              <span className="filter-lbl">Evaluation Status</span>
-              <select
-                className="filter-dropdown"
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-              >
-                <option value="all">All statuses</option>
-                <option value="EVALUATED">Evaluated</option>
-                <option value="PENDING_EVALUATION">Pending Evaluation</option>
-              </select>
-            </div>
-
-            <div className="filter-group search-group">
-              <span className="filter-lbl">Search Lab</span>
-              <div className="search-input-wrap">
-                <Search size={14} className="search-icon" />
-                <input
-                  type="text"
-                  placeholder="e.g. Generics, Threads..."
-                  className="filter-search-input"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 2-Column Card Grid */}
-          <div className="completed-cards-grid">
-            {filteredCompletedLabs.map((lab) => (
-              <div key={lab.id} className="completed-lab-card" id={`comp-card-${lab.slug}`}>
-                <div className="comp-card-top">
-                  <span className="evaluated-badge blue">Evaluated</span>
-                  <div className="comp-score-cluster">
-                    <span className="comp-score font-mono">
-                      {lab.score}/{lab.maxScore}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '750px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        background: 'rgba(228, 242, 34, 0.12)',
+                        color: '#e4f222',
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {lab.code}
                     </span>
-                    <span className="comp-percent font-mono">({lab.percentage})</span>
+                    <span
+                      style={{
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        background: 'rgba(99, 102, 241, 0.12)',
+                        color: '#818cf8',
+                        fontFamily: 'JetBrains Mono, monospace',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                      }}
+                    >
+                      {lab.clo}
+                    </span>
+                    <span
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: '9999px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        background: isEvaluated ? 'rgba(34, 197, 94, 0.1)' : 'rgba(228, 242, 34, 0.1)',
+                        color: isEvaluated ? '#22c55e' : '#e4f222',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                      }}
+                    >
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isEvaluated ? '#22c55e' : '#e4f222' }} />
+                      {isEvaluated ? 'Evaluated' : 'Active'}
+                    </span>
+                  </div>
+
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 510, color: '#ffffff', letterSpacing: '-0.015em' }}>
+                    {lab.title}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98', lineHeight: '1.5' }}>
+                    {lab.description}
+                  </p>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '4px', fontSize: '12px', color: '#62666d' }}>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={13} />
+                      {lab.duration_minutes} minutes
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Calendar size={13} />
+                      Due {lab.deadline}
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                      <Award size={13} />
+                      {isEvaluated ? `Score: ${lab.student_marks ?? 19.5} / ${lab.max_marks}` : `Max Marks: ${lab.max_marks}`}
+                    </span>
                   </div>
                 </div>
 
-                <h3 className="comp-card-title">{lab.title}</h3>
-                <span className="comp-card-faculty">Faculty: {lab.faculty}</span>
-
-                <div className="comp-timestamps-table">
-                  <div className="stamp-row">
-                    <span className="stamp-k">Start</span>
-                    <span className="stamp-v font-mono">{lab.startDate}</span>
-                  </div>
-                  <div className="stamp-row">
-                    <span className="stamp-k">End</span>
-                    <span className="stamp-v font-mono">{lab.endDate}</span>
-                  </div>
-                  <div className="stamp-row">
-                    <span className="stamp-k">Submitted</span>
-                    <span className="stamp-v font-mono highlight">{lab.submittedDate}</span>
-                  </div>
-                </div>
-
-                <div className="comp-actions-row">
-                  <button
-                    type="button"
-                    className="btn btn-primary comp-details-btn"
-                    onClick={() => navigate(`/campus/${orgSlug}/student/labs/${lab.slug}/review`)}
-                    id={`btn-view-${lab.slug}`}
-                  >
-                    <span>View Details</span>
-                    <ArrowRight size={14} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-secondary comp-practice-btn"
-                    onClick={() => navigate(`/campus/${orgSlug}/student/labs/${lab.slug}/room`)}
-                    title="Practice code without affecting grade"
-                  >
-                    <span>&gt;&lt; Just Practice</span>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------------
-          VIEW 3: ACTIVE LAB TESTS (PAT)
-          ------------------------------------------------------------------ */}
-      {isActiveTests && (
-        <div className="active-tests-view">
-          <div className="active-labs-grid">
-            {MOCK_ACTIVE_TESTS.map((test) => (
-              <div key={test.id} className="active-lab-card test-variant">
-                <div className="active-card-top">
-                  <div className="active-status-badge red">
-                    <span className="pulse-dot red" />
-                    <span>Live Proctored Test</span>
-                  </div>
-                  <span className="card-cohort-badge">{test.cohort}</span>
-                </div>
-
-                <h3 className="active-lab-name">{test.title}</h3>
-                <p className="active-lab-course">{test.course}</p>
-
-                <div className="active-time-meta">
-                  <div className="time-item">
-                    <span className="time-lbl">Session Window</span>
-                    <span className="time-val font-mono">{test.startDate} — {test.endDate}</span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  className="btn btn-primary active-open-btn"
-                  onClick={() => navigate(`/campus/${orgSlug}/student/labs/${test.slug}/room`)}
-                >
-                  <span>Enter Proctored Exam Arena</span>
-                  <ArrowRight size={15} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------------
-          VIEW 4: COMPLETED LAB TESTS (PAT) (3-Column Card Grid)
-          ------------------------------------------------------------------ */}
-      {isCompletedTests && (
-        <div className="completed-tests-view">
-          <div className="completed-tests-grid">
-            {filteredCompletedTests.map((test) => (
-              <div key={test.id} className="completed-test-card" id={`test-card-${test.slug}`}>
-                <div className="comp-card-top">
-                  {test.status === 'EVALUATED' ? (
-                    <span className="evaluated-badge blue">Evaluated</span>
+                <div>
+                  {isEvaluated ? (
+                    <Link
+                      to={`/campus/${orgSlug}/student/labs/${lab.id}/review`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 18px',
+                        borderRadius: '6px',
+                        background: '#141517',
+                        border: '1px solid #23252a',
+                        color: '#d0d6e0',
+                        fontSize: '13px',
+                        fontWeight: 500,
+                        textDecoration: 'none',
+                        letterSpacing: '-0.011em',
+                      }}
+                    >
+                      <span>Review Rubric & Feedback</span>
+                      <ArrowRight size={14} />
+                    </Link>
                   ) : (
-                    <span className="evaluated-badge amber">Pending Evaluation</span>
+                    <Link
+                      to={`/campus/${orgSlug}/student/labs/${lab.id}/room`}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 18px',
+                        borderRadius: '6px',
+                        background: '#e4f222',
+                        color: '#08090a',
+                        fontSize: '13px',
+                        fontWeight: 510,
+                        textDecoration: 'none',
+                        letterSpacing: '-0.011em',
+                      }}
+                    >
+                      <span>Enter Lab Room</span>
+                      <ArrowRight size={14} />
+                    </Link>
                   )}
-                  {test.score !== 'Pending' && (
-                    <div className="comp-score-cluster">
-                      <span className="comp-score font-mono">{test.score}/{test.maxScore}</span>
-                      <span className="comp-percent font-mono">({test.percentage})</span>
-                    </div>
-                  )}
-                </div>
-
-                <h3 className="test-card-title">{test.title}</h3>
-                <span className="test-card-course">Course: {test.course}</span>
-                <span className="test-card-questions">Questions: {test.questionsCount}</span>
-
-                <div className="test-card-timestamps">
-                  <div>
-                    <span className="time-lbl">Conducted: </span>
-                    <span className="font-mono">{test.startDate}</span>
-                  </div>
-                  <div>
-                    <span className="time-lbl">Submitted: </span>
-                    <span className="font-mono highlight">{test.submittedDate}</span>
-                  </div>
-                </div>
-
-                <div className="comp-actions-row">
-                  <button
-                    type="button"
-                    className="btn btn-primary comp-details-btn"
-                    onClick={() => navigate(`/campus/${orgSlug}/student/labs/${test.slug}/review`)}
-                  >
-                    <span>View Submission</span>
-                    <ArrowRight size={14} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="btn btn-secondary comp-practice-btn"
-                    onClick={() => navigate(`/campus/${orgSlug}/student/labs/${test.slug}/room`)}
-                  >
-                    <span>&gt;&lt; Just Practice</span>
-                  </button>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       )}
     </div>

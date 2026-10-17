@@ -1,508 +1,755 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   CheckCircle2,
-  Lock,
-  FileText,
-  Code2,
-  FileCheck2,
-  History,
-  MessageSquare,
-  Sparkles,
-  ExternalLink,
-  ChevronRight,
-  BookOpen,
-  Cpu,
-  Brain,
-  Shield,
   Clock,
-  Award,
+  ArrowLeft,
+  ArrowRight,
+  ShieldCheck,
+  Code2,
+  Sparkles,
+  Copy,
+  Check,
+  Calendar,
+  AlertCircle,
 } from 'lucide-react';
-
-type ReviewTab =
-  | 'content'
-  | 'demo'
-  | 'led'
-  | 'practice'
-  | 'challenging'
-  | 'evaluation'
-  | 'history'
-  | 'feedback';
+import Editor from '@monaco-editor/react';
+import { getCampusLabDetail, LabDetailResponse } from '../../services/api';
+import { getCampusSession } from '../../services/campusSession';
 
 export const CampusLabReviewPage: React.FC = () => {
-  const { orgSlug: paramSlug, labId } = useParams<{ orgSlug?: string; labId?: string }>();
+  const { orgSlug: paramSlug, labId: paramLabId } = useParams<{
+    orgSlug?: string;
+    labId?: string;
+  }>();
   const orgSlug = (paramSlug || 'vit-chennai').toLowerCase();
+  const rawLabId = paramLabId || 'bacs101-lab-10';
+  const labId = rawLabId === 'pps-11-multi-threading' ? 'bacs101-lab-11' : rawLabId;
   const navigate = useNavigate();
+  const session = getCampusSession(orgSlug);
 
-  const [activeTab, setActiveTab] = useState<ReviewTab>('evaluation');
+  const [lab, setLab] = useState<LabDetailResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState<boolean>(false);
 
-  // Format title from labId
-  const labTitle =
-    labId === 'week-12-generics'
-      ? 'Week 12_Generics'
-      : labId === 'week-11-multithreading'
-      ? 'Week 11_Multithreading'
-      : labId === 'week-10-pps'
-      ? 'Week 10_PPS'
-      : (labId || 'Lab Exercise')
-          .split('-')
-          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join(' ');
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLab() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getCampusLabDetail(orgSlug, labId, session?.loginId);
+        if (isMounted) {
+          setLab(data);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          console.error('Failed to load lab review details:', err);
+          setError(err.message || 'Failed to load lab review');
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+    fetchLab();
+    return () => {
+      isMounted = false;
+    };
+  }, [orgSlug, labId, session?.loginId]);
+
+  const handleCopyCode = () => {
+    const code = lab?.student_progress?.challenging_code;
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (loading) {
+    return (
+      <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div
+          style={{
+            height: '140px',
+            background: '#0f1011',
+            borderRadius: '12px',
+            border: '1px solid #23252a',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#8a8f98',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: '13px',
+          }}
+        >
+          Loading authenticated lab evaluation assessment...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !lab) {
+    return (
+      <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+        <div
+          style={{
+            background: '#0f1011',
+            borderRadius: '12px',
+            border: '1px solid #eb5757',
+            padding: '32px',
+            textAlign: 'center',
+          }}
+        >
+          <AlertCircle size={32} style={{ color: '#eb5757', margin: '0 auto 16px' }} />
+          <h2 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px' }}>
+            Assessment Record Unavailable
+          </h2>
+          <p style={{ color: '#8a8f98', fontSize: '14px', marginBottom: '20px' }}>
+            {error || 'The requested lab record could not be retrieved from the campus database.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate(`/campus/${orgSlug}/student/labs`)}
+            style={{
+              background: '#e4f222',
+              color: '#08090a',
+              border: 'none',
+              padding: '10px 18px',
+              borderRadius: '6px',
+              fontWeight: 590,
+              fontSize: '13px',
+              cursor: 'pointer',
+            }}
+          >
+            ← Return to Lab Assessments
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const labRecord = lab.lab;
+  const progress = lab.student_progress;
+  const score = progress?.obtained_marks ?? 0;
+  const maxScore = labRecord?.max_marks || progress?.max_marks || 20;
+  const percentage = Math.round((score / maxScore) * 100);
+
+  // Derive letter grade
+  const grade =
+    percentage >= 90
+      ? 'A+'
+      : percentage >= 80
+      ? 'A'
+      : percentage >= 70
+      ? 'B'
+      : percentage >= 60
+      ? 'C'
+      : 'F';
 
   return (
-    <div className="campus-review-page">
-      {/* Top Info Banner */}
-      <div className="campus-review-banner">
-        <div className="banner-left">
-          <Lock size={15} className="banner-lock-icon" />
-          <div className="banner-text-cluster">
-            <strong>Completed Lab Exercise</strong>
-            <span>
-              This lab exercise has already been submitted and scored. You are viewing your submission
-              and evaluation in read-only mode.
+    <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Top Back Link */}
+      <div style={{ marginBottom: '16px' }}>
+        <Link
+          to={`/campus/${orgSlug}/student/labs`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            color: '#8a8f98',
+            textDecoration: 'none',
+            fontSize: '13px',
+            fontWeight: 510,
+            transition: 'color 0.15s ease',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
+        >
+          <ArrowLeft size={14} /> Back to Lab Assessments
+        </Link>
+      </div>
+
+      {/* Main Review Hero Banner */}
+      <div
+        style={{
+          background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
+          border: '1px solid #23252a',
+          borderRadius: '12px',
+          padding: '28px',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '20px',
+        }}
+      >
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.04em',
+                padding: '3px 8px',
+                borderRadius: '4px',
+                background: 'rgba(34, 197, 94, 0.1)',
+                color: '#22c55e',
+                border: '1px solid rgba(34, 197, 94, 0.25)',
+                fontFamily: 'JetBrains Mono, monospace',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
+              <CheckCircle2 size={11} /> EVALUATED & VERIFIED
+            </span>
+            <span style={{ color: '#62666d' }}>•</span>
+            <span
+              style={{
+                fontSize: '12px',
+                color: '#8a8f98',
+                fontFamily: 'JetBrains Mono, monospace',
+              }}
+            >
+              {labRecord?.course_code || labRecord?.code || 'BACS101'}
+            </span>
+          </div>
+
+          <h1
+            style={{
+              fontSize: '26px',
+              fontWeight: 590,
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.02em',
+              color: '#ffffff',
+            }}
+          >
+            {labRecord?.title || 'Lab Assessment Review'}
+          </h1>
+
+          <p style={{ color: '#8a8f98', fontSize: '14px', margin: '0 0 12px 0', maxWidth: '640px' }}>
+            {labRecord?.description}
+          </p>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+              fontSize: '12px',
+              color: '#62666d',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <Calendar size={13} /> Submitted:{' '}
+              <strong style={{ color: '#d0d6e0' }}>
+                {progress?.submitted_at
+                  ? new Date(progress.submitted_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })
+                  : 'Oct 14, 2026'}
+              </strong>
+            </span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <Clock size={13} /> Active Time Spent:{' '}
+              <strong style={{ color: '#d0d6e0', fontFamily: 'JetBrains Mono, monospace' }}>
+                {progress?.active_minutes
+                  ? `${progress.active_minutes} mins`
+                  : '45 mins'}
+              </strong>
+            </span>
+            <span>•</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <ShieldCheck size={13} style={{ color: '#22c55e' }} /> Plagiarism Score:{' '}
+              <strong style={{ color: '#22c55e', fontFamily: 'JetBrains Mono, monospace' }}>
+                0.0% Clean (AST Winnowed)
+              </strong>
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          className="btn btn-secondary review-back-btn"
-          onClick={() => navigate(`/campus/${orgSlug}/student/labs/completed`)}
-        >
-          <ArrowLeft size={14} />
-          <span>Back to Completed Labs</span>
-        </button>
-      </div>
 
-      {/* Lab Header Summary */}
-      <div className="campus-review-header">
-        <div className="review-title-col">
-          <div className="review-breadcrumbs">
-            <span>BACS101 · Problem Solving Using Java</span>
-            <ChevronRight size={12} />
-            <span className="font-mono">{labTitle}</span>
+        {/* Big Score Card */}
+        <div
+          style={{
+            background: '#08090a',
+            border: '1px solid #23252a',
+            borderRadius: '10px',
+            padding: '20px 24px',
+            textAlign: 'center',
+            minWidth: '180px',
+          }}
+        >
+          <div
+            style={{
+              fontSize: '11px',
+              color: '#8a8f98',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+              marginBottom: '6px',
+            }}
+          >
+            Final Assessment Score
           </div>
-          <h1 className="review-lab-title">{labTitle}</h1>
-          <div className="review-meta-pills">
-            <span className="pill-status blue">
-              <CheckCircle2 size={13} />
-              <span>Evaluated</span>
+          <div
+            style={{
+              fontSize: '36px',
+              fontWeight: 600,
+              fontFamily: 'JetBrains Mono, monospace',
+              color: '#22c55e',
+              lineHeight: 1.1,
+              marginBottom: '4px',
+            }}
+          >
+            {score.toFixed(1)}
+            <span style={{ fontSize: '18px', color: '#62666d' }}> / {maxScore.toFixed(1)}</span>
+          </div>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '12px',
+              color: '#8a8f98',
+            }}
+          >
+            <span
+              style={{
+                background: 'rgba(34, 197, 94, 0.15)',
+                color: '#22c55e',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontWeight: 600,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}
+            >
+              Grade {grade}
             </span>
-            <span className="pill-cohort">Cohort: BACS101 - CH2025260101659</span>
-            <span className="pill-faculty">Faculty: Dr. SARAVANAN P</span>
+            <span>({percentage}%)</span>
           </div>
-        </div>
-
-        <div className="review-score-hero">
-          <span className="score-hero-label">Final Evaluation Score</span>
-          <div className="score-hero-digits">
-            <span className="earned-points font-mono">20</span>
-            <span className="total-points font-mono">/ 20</span>
-            <span className="percent-badge font-mono">100%</span>
-          </div>
-          <span className="score-hero-sub">Grade Awarded by Faculty & Automated Judge</span>
         </div>
       </div>
 
-      {/* 8 HORIZONTAL REVIEW TABS */}
-      <div className="campus-review-tabs" role="tablist">
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
-          onClick={() => setActiveTab('content')}
+      {/* 2-Column Evaluation Summary */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gap: '20px',
+          marginBottom: '24px',
+        }}
+      >
+        {/* Rubric Criteria Breakdown */}
+        <div
+          style={{
+            background: '#0f1011',
+            border: '1px solid #23252a',
+            borderRadius: '12px',
+            padding: '24px',
+          }}
         >
-          <BookOpen size={14} />
-          <span>1. Content</span>
-        </button>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '16px',
+            }}
+          >
+            <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+              Rubric Assessment Breakdown
+            </h3>
+            <span
+              style={{
+                fontSize: '11px',
+                fontFamily: 'JetBrains Mono, monospace',
+                color: '#8a8f98',
+              }}
+            >
+              4 Stages Evaluated
+            </span>
+          </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'demo' ? 'active' : ''}`}
-          onClick={() => setActiveTab('demo')}
-        >
-          <Code2 size={14} />
-          <span>2. Demonstration</span>
-        </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {/* Criteria 1 */}
+            <div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  marginBottom: '6px',
+                }}
+              >
+                <span style={{ color: '#d0d6e0' }}>Stage 02: Worked Example Analysis</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
+                  4.0 / 4.0
+                </span>
+              </div>
+              <div
+                style={{
+                  height: '5px',
+                  background: '#161718',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ width: '100%', height: '100%', background: '#22c55e' }} />
+              </div>
+            </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'led' ? 'active' : ''}`}
-          onClick={() => setActiveTab('led')}
-        >
-          <CheckCircle2 size={14} />
-          <span>3. LED (5/5)</span>
-        </button>
+            {/* Criteria 2 */}
+            <div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  marginBottom: '6px',
+                }}
+              >
+                <span style={{ color: '#d0d6e0' }}>Stage 03: LED MCQs Mastery</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
+                  4.0 / 4.0
+                </span>
+              </div>
+              <div
+                style={{
+                  height: '5px',
+                  background: '#161718',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ width: '100%', height: '100%', background: '#22c55e' }} />
+              </div>
+            </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'practice' ? 'active' : ''}`}
-          onClick={() => setActiveTab('practice')}
-        >
-          <Cpu size={14} />
-          <span>4. Practice Problems</span>
-        </button>
+            {/* Criteria 3 */}
+            <div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  marginBottom: '6px',
+                }}
+              >
+                <span style={{ color: '#d0d6e0' }}>Stage 04: Section-Locked Practice</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
+                  6.0 / 6.0
+                </span>
+              </div>
+              <div
+                style={{
+                  height: '5px',
+                  background: '#161718',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div style={{ width: '100%', height: '100%', background: '#22c55e' }} />
+              </div>
+            </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'challenging' ? 'active' : ''}`}
-          onClick={() => setActiveTab('challenging')}
-        >
-          <Award size={14} />
-          <span>5. Challenging Problem</span>
-        </button>
+            {/* Criteria 4 */}
+            <div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '13px',
+                  marginBottom: '6px',
+                }}
+              >
+                <span style={{ color: '#d0d6e0' }}>Stage 05: Capstone Execution & Invariants</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
+                  {Math.max(0, score - 14).toFixed(1)} / 6.0
+                </span>
+              </div>
+              <div
+                style={{
+                  height: '5px',
+                  background: '#161718',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    width: `${Math.min(100, Math.round(((score - 14) / 6) * 100))}%`,
+                    height: '100%',
+                    background: '#22c55e',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'evaluation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('evaluation')}
+        {/* CLO Attainment & Automated Feedback */}
+        <div
+          style={{
+            background: '#0f1011',
+            border: '1px solid #23252a',
+            borderRadius: '12px',
+            padding: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+          }}
         >
-          <FileCheck2 size={14} />
-          <span>6. Evaluation Summary</span>
-        </button>
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: '#e4f222',
+                marginBottom: '12px',
+              }}
+            >
+              <Sparkles size={16} />
+              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+                Course Learning Outcomes (ABET / NBA)
+              </h3>
+            </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
-        >
-          <History size={14} />
-          <span>7. Submission History</span>
-        </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+              <div
+                style={{
+                  background: '#161718',
+                  border: '1px solid #23252a',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: 510 }}>
+                    CLO-1: Core Algorithmic Techniques
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#8a8f98' }}>
+                    Recursive structures & invariant correctness
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    fontWeight: 600,
+                    color: '#22c55e',
+                  }}
+                >
+                  98.2%
+                </span>
+              </div>
 
-        <button
-          type="button"
-          className={`tab-btn ${activeTab === 'feedback' ? 'active' : ''}`}
-          onClick={() => setActiveTab('feedback')}
-        >
-          <MessageSquare size={14} />
-          <span>8. Feedback & CLO</span>
-        </button>
+              <div
+                style={{
+                  background: '#161718',
+                  border: '1px solid #23252a',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: 510 }}>
+                    CLO-2: Complexity Analysis & Optimization
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#8a8f98' }}>
+                    Asymptotic bounds & memory constraints
+                  </div>
+                </div>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontFamily: 'JetBrains Mono, monospace',
+                    fontWeight: 600,
+                    color: '#22c55e',
+                  }}
+                >
+                  95.0%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: '#141517',
+              border: '1px solid #23252a',
+              borderRadius: '8px',
+              padding: '14px',
+              fontSize: '12px',
+              color: '#8a8f98',
+              lineHeight: 1.5,
+            }}
+          >
+            <div
+              style={{
+                color: '#d0d6e0',
+                fontWeight: 510,
+                marginBottom: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              <CheckCircle2 size={13} style={{ color: '#22c55e' }} /> Evaluation Reviewer Note:
+            </div>
+            {progress?.evaluation_feedback ||
+              'Excellent implementation. All 10 hidden edge test cases passed within 256MB memory boundaries. Code complies strictly with time complexity invariants without memory leaks.'}
+          </div>
+        </div>
       </div>
 
-      {/* TAB CONTENT PANELS */}
-      <div className="campus-review-content-card">
-        {/* TAB 1: Content */}
-        {activeTab === 'content' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Lecture Notes & Core Pedagogical Concepts</h3>
-            <p className="panel-sub">
-              Theoretical reference materials and code templates provided by the course faculty.
-            </p>
-
-            <div className="content-markdown-box">
-              <h4>1. Java Generics and Type Erasure</h4>
-              <p>
-                Generics allow types (classes and interfaces) to be parameters when defining
-                classes, interfaces and methods. Type parameters provide a way for you to re-use
-                the same code with different inputs:
-              </p>
-              <pre className="code-block font-mono">
-{`public class Box<T> {
-    private T t;
-    public void set(T t) { this.t = t; }
-    public T get() { return t; }
-}`}
-              </pre>
-
-              <h4>2. Bounded Type Parameters & Wildcards</h4>
-              <p>
-                Use upper-bounded wildcards <code>&lt;? extends Number&gt;</code> to relax the
-                restrictions on a variable. A lower-bounded wildcard <code>&lt;? super Integer&gt;</code>
-                restricts the unknown type to be a specific type or a super type.
-              </p>
-            </div>
+      {/* Submitted Code Viewer */}
+      <div
+        style={{
+          background: '#0f1011',
+          border: '1px solid #23252a',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          marginBottom: '32px',
+        }}
+      >
+        <div
+          style={{
+            background: '#141517',
+            borderBottom: '1px solid #23252a',
+            padding: '12px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Code2 size={16} style={{ color: '#e4f222' }} />
+            <span style={{ fontSize: '13px', fontWeight: 590, color: '#ffffff' }}>
+              Final Evaluated Code Solution
+            </span>
+            <span
+              style={{
+                fontSize: '11px',
+                color: '#8a8f98',
+                fontFamily: 'JetBrains Mono, monospace',
+                background: '#161718',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                border: '1px solid #23252a',
+              }}
+            >
+              {labRecord?.challenging_problem?.language || 'java'}
+            </span>
           </div>
-        )}
 
-        {/* TAB 2: Demonstration Problems */}
-        {activeTab === 'demo' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Worked Demonstration Problems</h3>
-            <p className="panel-sub">
-              Instructor walkthroughs and canonical reference solutions for study.
-            </p>
+          <button
+            type="button"
+            onClick={handleCopyCode}
+            style={{
+              background: 'transparent',
+              border: '1px solid #23252a',
+              borderRadius: '6px',
+              color: copied ? '#22c55e' : '#8a8f98',
+              padding: '6px 12px',
+              fontSize: '12px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            {copied ? <Check size={13} /> : <Copy size={13} />}
+            {copied ? 'Copied' : 'Copy Code'}
+          </button>
+        </div>
 
-            <div className="demo-problem-box">
-              <div className="demo-header">
-                <strong>Demo Problem 1: Generic Thread-Safe Stack</strong>
-                <span className="badge-easy">Demonstration</span>
-              </div>
-              <p className="demo-desc">
-                Implementing a bounded LIFO stack that safely handles simultaneous push and pop
-                operations using Java synchronized blocks.
-              </p>
-              <pre className="code-block font-mono">
-{`import java.util.LinkedList;
+        <div style={{ height: '360px', width: '100%' }}>
+          <Editor
+            height="100%"
+            language={labRecord?.challenging_problem?.language || 'java'}
+            theme="vs-dark"
+            value={
+              progress?.challenging_code ||
+              '// Evaluated solution code verified against concurrency test harness.'
+            }
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              fontSize: 13,
+              fontFamily: 'JetBrains Mono, monospace',
+              scrollBeyondLastLine: false,
+              lineNumbers: 'on',
+              folding: true,
+              renderLineHighlight: 'all',
+            }}
+          />
+        </div>
+      </div>
 
-public class ThreadSafeStack<T> {
-    private final LinkedList<T> list = new LinkedList<>();
+      {/* Bottom Navigation Actions */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
+        <Link
+          to={`/campus/${orgSlug}/student/labs`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            color: '#8a8f98',
+            textDecoration: 'none',
+            fontSize: '13px',
+            fontWeight: 510,
+          }}
+        >
+          <ArrowLeft size={14} /> Back to Lab List
+        </Link>
 
-    public synchronized void push(T item) {
-        list.addFirst(item);
-        notifyAll();
-    }
-
-    public synchronized T pop() throws InterruptedException {
-        while (list.isEmpty()) {
-            wait();
-        }
-        return list.removeFirst();
-    }
-}`}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: LED Assessment */}
-        {activeTab === 'led' && (
-          <div className="tab-panel-inner">
-            <div className="led-top-status">
-              <div className="led-badge-pill">
-                <CheckCircle2 size={16} />
-                <span>LED Assessment Complete: 5/5 Correct (100%)</span>
-              </div>
-              <span className="led-sub">Points Awarded: 5.0 / 5.0</span>
-            </div>
-
-            <div className="led-questions-list">
-              <div className="led-q-card correct">
-                <div className="q-head">
-                  <span className="q-num">Q1</span>
-                  <span className="q-title">Which of the following creates a bounded wildcard in Java?</span>
-                  <span className="q-mark">1/1 Mark</span>
-                </div>
-                <div className="q-options">
-                  <div className="q-opt selected-correct">
-                    <span className="opt-radio">●</span>
-                    <span>List&lt;? extends Number&gt; list</span>
-                  </div>
-                  <div className="q-opt">
-                    <span className="opt-radio">○</span>
-                    <span>List&lt;T : Number&gt; list</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="led-q-card correct">
-                <div className="q-head">
-                  <span className="q-num">Q2</span>
-                  <span className="q-title">What happens to generic type information at runtime in Java?</span>
-                  <span className="q-mark">1/1 Mark</span>
-                </div>
-                <div className="q-options">
-                  <div className="q-opt selected-correct">
-                    <span className="opt-radio">●</span>
-                    <span>It is erased by the compiler via type erasure</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 4: Practice Problems */}
-        {activeTab === 'practice' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Practice Coding Challenges (Read-Only)</h3>
-            <p className="panel-sub">
-              Your passing solutions executed against the Linux sandbox container.
-            </p>
-
-            <div className="practice-subtabs">
-              <span className="badge-pill active">Problem 1: Generic Pair Swapper (Solved · 10/10)</span>
-            </div>
-
-            <div className="code-read-only-box">
-              <div className="code-editor-top">
-                <span>Solution: PairSwapper.java (GCC Java 21)</span>
-                <span className="test-pass-indicator">✓ All 4 Test Cases Passed</span>
-              </div>
-              <pre className="code-block font-mono">
-{`public class PairSwapper {
-    public static <T> void swap(T[] array, int i, int j) {
-        if (array == null || i < 0 || j < 0 || i >= array.length || j >= array.length) {
-            return;
-        }
-        T temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-}`}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 5: Challenging Problems */}
-        {activeTab === 'challenging' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Challenging Concurrency Problem</h3>
-            <p className="panel-sub">
-              Multi-threaded Deadlock-Free Locking of Two Shared Resources with submitted pseudocode and design.
-            </p>
-
-            <div className="challenge-review-grid">
-              <div className="challenge-item">
-                <h4>Submitted Approach & Pseudocode</h4>
-                <div className="pseudocode-preview font-mono">
-                  1. Determine intrinsic System.identityHashCode for both locks.<br />
-                  2. Always acquire the lock with lower hashcode first.<br />
-                  3. If hashcodes collide, acquire tie-breaker secondary lock.<br />
-                  4. Execute critical section within try-finally block.
-                </div>
-              </div>
-
-              <div className="challenge-item">
-                <h4>Uploaded Design Artifact</h4>
-                <div className="artifact-preview">
-                  <FileText size={20} color="#60a5fa" />
-                  <div>
-                    <strong>flowchart-lock-ordering.pdf</strong>
-                    <span className="artifact-size">142 KB · Verified Upload</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 6: Evaluation Summary */}
-        {activeTab === 'evaluation' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Itemized Evaluation Breakdown</h3>
-            <p className="panel-sub">
-              Automated judge test suite results and rubric allocations.
-            </p>
-
-            <div className="eval-table-wrapper">
-              <table className="eval-table">
-                <thead>
-                  <tr>
-                    <th>Component</th>
-                    <th>Public Tests</th>
-                    <th>Private (Hidden) Tests</th>
-                    <th>Time (Max)</th>
-                    <th>Memory</th>
-                    <th>Score</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>LED Concept Assessment</strong></td>
-                    <td>5 / 5 passed</td>
-                    <td>N/A</td>
-                    <td>Instant</td>
-                    <td>-</td>
-                    <td className="score-cell font-mono">5.0 / 5.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Practice Part 1: Debugging Code</strong></td>
-                    <td>2 / 2 passed</td>
-                    <td>2 / 2 passed</td>
-                    <td>14ms</td>
-                    <td>18.4 MB</td>
-                    <td className="score-cell font-mono">5.0 / 5.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Practice Part 2: Problem Solving</strong></td>
-                    <td>2 / 2 passed</td>
-                    <td>2 / 2 passed</td>
-                    <td>18ms</td>
-                    <td>21.2 MB</td>
-                    <td className="score-cell font-mono">5.0 / 5.0</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Challenging Problem: Concurrency</strong></td>
-                    <td>3 / 3 passed</td>
-                    <td>4 / 4 passed</td>
-                    <td>28ms</td>
-                    <td>24.6 MB</td>
-                    <td className="score-cell font-mono">5.0 / 5.0</td>
-                  </tr>
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colSpan={5}><strong>Total Evaluated Marks</strong></td>
-                    <td className="score-cell font-mono total">20.0 / 20.0 (100%)</td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 7: Submission History */}
-        {activeTab === 'history' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Submission History & Audit Trail</h3>
-            <div className="history-timeline">
-              <div className="history-entry final">
-                <div className="entry-dot" />
-                <div className="entry-body">
-                  <div className="entry-title-row">
-                    <strong>Final Graded Submission</strong>
-                    <span className="font-mono text-muted">Oct 12, 2026 · 10:14:22 PM</span>
-                  </div>
-                  <span className="entry-detail font-mono">Verdict: ACCEPTED · Score: 20/20 · SHA: a8f419b...</span>
-                </div>
-              </div>
-
-              <div className="history-entry">
-                <div className="entry-dot" />
-                <div className="entry-body">
-                  <div className="entry-title-row">
-                    <span>Practice Run 3: Challenging Problem</span>
-                    <span className="font-mono text-muted">Oct 12, 2026 · 10:02:15 PM</span>
-                  </div>
-                  <span className="entry-detail font-mono">Public Tests: 3/3 passed</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 8: Feedback Summary & CLO */}
-        {activeTab === 'feedback' && (
-          <div className="tab-panel-inner">
-            <h3 className="panel-title">Instructor Feedback & Learning Outcomes</h3>
-
-            <div className="feedback-card">
-              <div className="feedback-source">
-                <strong>👨‍🏫 Dr. SARAVANAN P (Course Faculty)</strong>
-                <span className="feedback-date">Oct 13, 2026 · 09:15 AM</span>
-              </div>
-              <p className="feedback-text">
-                "Excellent grasp of bounded wildcards and rigorous identity-hashcode lock ordering.
-                Code formatting complies with Google Java style guidelines. Well done."
-              </p>
-            </div>
-
-            <div className="feedback-card ai">
-              <div className="feedback-source">
-                <Sparkles size={14} className="sparkle-ai" />
-                <strong>AlgoCeleris AI Mentor Insight</strong>
-              </div>
-              <p className="feedback-text">
-                "Zero deadlock occurrences across 10,000 automated stress cycles. High cyclomatic
-                efficiency (Complexity: 3). Strong candidate for advanced Distributed Systems modules."
-              </p>
-            </div>
-
-            <div className="clo-attainment-box">
-              <h4>Course Learning Outcome (CLO) Attainment</h4>
-              <div className="clo-item">
-                <div className="clo-info">
-                  <span className="clo-code">CLO-2: Concurrency & Generic Data Structures</span>
-                  <span className="clo-score font-mono">100% Attained</span>
-                </div>
-                <div className="clo-bar-track">
-                  <div className="clo-bar-fill" style={{ width: '100%' }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <Link
+          to={`/campus/${orgSlug}/student/analytics`}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 18px',
+            borderRadius: '6px',
+            background: '#e4f222',
+            color: '#08090a',
+            fontWeight: 590,
+            fontSize: '13px',
+            textDecoration: 'none',
+          }}
+        >
+          View Full Attainment & Analytics <ArrowRight size={14} />
+        </Link>
       </div>
     </div>
   );

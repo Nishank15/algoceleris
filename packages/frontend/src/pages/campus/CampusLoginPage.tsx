@@ -1,440 +1,465 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  GraduationCap,
-  Sparkles,
-  Cpu,
-  Brain,
-  BarChart3,
-  CheckCircle2,
+  campusLogin,
+  listCampusOrgs,
+  CampusOrgSummary,
+  setAccessToken,
+} from '../../services/api';
+import { saveCampusSession, CampusRole } from '../../services/campusSession';
+import {
+  Building2,
   Lock,
+  User,
+  ShieldAlert,
+  ArrowRight,
+  GraduationCap,
+  Users,
+  ShieldCheck,
   Eye,
   EyeOff,
-  User,
-  Shield,
-  ArrowRight,
-  School,
-  Building2,
-  ChevronDown,
-  Info,
 } from 'lucide-react';
-import {
-  CampusRole,
-  DEMO_CAMPUS_ACCOUNTS,
-  saveCampusSession,
-  CampusUserSession,
-} from '../../services/campusSession';
-
-interface OrgBranding {
-  name: string;
-  fullName: string;
-  acronym: string;
-  location: string;
-  accent: string;
-}
-
-const ORG_PRESETS: Record<string, OrgBranding> = {
-  'vit-chennai': {
-    name: 'VIT CHENNAI',
-    fullName: 'Vellore Institute of Technology, Chennai',
-    acronym: 'VIT',
-    location: 'Vandalur-Kelambakkam Road, Chennai',
-    accent: '#3b82f6',
-  },
-  iitm: {
-    name: 'IIT MADRAS',
-    fullName: 'Indian Institute of Technology Madras',
-    acronym: 'IITM',
-    location: 'Sardar Patel Road, Chennai',
-    accent: '#f59e0b',
-  },
-  nitt: {
-    name: 'NIT TRICHY',
-    fullName: 'National Institute of Technology, Tiruchirappalli',
-    acronym: 'NITT',
-    location: 'Thuvakudi, Tiruchirappalli',
-    accent: '#10b981',
-  },
-};
 
 export const CampusLoginPage: React.FC = () => {
-  const { orgSlug: paramSlug } = useParams<{ orgSlug?: string }>();
+  const { orgSlug = 'vit-chennai' } = useParams<{ orgSlug: string }>();
   const navigate = useNavigate();
 
-  const orgSlug = (paramSlug || 'vit-chennai').toLowerCase();
-  const branding: OrgBranding = ORG_PRESETS[orgSlug] || {
-    name: orgSlug.toUpperCase(),
-    fullName: `${orgSlug.toUpperCase()} Engineering Institute`,
-    acronym: orgSlug.slice(0, 4).toUpperCase(),
-    location: 'University Campus',
-    accent: '#3b82f6',
-  };
+  const [org, setOrg] = useState<CampusOrgSummary | null>(null);
+  const [role, setRole] = useState<CampusRole>('student');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loadingOrg, setLoadingOrg] = useState(true);
 
-  const [selectedRole, setSelectedRole] = useState<CampusRole>('student');
-  const [loginId, setLoginId] = useState<string>('nishank.chhipa2025@vitstudent.ac.in');
-  const [password, setPassword] = useState<string>('••••••••••••');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [rememberMe, setRememberMe] = useState<boolean>(true);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [notification, setNotification] = useState<string | null>(null);
-
-  // 1-Click Demo autofill handler
-  const handleAutofillDemo = (role: CampusRole) => {
-    const preset = DEMO_CAMPUS_ACCOUNTS[role];
-    setSelectedRole(role);
-    setLoginId(preset.loginId);
-    setPassword('demopassword123');
-    setNotification(`Autofilled credentials for ${preset.name} (${preset.role.toUpperCase()})`);
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  // Perform login submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    const preset = DEMO_CAMPUS_ACCOUNTS[selectedRole];
-    const session: CampusUserSession = {
-      role: selectedRole,
-      orgSlug,
-      orgName: branding.fullName,
-      name: loginId.toLowerCase().includes('saravanan')
-        ? 'Dr. SARAVANAN P'
-        : loginId.toLowerCase().includes('dean')
-        ? 'Dean CSE Office'
-        : preset.name,
-      loginId: loginId.trim(),
-      regNumber: selectedRole === 'student' ? '25BCE1642' : selectedRole === 'faculty' ? 'FAC-7819' : 'ADMIN-01',
-      department: preset.department,
-      initials: selectedRole === 'student' ? 'NC' : selectedRole === 'faculty' ? 'SP' : 'DC',
+  useEffect(() => {
+    let isMounted = true;
+    async function loadOrgInfo() {
+      try {
+        setLoadingOrg(true);
+        const orgs = await listCampusOrgs();
+        if (isMounted) {
+          const match = orgs.find(
+            (o) => o.slug.toLowerCase() === orgSlug.toLowerCase()
+          );
+          if (match) {
+            setOrg(match);
+          } else {
+            // Synthesize fallback org info if slug matches format
+            setOrg({
+              id: '00000000-0000-0000-0000-000000000000',
+              name: orgSlug.toUpperCase().replace('-', ' '),
+              slug: orgSlug,
+              domain_whitelist: ['ac.in', 'edu'],
+              tier: 'Enterprise Campus',
+              student_count: 500,
+              faculty_count: 20,
+              created_at: new Date().toISOString(),
+            });
+          }
+        }
+      } catch (err) {
+        console.debug('Could not fetch org list:', err);
+      } finally {
+        if (isMounted) {
+          setLoadingOrg(false);
+        }
+      }
+    }
+    loadOrgInfo();
+    return () => {
+      isMounted = false;
     };
+  }, [orgSlug]);
 
-    saveCampusSession(session);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!identifier.trim()) {
+      setErrorMessage('Please enter your institutional email or ID.');
+      return;
+    }
+    if (!password.trim()) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
 
-    setTimeout(() => {
-      setIsLoading(false);
-      if (selectedRole === 'student') {
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const resp = await campusLogin({
+        org_slug: orgSlug,
+        identifier: identifier.trim(),
+        password: password.trim(),
+        role,
+      });
+
+      // Save session and token
+      setAccessToken(resp.access_token);
+      saveCampusSession({
+        role: (resp.user.role as CampusRole) || role,
+        orgSlug: resp.user.org_slug || orgSlug,
+        orgName: resp.user.org_name || org?.name || 'Institutional Campus',
+        userId: resp.user.user_id,
+        name: resp.user.username,
+        loginId: resp.user.email,
+        regNumber: resp.user.reg_number || '25BAI1234',
+        department: resp.user.cohort_name || 'Computer Science & Engineering',
+        initials: (resp.user.username || 'US').slice(0, 2).toUpperCase(),
+        token: resp.access_token,
+        cohortId: resp.user.cohort_id,
+        cohortName: resp.user.cohort_name,
+      });
+
+      // Navigate to destination role dashboard
+      const targetRole = (resp.user.role as CampusRole) || role;
+      if (targetRole === 'student') {
         navigate(`/campus/${orgSlug}/student/dashboard`);
-      } else if (selectedRole === 'faculty') {
+      } else if (targetRole === 'faculty') {
         navigate(`/campus/${orgSlug}/faculty/dashboard`);
       } else {
         navigate(`/campus/${orgSlug}/admin/dashboard`);
       }
-    }, 400);
+    } catch (err: any) {
+      console.error('Campus login failed:', err);
+      setErrorMessage(
+        err.message || 'Authentication failed. Please verify credentials.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const roleLabel =
-    selectedRole === 'student'
-      ? 'Student'
-      : selectedRole === 'faculty'
-      ? 'Faculty'
-      : 'Institution Admin';
-
   return (
-    <div className="campus-login-container">
-      {/* LEFT 50% PANEL: Royal Blue Architectural Showcase */}
-      <section className="campus-login-left">
-        <div className="campus-blueprint-overlay" />
-
-        <div className="campus-login-left-content">
-          {/* Co-Branded Header */}
-          <div className="campus-cobrand-header">
-            <Link to="/campus" className="campus-cobrand-brand">
-              <div className="campus-brand-symbol">
-                <GraduationCap size={20} />
-              </div>
-              <span className="brand-name">AlgoCeleris</span>
-            </Link>
-            <div className="campus-cobrand-divider">/</div>
-            <div className="campus-cobrand-institution">
-              <div className="inst-badge-chip">
-                <Building2 size={13} />
-                <span>{branding.name}</span>
-              </div>
-              <span className="inst-full-name">{branding.fullName}</span>
-            </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#08090a',
+        color: '#ffffff',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 24px',
+      }}
+    >
+      <div style={{ maxWidth: '440px', width: '100%' }}>
+        {/* University Header Branding */}
+        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              background: '#0f1011',
+              border: '1px solid #23252a',
+              fontSize: '11px',
+              color: '#8a8f98',
+              fontFamily: 'JetBrains Mono, monospace',
+              marginBottom: '16px',
+            }}
+          >
+            <Building2 size={12} style={{ color: '#e4f222' }} />
+            <span>tenant /{orgSlug}</span>
           </div>
 
-          {/* Hero Section */}
-          <div className="campus-login-hero">
-            <div className="campus-copilot-pill">
-              <Sparkles size={14} className="accent-sparkle" />
-              <span>Your AI Co-Pilot for Programming Labs</span>
-            </div>
+          <h1
+            style={{
+              fontSize: '28px',
+              fontWeight: 590,
+              margin: '0 0 8px 0',
+              letterSpacing: '-0.02em',
+              color: '#ffffff',
+            }}
+          >
+            {loadingOrg ? 'Loading Campus...' : org?.name || 'Institutional Portal'}
+          </h1>
 
-            <h1 className="campus-login-title">
-              Master Programming With Your <span className="highlight-text">AI Learning Companion</span>
-            </h1>
-
-            <p className="campus-login-description">
-              Practice lab exercises, get instant feedback on your code, and grow from understanding
-              concepts to mastering programming skills with LPilot pedagogy.
-            </p>
-          </div>
-
-          {/* 2x2 Feature Grid */}
-          <div className="campus-feature-grid">
-            <div className="campus-feature-item">
-              <div className="feature-icon-box blue">
-                <Brain size={18} />
-              </div>
-              <div>
-                <h4 className="feature-title">AI Mentor</h4>
-                <p className="feature-sub">Personalized guidance, Socratic hints & debugging cues</p>
-              </div>
-            </div>
-
-            <div className="campus-feature-item">
-              <div className="feature-icon-box green">
-                <Cpu size={18} />
-              </div>
-              <div>
-                <h4 className="feature-title">Smart Evaluation</h4>
-                <p className="feature-sub">Kernel-isolated cgroups sandboxes with instant verdicts</p>
-              </div>
-            </div>
-
-            <div className="campus-feature-item">
-              <div className="feature-icon-box purple">
-                <Code2Icon />
-              </div>
-              <div>
-                <h4 className="feature-title">Adaptive Practice</h4>
-                <p className="feature-sub">Section-locked workspaces & algorithmic challenges</p>
-              </div>
-            </div>
-
-            <div className="campus-feature-item">
-              <div className="feature-icon-box amber">
-                <BarChart3 size={18} />
-              </div>
-              <div>
-                <h4 className="feature-title">Learning Analytics</h4>
-                <p className="feature-sub">Track CLO attainment, programming velocity & time</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Security Assurance */}
-          <div className="campus-security-footer">
-            <Shield size={14} />
-            <span>Dedicated Multi-Tenant Institutional Sandbox · FERPA & SOC-2 Invariant</span>
-          </div>
+          <p style={{ color: '#8a8f98', fontSize: '13px', margin: 0, lineHeight: 1.4 }}>
+            Multi-Tenant Sandboxed Lab & Proctoring Authentication Gateway
+          </p>
         </div>
-      </section>
 
-      {/* RIGHT 50% PANEL: Obsidian Portal Login */}
-      <section className="campus-login-right">
-        <div className="campus-login-form-wrapper">
-          {/* Top Portal Mode Pill */}
-          <div className="campus-mode-pill-container">
-            <span className="mode-pill-dot" />
-            <span className="mode-pill-text">{roleLabel} Portal Active</span>
-            <span className="mode-pill-org">({branding.acronym})</span>
+        {/* Login Card */}
+        <div
+          style={{
+            background: '#0f1011',
+            border: '1px solid #23252a',
+            borderRadius: '12px',
+            padding: '28px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+          }}
+        >
+          {/* Segmented 3-Way Role Switcher */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              background: '#161718',
+              padding: '3px',
+              borderRadius: '8px',
+              border: '1px solid #23252a',
+              marginBottom: '24px',
+            }}
+          >
+            {(
+              [
+                { id: 'student', label: 'Student', icon: GraduationCap },
+                { id: 'faculty', label: 'Faculty', icon: Users },
+                { id: 'org_admin', label: 'Admin', icon: ShieldCheck },
+              ] as const
+            ).map((item) => {
+              const active = role === item.id;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    setRole(item.id);
+                    setErrorMessage(null);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '8px 0',
+                    border: 'none',
+                    borderRadius: '6px',
+                    background: active ? '#23252a' : 'transparent',
+                    color: active ? '#ffffff' : '#8a8f98',
+                    fontSize: '12px',
+                    fontWeight: active ? 590 : 400,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Icon size={13} style={{ color: active ? '#e4f222' : 'inherit' }} />
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
 
-          <div className="campus-form-header">
-            <h2 className="campus-form-title">Welcome back</h2>
-            <p className="campus-form-subtitle">
-              Access your courses, lab sessions, and programming assessments
-            </p>
-          </div>
-
-          {/* Role Segmented Switcher */}
-          <div className="campus-role-switcher" role="tablist">
-            <button
-              type="button"
-              className={`campus-role-btn ${selectedRole === 'student' ? 'active' : ''}`}
-              onClick={() => handleAutofillDemo('student')}
-              role="tab"
-              aria-selected={selectedRole === 'student'}
+          {/* Error Message */}
+          {errorMessage && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(235, 87, 87, 0.1)',
+                border: '1px solid rgba(235, 87, 87, 0.3)',
+                borderRadius: '6px',
+                padding: '10px 12px',
+                color: '#eb5757',
+                fontSize: '12px',
+                marginBottom: '20px',
+              }}
             >
-              <User size={14} />
-              <span>Student</span>
-            </button>
-            <button
-              type="button"
-              className={`campus-role-btn ${selectedRole === 'faculty' ? 'active' : ''}`}
-              onClick={() => handleAutofillDemo('faculty')}
-              role="tab"
-              aria-selected={selectedRole === 'faculty'}
-            >
-              <GraduationCap size={14} />
-              <span>Faculty</span>
-            </button>
-            <button
-              type="button"
-              className={`campus-role-btn ${selectedRole === 'org_admin' ? 'active' : ''}`}
-              onClick={() => handleAutofillDemo('org_admin')}
-              role="tab"
-              aria-selected={selectedRole === 'org_admin'}
-            >
-              <Shield size={14} />
-              <span>Admin</span>
-            </button>
-          </div>
-
-          {/* Notification Banner */}
-          {notification && (
-            <div className="campus-notification-banner" role="status">
-              <CheckCircle2 size={14} />
-              <span>{notification}</span>
+              <ShieldAlert size={15} style={{ flexShrink: 0 }} />
+              <span>{errorMessage}</span>
             </div>
           )}
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="campus-login-form">
-            <div className="form-group">
-              <label htmlFor="campus-login-id" className="form-label">
-                Login ID / Registration Number
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 510,
+                  color: '#d0d6e0',
+                  marginBottom: '6px',
+                }}
+              >
+                {role === 'student'
+                  ? 'Registration Number or Student Email'
+                  : role === 'faculty'
+                  ? 'Faculty ID or Academic Email'
+                  : 'Institutional Admin Email'}
               </label>
-              <div className="input-with-icon">
+              <div style={{ position: 'relative' }}>
+                <User
+                  size={14}
+                  style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#62666d',
+                  }}
+                />
                 <input
-                  id="campus-login-id"
                   type="text"
-                  className="form-input"
-                  value={loginId}
-                  onChange={(e) => setLoginId(e.target.value)}
-                  placeholder="e.g. 25BCE1642 or email address"
-                  required
+                  placeholder={
+                    role === 'student'
+                      ? 'e.g. 25BAI1234 or student@vitstudent.ac.in'
+                      : role === 'faculty'
+                      ? 'e.g. FAC-9842 or faculty@vit.ac.in'
+                      : 'admin@vit.ac.in'
+                  }
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '10px 12px 10px 34px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    fontFamily: 'Inter, sans-serif',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
               </div>
+
+              {org?.domain_whitelist && org.domain_whitelist.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
+                  <span style={{ fontSize: '11px', color: '#62666d' }}>Whitelisted:</span>
+                  {org.domain_whitelist.map((d) => (
+                    <span
+                      key={d}
+                      style={{
+                        fontSize: '10px',
+                        fontFamily: 'JetBrains Mono, monospace',
+                        color: '#8a8f98',
+                        background: 'rgba(35, 37, 42, 0.4)',
+                        padding: '1px 5px',
+                        borderRadius: '3px',
+                      }}
+                    >
+                      @{d}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
-            <div className="form-group">
-              <div className="form-label-row">
-                <label htmlFor="campus-password" className="form-label">
-                  Password
-                </label>
-                <a
-                  href="#forgot"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert('Please contact your university IT department or campus administrator.');
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 510,
+                  color: '#d0d6e0',
+                  marginBottom: '6px',
+                }}
+              >
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock
+                  size={14}
+                  style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#62666d',
                   }}
-                  className="form-forgot-link"
-                >
-                  Forgot password?
-                </a>
-              </div>
-              <div className="input-with-icon">
+                />
                 <input
-                  id="campus-password"
                   type={showPassword ? 'text' : 'password'}
-                  className="form-input"
+                  placeholder="Enter password..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
+                  style={{
+                    width: '100%',
+                    background: '#161718',
+                    border: '1px solid #23252a',
+                    borderRadius: '6px',
+                    padding: '10px 36px 10px 34px',
+                    color: '#ffffff',
+                    fontSize: '13px',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
                 />
                 <button
                   type="button"
-                  className="password-toggle-btn"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  title={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#62666d',
+                    cursor: 'pointer',
+                    padding: 0,
+                    display: 'flex',
+                  }}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
             </div>
 
-            <div className="form-options-row">
-              <label className="remember-me-label">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                />
-                <span>Remember this workstation</span>
-              </label>
-            </div>
-
-            <div className="form-actions-stack">
-              <button
-                type="submit"
-                className="btn btn-primary campus-submit-btn"
-                disabled={isLoading}
-              >
-                <span>{isLoading ? 'Authenticating...' : `Sign in as ${roleLabel}`}</span>
-                <ArrowRight size={15} />
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary campus-first-time-btn"
-                onClick={() => {
-                  alert(
-                    'First Time Login: Please use your university registration number and the temporary password sent to your official campus email.'
-                  );
-                }}
-              >
-                First Time Login
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                marginTop: '10px',
+                width: '100%',
+                background: '#e4f222',
+                color: '#08090a',
+                border: 'none',
+                padding: '11px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 590,
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: isSubmitting ? 0.7 : 1,
+              }}
+            >
+              {isSubmitting ? (
+                'Authenticating with Tenant...'
+              ) : (
+                <>
+                  Sign In to Institutional Portal <ArrowRight size={14} />
+                </>
+              )}
+            </button>
           </form>
-
-          {/* Quick Demo Credentials Bar */}
-          <div className="campus-demo-bar">
-            <div className="demo-bar-title">
-              <Info size={12} />
-              <span>1-Click Evaluator Demo Credentials</span>
-            </div>
-            <div className="demo-pills-row">
-              <button
-                type="button"
-                className={`demo-pill ${selectedRole === 'student' ? 'active' : ''}`}
-                onClick={() => handleAutofillDemo('student')}
-                title="Log in as Student Nishank Chhipa (25BCE1642)"
-              >
-                🎓 Demo Student: Nishank
-              </button>
-              <button
-                type="button"
-                className={`demo-pill ${selectedRole === 'faculty' ? 'active' : ''}`}
-                onClick={() => handleAutofillDemo('faculty')}
-                title="Log in as Faculty Dr. Saravanan P"
-              >
-                👨‍🏫 Demo Faculty: Dr. Saravanan
-              </button>
-              <button
-                type="button"
-                className={`demo-pill ${selectedRole === 'org_admin' ? 'active' : ''}`}
-                onClick={() => handleAutofillDemo('org_admin')}
-                title="Log in as Dean CSE / Institution Administrator"
-              >
-                👑 Demo Admin: Dean CSE
-              </button>
-            </div>
-          </div>
-
-          {/* Footer Backlink */}
-          <div className="campus-login-foot">
-            <Link to="/campus" className="campus-back-link">
-              &larr; Switch Institution or View Public Portal
-            </Link>
-          </div>
         </div>
-      </section>
+
+        {/* Institution Switcher Footer */}
+        <div
+          style={{
+            textAlign: 'center',
+            marginTop: '24px',
+            fontSize: '13px',
+            color: '#8a8f98',
+          }}
+        >
+          Not from this university?{' '}
+          <Link
+            to="/campus"
+            style={{
+              color: '#e4f222',
+              textDecoration: 'none',
+              fontWeight: 510,
+            }}
+          >
+            Switch Institution Directory →
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
-
-// Compact icon helper
-function Code2Icon() {
-  return (
-    <svg
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="16 18 22 12 16 6" />
-      <polyline points="8 6 2 12 8 18" />
-    </svg>
-  );
-}
 export default CampusLoginPage;

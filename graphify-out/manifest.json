@@ -348,10 +348,10 @@
     "semantic_hash": "4bdaf10775618c149a7c7a8327616657"
   },
   "crates/judge-gateway/src/lib.rs": {
-    "mtime": 1792069845.3895335,
-    "seen": 1792090152.508527,
-    "ast_hash": "af3f789abe87167cef35ab3fede16645",
-    "semantic_hash": "af3f789abe87167cef35ab3fede16645"
+    "mtime": 1792180593.6247792,
+    "seen": 1792183294.0460749,
+    "ast_hash": "6348c488a1e07cdb1e665002c43025a3",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/src/main.rs": {
     "mtime": 1791961771.273552,
@@ -372,10 +372,10 @@
     "semantic_hash": "de67012ff47ebc2350609e44298fda62"
   },
   "crates/judge-gateway/src/routes/campus.rs": {
-    "mtime": 1791961771.2746038,
-    "seen": 1792090152.50853,
-    "ast_hash": "2536183de94cdbec0c030c0935e46ed8",
-    "semantic_hash": "2536183de94cdbec0c030c0935e46ed8"
+    "mtime": 1792233260.6331093,
+    "seen": 1792233829.471749,
+    "ast_hash": "fb3c77bae4978725dfbba5a0ba94f729",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/src/routes/cockpit.rs": {
     "mtime": 1791961771.274858,
@@ -390,10 +390,10 @@
     "semantic_hash": "31bb5b8f26b14c91d80dfb6413c0f519"
   },
   "crates/judge-gateway/src/routes/hackathons.rs": {
-    "mtime": 1792069763.0357594,
-    "seen": 1792090152.5085309,
-    "ast_hash": "b55c04be16f4c2a0150c669486ed94e1",
-    "semantic_hash": "b55c04be16f4c2a0150c669486ed94e1"
+    "mtime": 1792178909.775227,
+    "seen": 1792179709.480897,
+    "ast_hash": "49cafa75f449e76f796f6d67ee7f1086",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/src/routes/health.rs": {
     "mtime": 1791961771.2756233,
@@ -402,10 +402,10 @@
     "semantic_hash": "232ed9c0c70f2de4ab08eea9fdc3da5f"
   },
   "crates/judge-gateway/src/routes/mod.rs": {
-    "mtime": 1792069785.6204224,
-    "seen": 1792090152.508533,
-    "ast_hash": "936e785bbeb03abb81caace68d9f6fce",
-    "semantic_hash": "936e785bbeb03abb81caace68d9f6fce"
+    "mtime": 1792180542.6020448,
+    "seen": 1792183294.046082,
+    "ast_hash": "f090ab56b238c3136d6dc0a876e7068b",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/src/routes/problems.rs": {
     "mtime": 1791961771.276075,
@@ -432,10 +432,10 @@
     "semantic_hash": "8b53985324c3f6bcce5dbcf492729fef"
   },
   "crates/judge-gateway/src/state.rs": {
-    "mtime": 1791961771.2772434,
-    "seen": 1792090152.5085351,
-    "ast_hash": "f44ee17024ab8d400fd98b5abbfb3a9a",
-    "semantic_hash": "f44ee17024ab8d400fd98b5abbfb3a9a"
+    "mtime": 1792180372.5789337,
+    "seen": 1792183294.0460858,
+    "ast_hash": "1f6a32f45164cec1286b696f4634d17e",
+    "semantic_hash": ""
   },
   "crates/judge-gateway/tests/test_assessment_lifecycle.rs": {
     "mtime": 1791961771.2775557,
@@ -738,22 +738,16 @@
     "semantic_hash": "bef5b9bb0dd942c09065dcb17172b324"
   },
   "packages/frontend/src/App.tsx": {
-    "mtime": 1792069965.532248,
-    "seen": 1792090152.508566,
-    "ast_hash": "39b4a6dd2cbbacb720d05dbd4a191e5f",
-    "semantic_hash": "39b4a6dd2cbbacb720d05dbd4a191e5f"
+    "mtime": 1792232454.948347,
+    "seen": 1792233829.471801,
+    "ast_hash": "75ee83fc8925c9f59f4d32c96bb97007",
+    "semantic_hash": ""
   },
   "packages/frontend/src/components/AIDebugModal.tsx": {
     "mtime": 1791961771.337804,
     "seen": 1792090152.508567,
     "ast_hash": "d2a9832e323280df52a7a26d74083c2f",
     "semantic_hash": "d2a9832e323280df52a7a26d74083c2f"
-  },
-  "packages/frontend/src/components/CampusSidebarLayout.tsx": {
-    "mtime": 1792058317.941541,
-    "seen": 1792090152.508567,
-    "ast_hash": "6481197bf9e6d589b449e19de048ee28",
-    "semantic_hash": "6481197bf9e6d589b449e19de048ee28"
   },
   "packages/frontend/src/components/CodeEditor.tsx": {
     "mtime": 1791961771.3380575,
@@ -798,10 +792,10 @@
     "semantic_hash": "e4bfdf2f11de2bd9ab90b78c52842f09"
   },
   "packages/frontend/src/components/LinearHeaderNav.tsx": {
-    "mtime": 1792057752.4296052,
-    "seen": 1792090152.5085719,
-    "ast_hash": "28106137c92b807052e2f7faa057bb03",
-    "semantic_hash": "28106137c92b807052e2f7faa057bb03"
+    "mtime": 1792129485.198038,
+    "seen": 1792129642.0886762,
+    "ast_hash": "f3455bcf85d14085f5cf608c9d620c3d",
+    "semantic_hash": ""
   },
   "packages/frontend/src/components/MicroSandboxTeaser.tsx": {
     "mtime": 1791025404.3177958,
@@ -894,28 +888,16 @@
     "semantic_hash": "d60d69aece48187d7d55a52901ec602d"
   },
   "packages/frontend/src/pages/AuthPage.tsx": {
-    "mtime": 1792057705.2217164,
-    "seen": 1792090152.5085812,
-    "ast_hash": "9e4964d4ef84ed23479221c150948f7e",
-    "semantic_hash": "9e4964d4ef84ed23479221c150948f7e"
+    "mtime": 1792176811.4845936,
+    "seen": 1792177069.484663,
+    "ast_hash": "c4bd65a1f640bba95819385c8ad848b4",
+    "semantic_hash": ""
   },
   "packages/frontend/src/pages/ContestsPage.tsx": {
     "mtime": 1791961771.3417847,
     "seen": 1792090152.5085819,
     "ast_hash": "3e105a97e780868d7842bda0e04fc716",
     "semantic_hash": "3e105a97e780868d7842bda0e04fc716"
-  },
-  "packages/frontend/src/pages/HackathonDetailPage.tsx": {
-    "mtime": 1792069928.8935585,
-    "seen": 1792090152.5085819,
-    "ast_hash": "a19eaea617fce1a991cce1c896a09edc",
-    "semantic_hash": "a19eaea617fce1a991cce1c896a09edc"
-  },
-  "packages/frontend/src/pages/HackathonsPage.tsx": {
-    "mtime": 1792057866.4136143,
-    "seen": 1792090152.5085828,
-    "ast_hash": "d2c53777b177dbabf6c8fd99c94f6f33",
-    "semantic_hash": "d2c53777b177dbabf6c8fd99c94f6f33"
   },
   "packages/frontend/src/pages/LandingPage.tsx": {
     "mtime": 1791025362.1040373,
@@ -930,10 +912,10 @@
     "semantic_hash": "57de01588c99e3ae46209b13ede3ff57"
   },
   "packages/frontend/src/pages/ProblemsPage.tsx": {
-    "mtime": 1791961771.3423915,
-    "seen": 1792090152.508585,
-    "ast_hash": "5bbcbbb3dc5bff4b1f70dd1962dcc094",
-    "semantic_hash": "5bbcbbb3dc5bff4b1f70dd1962dcc094"
+    "mtime": 1792176868.7112396,
+    "seen": 1792177069.484666,
+    "ast_hash": "619e8753fc72784a4d7d98ea82caebf4",
+    "semantic_hash": ""
   },
   "packages/frontend/src/pages/ProfilePage.tsx": {
     "mtime": 1791212797.716081,
@@ -941,107 +923,11 @@
     "ast_hash": "3cfb3e41adfaa69369346b40b997f434",
     "semantic_hash": "3cfb3e41adfaa69369346b40b997f434"
   },
-  "packages/frontend/src/pages/campus/AssessmentCreatePage.tsx": {
-    "mtime": 1791961771.3426695,
-    "seen": 1792090152.508586,
-    "ast_hash": "b1b48064065b7e30bff6d0fb0dcc60fb",
-    "semantic_hash": "b1b48064065b7e30bff6d0fb0dcc60fb"
-  },
-  "packages/frontend/src/pages/campus/CampusAdminDashboard.tsx": {
-    "mtime": 1792069386.7456255,
-    "seen": 1792090152.508586,
-    "ast_hash": "31027bdf8c5bd09ff319341b86992a7a",
-    "semantic_hash": "31027bdf8c5bd09ff319341b86992a7a"
-  },
-  "packages/frontend/src/pages/campus/CampusAnalyticsPage.tsx": {
-    "mtime": 1792069341.7452312,
-    "seen": 1792090152.5085871,
-    "ast_hash": "1e9e54e29bf3d0376c67f500d5f88a8e",
-    "semantic_hash": "1e9e54e29bf3d0376c67f500d5f88a8e"
-  },
-  "packages/frontend/src/pages/campus/CampusCalendarPage.tsx": {
-    "mtime": 1791961771.3429282,
-    "seen": 1792090152.508588,
-    "ast_hash": "f69f79ecf41fa1e9a7db44e17a42acc9",
-    "semantic_hash": "f69f79ecf41fa1e9a7db44e17a42acc9"
-  },
-  "packages/frontend/src/pages/campus/CampusFacultyDashboard.tsx": {
-    "mtime": 1792069364.5017314,
-    "seen": 1792090152.508588,
-    "ast_hash": "01afa62dbeb07e9870157a445f2b04ed",
-    "semantic_hash": "01afa62dbeb07e9870157a445f2b04ed"
-  },
-  "packages/frontend/src/pages/campus/CampusLabReviewPage.tsx": {
-    "mtime": 1792058695.8643541,
-    "seen": 1792090152.508589,
-    "ast_hash": "81047170b9e1e404a4d8003955132efb",
-    "semantic_hash": "81047170b9e1e404a4d8003955132efb"
-  },
-  "packages/frontend/src/pages/campus/CampusLabRoomPage.tsx": {
-    "mtime": 1792059038.4471302,
-    "seen": 1792090152.50859,
-    "ast_hash": "e087c47d2986985fd0a996f8512c383a",
-    "semantic_hash": "e087c47d2986985fd0a996f8512c383a"
-  },
-  "packages/frontend/src/pages/campus/CampusLabsListPage.tsx": {
-    "mtime": 1792058656.0070374,
-    "seen": 1792090152.50859,
-    "ast_hash": "b213f508fb11d658eb93668fcc877ddd",
-    "semantic_hash": "b213f508fb11d658eb93668fcc877ddd"
-  },
-  "packages/frontend/src/pages/campus/CampusLandingPage.tsx": {
-    "mtime": 1792057785.7569656,
-    "seen": 1792090152.5085912,
-    "ast_hash": "ee019833ffa1a52459821acc028d05a7",
-    "semantic_hash": "ee019833ffa1a52459821acc028d05a7"
-  },
-  "packages/frontend/src/pages/campus/CampusLoginPage.tsx": {
-    "mtime": 1792058278.762401,
-    "seen": 1792090152.5085912,
-    "ast_hash": "403154cde62eb8923b00f00578e0478c",
-    "semantic_hash": "403154cde62eb8923b00f00578e0478c"
-  },
-  "packages/frontend/src/pages/campus/CampusOnboardingPage.tsx": {
-    "mtime": 1792057832.306037,
-    "seen": 1792090152.5085921,
-    "ast_hash": "76d2733ab6b5a3dcb47d6287c3e4a03a",
-    "semantic_hash": "76d2733ab6b5a3dcb47d6287c3e4a03a"
-  },
-  "packages/frontend/src/pages/campus/CampusPlaceholderWorkspace.tsx": {
-    "mtime": 1792058449.9417768,
-    "seen": 1792090152.5085928,
-    "ast_hash": "be184540813ffa85cb9b357aac8c0933",
-    "semantic_hash": "be184540813ffa85cb9b357aac8c0933"
-  },
-  "packages/frontend/src/pages/campus/CampusStudentDashboard.tsx": {
-    "mtime": 1792058609.7872512,
-    "seen": 1792090152.5085928,
-    "ast_hash": "72920777ff8703cb53b9a6a7a26873ce",
-    "semantic_hash": "72920777ff8703cb53b9a6a7a26873ce"
-  },
-  "packages/frontend/src/pages/campus/FacultyProctorCockpitPage.tsx": {
-    "mtime": 1791961771.343202,
-    "seen": 1792090152.508594,
-    "ast_hash": "2386adb072502d9cb838f8923e37f2ba",
-    "semantic_hash": "2386adb072502d9cb838f8923e37f2ba"
-  },
-  "packages/frontend/src/pages/campus/StudentExamArenaPage.tsx": {
-    "mtime": 1791961771.343427,
-    "seen": 1792090152.508595,
-    "ast_hash": "99a3ba2d842e13cec3098cfae5be5a51",
-    "semantic_hash": "99a3ba2d842e13cec3098cfae5be5a51"
-  },
-  "packages/frontend/src/pages/campus/VivaInterviewWorkspacePage.tsx": {
-    "mtime": 1791961771.3436809,
-    "seen": 1792090152.508596,
-    "ast_hash": "2d68ea3feef9fe21461526275d4ffb31",
-    "semantic_hash": "2d68ea3feef9fe21461526275d4ffb31"
-  },
   "packages/frontend/src/services/api.ts": {
-    "mtime": 1791961771.343935,
-    "seen": 1792090152.508596,
-    "ast_hash": "e4edbc607827bfad15d0a236c4dc3ce9",
-    "semantic_hash": "e4edbc607827bfad15d0a236c4dc3ce9"
+    "mtime": 1792181280.156988,
+    "seen": 1792183294.046164,
+    "ast_hash": "a543ecdb68c117888f63e87c2aadb0da",
+    "semantic_hash": ""
   },
   "packages/frontend/src/services/campusApi.ts": {
     "mtime": 1791961771.344215,
@@ -1050,10 +936,10 @@
     "semantic_hash": "c092a5a347149504f26da4620d60a889"
   },
   "packages/frontend/src/services/campusSession.ts": {
-    "mtime": 1792058239.1339936,
-    "seen": 1792090152.508598,
-    "ast_hash": "7711776aae98fb944d76658b9e87bcea",
-    "semantic_hash": "7711776aae98fb944d76658b9e87bcea"
+    "mtime": 1792179298.8519156,
+    "seen": 1792179709.4809768,
+    "ast_hash": "0e272d2f9dd0ac6aa99cc9f764cab97b",
+    "semantic_hash": ""
   },
   "packages/frontend/src/services/problemService.ts": {
     "mtime": 1791212434.0767438,
@@ -1168,5 +1054,371 @@
     "seen": 1792090152.508609,
     "ast_hash": "59ce6e9e8c2268e40aa0e8ddddbe1706",
     "semantic_hash": "59ce6e9e8c2268e40aa0e8ddddbe1706"
+  },
+  ".agents/agents/architect.md": {
+    "mtime": 1791961771.234137,
+    "seen": 1792091264.7999449,
+    "ast_hash": "12928dc1847c0b796333de8d2a9a4b6f",
+    "semantic_hash": ""
+  },
+  ".agents/agents/code-reviewer.md": {
+    "mtime": 1791961771.2344406,
+    "seen": 1792091264.799946,
+    "ast_hash": "45ffdaaf0158d51f296b921ebc88d946",
+    "semantic_hash": ""
+  },
+  ".agents/agents/critic.md": {
+    "mtime": 1791961771.2350874,
+    "seen": 1792091264.799947,
+    "ast_hash": "92ff76d354261b401756db621d0f33db",
+    "semantic_hash": ""
+  },
+  ".agents/agents/implementation-worker.md": {
+    "mtime": 1791961771.235377,
+    "seen": 1792091264.799948,
+    "ast_hash": "91924cdfc2c9305aa974132795a190b2",
+    "semantic_hash": ""
+  },
+  ".agents/agents/investigator.md": {
+    "mtime": 1791961771.235522,
+    "seen": 1792091264.799948,
+    "ast_hash": "954455add7333abf93aa80421aa173ca",
+    "semantic_hash": ""
+  },
+  ".agents/agents/security-critic.md": {
+    "mtime": 1791961771.2356796,
+    "seen": 1792091264.7999492,
+    "ast_hash": "5982b0ad3b3bc2f2da263df7d73e946d",
+    "semantic_hash": ""
+  },
+  ".agents/rules/ast-search-first.md": {
+    "mtime": 1791961771.2376654,
+    "seen": 1792091264.7999501,
+    "ast_hash": "81e599f03e7eec1cec2929958e6214dd",
+    "semantic_hash": ""
+  },
+  ".agents/rules/core-architecture.md": {
+    "mtime": 1791961771.2379673,
+    "seen": 1792091264.7999501,
+    "ast_hash": "a3f87c6900354e2f93207bbfa02e63f7",
+    "semantic_hash": ""
+  },
+  ".agents/rules/domain-specific-validation.md": {
+    "mtime": 1791961771.2381725,
+    "seen": 1792091264.799951,
+    "ast_hash": "dfa2d0b71e9642d5bc794ae218243703",
+    "semantic_hash": ""
+  },
+  ".agents/rules/event-bus-guidelines.md": {
+    "mtime": 1791961771.238378,
+    "seen": 1792091264.799951,
+    "ast_hash": "766130b4ca01a1491edee03175e8b9e7",
+    "semantic_hash": ""
+  },
+  ".agents/scripts/changeset/README.md": {
+    "mtime": 1791961771.2389688,
+    "seen": 1792091264.7999518,
+    "ast_hash": "f444eba8d4d1c229f4af7dde930e2919",
+    "semantic_hash": ""
+  },
+  ".agents/skills/continuous-learning/SKILL.md": {
+    "mtime": 1791961771.2467136,
+    "seen": 1792091264.7999518,
+    "ast_hash": "bd3a8f5fb57a601e34cd77dc7f119264",
+    "semantic_hash": ""
+  },
+  ".agents/skills/design-taste-frontend/SKILL.md": {
+    "mtime": 1791961771.2474067,
+    "seen": 1792091264.799953,
+    "ast_hash": "6f73606d20cd948b471b1ce1767aab50",
+    "semantic_hash": ""
+  },
+  ".agents/skills/image-to-code/SKILLS.md": {
+    "mtime": 1791961771.247641,
+    "seen": 1792091264.799954,
+    "ast_hash": "5f0eed46c320db570fee793b1f0e6a98",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/SKILL.md": {
+    "mtime": 1791961771.2479172,
+    "seen": 1792091264.799954,
+    "ast_hash": "0821c515eb1c0d2c50b50a6715aafab1",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/element-attributes.md": {
+    "mtime": 1791961771.248167,
+    "seen": 1792091264.799955,
+    "ast_hash": "8b8ffc48e38a5b4a04baec18a2732cd7",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/playwright-tests.md": {
+    "mtime": 1791961771.2483852,
+    "seen": 1792091264.799955,
+    "ast_hash": "99970dceff6228941c8f994e7dd71d27",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/pr-attachments.md": {
+    "mtime": 1791961771.2488973,
+    "seen": 1792091264.799956,
+    "ast_hash": "1177e18d35661616471a5dbc56d915b8",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/request-mocking.md": {
+    "mtime": 1791961771.2491076,
+    "seen": 1792091264.799957,
+    "ast_hash": "3b74af1fc908062c9c7f2cef04be6a24",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/running-code.md": {
+    "mtime": 1791961771.249517,
+    "seen": 1792091264.799957,
+    "ast_hash": "a051719484d5330b826a5664fa1fbb32",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/session-management.md": {
+    "mtime": 1791961771.2500515,
+    "seen": 1792091264.799958,
+    "ast_hash": "911dd3af00bd5e8c8fa4515970d90dc1",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/storage-state.md": {
+    "mtime": 1791961771.2503455,
+    "seen": 1792091264.799958,
+    "ast_hash": "128ea37ea2ddc5022920718d0f9ab96d",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/test-generation.md": {
+    "mtime": 1791961771.2507005,
+    "seen": 1792091264.799959,
+    "ast_hash": "b15132f278666e69e42fbe607056651b",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/tracing.md": {
+    "mtime": 1791961771.2508206,
+    "seen": 1792091264.7999601,
+    "ast_hash": "ef8d17a2e59f58c77800ddde72f7ce51",
+    "semantic_hash": ""
+  },
+  ".agents/skills/playwright-cli/references/video-recording.md": {
+    "mtime": 1791961771.250979,
+    "seen": 1792091264.7999601,
+    "ast_hash": "839208845060c048ac8e23f114e11aab",
+    "semantic_hash": ""
+  },
+  ".agents/skills/schema-migration-engine/SKILL.md": {
+    "mtime": 1791961771.251142,
+    "seen": 1792091264.799961,
+    "ast_hash": "d57dfe4605ba94e4e9a2531e56458721",
+    "semantic_hash": ""
+  },
+  ".agents/skills/strategic-compact/SKILL.md": {
+    "mtime": 1791961771.2512972,
+    "seen": 1792091264.799962,
+    "ast_hash": "ecb03af61589402aa567b5e286f6ca62",
+    "semantic_hash": ""
+  },
+  ".agents/skills/verification-loop/SKILL.md": {
+    "mtime": 1791961771.251468,
+    "seen": 1792091264.799962,
+    "ast_hash": "3dd9dd9dffdc258c0ffecb7345717411",
+    "semantic_hash": ""
+  },
+  ".agents/skills/web-design-guidelines/SKILL.md": {
+    "mtime": 1791961771.251683,
+    "seen": 1792091264.799963,
+    "ast_hash": "98087aedd18375666dbb093c859b2949",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1791961771.2619667,
+    "seen": 1792091264.799964,
+    "ast_hash": "3be7b8b182ccd96e48989b4e57311193",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1790958288.762231,
+    "seen": 1792091264.799964,
+    "ast_hash": "9071a9af80fde095668f6648f1e13f1f",
+    "semantic_hash": ""
+  },
+  "IMPLEMENTATION_PLAN.md": {
+    "mtime": 1792183334.1572852,
+    "seen": 1792233829.4718862,
+    "ast_hash": "c9136d80529594fd80ed0cf8ac56548b",
+    "semantic_hash": ""
+  },
+  "deploy/docker-compose.yml": {
+    "mtime": 1791207028.7227511,
+    "seen": 1792091264.799965,
+    "ast_hash": "8672d01c50802234273ea1a49fd58399",
+    "semantic_hash": ""
+  },
+  "docs/BRIEF.md": {
+    "mtime": 1790957551.6660006,
+    "seen": 1792091264.7999659,
+    "ast_hash": "6280c67c8f6b7a389cd97c08ab081a3d",
+    "semantic_hash": ""
+  },
+  "docs/DESIGN.md": {
+    "mtime": 1790950374.454072,
+    "seen": 1792091264.799967,
+    "ast_hash": "94970ff9503dde0b79c9752745ff435c",
+    "semantic_hash": ""
+  },
+  "packages/frontend/index.html": {
+    "mtime": 1791961771.336097,
+    "seen": 1792091264.799968,
+    "ast_hash": "82a771d74e6b928e0df0619553089d6c",
+    "semantic_hash": ""
+  },
+  "docs/MILESTONE_V4_3_SPEC.md": {
+    "mtime": 1792177511.3876061,
+    "seen": 1792178460.5602078,
+    "ast_hash": "93c792cf271ff8b31cb7809ba1f94543",
+    "semantic_hash": ""
+  },
+  "crates/judge-gateway/tests/test_hackathons.rs": {
+    "mtime": 1792178430.9091978,
+    "seen": 1792178460.560095,
+    "ast_hash": "71b4655cc334bcc55d8a20a80363fcd5",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/HackathonDetailPage.tsx": {
+    "mtime": 1792178350.8872745,
+    "seen": 1792178460.5601568,
+    "ast_hash": "3545780adc03b8121e4a319dd8663f85",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/HackathonsPage.tsx": {
+    "mtime": 1792178163.2852442,
+    "seen": 1792178460.560158,
+    "ast_hash": "845d026441cfb68a51624211b5af9d95",
+    "semantic_hash": ""
+  },
+  "crates/judge-gateway/tests/test_campus_phase31.rs": {
+    "mtime": 1792179622.1940746,
+    "seen": 1792179709.480905,
+    "ast_hash": "1a6d8fcead7dec23871723e2d1f991e0",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/components/CampusSidebarLayout.tsx": {
+    "mtime": 1792233442.9272914,
+    "seen": 1792233829.471803,
+    "ast_hash": "ce69fa887b81d4d4c79e5ec74cdb4cd2",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusLandingPage.tsx": {
+    "mtime": 1792233279.238679,
+    "seen": 1792233829.471835,
+    "ast_hash": "dd7372eb71a505f7d79d604a327cba31",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusLoginPage.tsx": {
+    "mtime": 1792179450.8630579,
+    "seen": 1792179709.480973,
+    "ast_hash": "cb2957f25853adfd243e124eb83ea42b",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusOnboardingPage.tsx": {
+    "mtime": 1792179417.4993293,
+    "seen": 1792179709.4809742,
+    "ast_hash": "80339d5515bff8a665cf6f396dca73c8",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusWorkspacePage.tsx": {
+    "mtime": 1792179537.7169478,
+    "seen": 1792179709.4809752,
+    "ast_hash": "8922cb9aeb916f6fd2f2d0296f3b48b2",
+    "semantic_hash": ""
+  },
+  "crates/judge-gateway/tests/test_campus_phase32.rs": {
+    "mtime": 1792180663.487286,
+    "seen": 1792183294.046089,
+    "ast_hash": "b2565cc47ede36ca92452cb98b8460b4",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusAdminDashboard.tsx": {
+    "mtime": 1792183152.5283556,
+    "seen": 1792183294.046156,
+    "ast_hash": "a2f10164dc34baf55b1e657e580a10b8",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusAnalyticsPage.tsx": {
+    "mtime": 1792232491.8122675,
+    "seen": 1792233829.471831,
+    "ast_hash": "f1648790b7815b8d6e5db56def368cc8",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusFacultyDashboard.tsx": {
+    "mtime": 1792183166.2863033,
+    "seen": 1792183294.0461571,
+    "ast_hash": "5e26a9974ceb46980df07ba0e317bc38",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusLabReviewPage.tsx": {
+    "mtime": 1792232543.439118,
+    "seen": 1792233829.471832,
+    "ast_hash": "af5f34ded446e1c9fb2422c143a4cfc0",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusLabRoomPage.tsx": {
+    "mtime": 1792232531.8379807,
+    "seen": 1792233829.471833,
+    "ast_hash": "ebd1c3ff212a2c91d25ad77fdc33458d",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusLabsListPage.tsx": {
+    "mtime": 1792233666.0473573,
+    "seen": 1792233829.4718342,
+    "ast_hash": "8f40fb0a3dd65585a2f7a3d10a1ae312",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/CampusStudentDashboard.tsx": {
+    "mtime": 1792181632.1922598,
+    "seen": 1792183294.0461628,
+    "ast_hash": "1a8090bb767aa1a18b1ffa39228f860b",
+    "semantic_hash": ""
+  },
+  "scripts/verify-v43-linear-reset.mjs": {
+    "mtime": 1792182978.6079895,
+    "seen": 1792183294.04618,
+    "ast_hash": "5a18ee90d3dc8a4ffadac9f1b5295287",
+    "semantic_hash": ""
+  },
+  "audit-results.json": {
+    "mtime": 1792233752.4573452,
+    "seen": 1792233829.471723,
+    "ast_hash": "88473679af57fe3741bf16ccb1438e46",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/FacultyProctorCockpitPage.tsx": {
+    "mtime": 1792232153.990495,
+    "seen": 1792233829.471839,
+    "ast_hash": "2386adb072502d9cb838f8923e37f2ba",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/StudentExamArenaPage.tsx": {
+    "mtime": 1792232276.580223,
+    "seen": 1792233829.47184,
+    "ast_hash": "c7eebb65556a12d8c7743b9a9797932b",
+    "semantic_hash": ""
+  },
+  "packages/frontend/src/pages/campus/VivaInterviewWorkspacePage.tsx": {
+    "mtime": 1792232153.9908051,
+    "seen": 1792233829.47184,
+    "ast_hash": "2d68ea3feef9fe21461526275d4ffb31",
+    "semantic_hash": ""
+  },
+  "scripts/audit-full-v43.mjs": {
+    "mtime": 1792233678.6456048,
+    "seen": 1792233829.471849,
+    "ast_hash": "4b040cbb0d637c1fff89f1035f0282ce",
+    "semantic_hash": ""
+  },
+  "REPORT_V4.3.md": {
+    "mtime": 1792233813.716598,
+    "seen": 1792233829.471887,
+    "ast_hash": "336dd62a1ee2b05d07fb8309640753f4",
+    "semantic_hash": ""
   }
 }

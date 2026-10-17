@@ -242,13 +242,21 @@ export const FacultyProctorCockpitPage: React.FC = () => {
       wsRef.current = socket;
       setWsConnected(true);
     } catch (e) {
-      console.warn('Proctoring WebSocket connection failed:', e);
+      console.debug('Proctoring WebSocket fallback:', e);
       setWsConnected(false);
     }
 
     return () => {
       if (wsRef.current) {
-        wsRef.current.close();
+        const s = wsRef.current;
+        if (s.readyState === WebSocket.CONNECTING) {
+          s.onopen = () => {
+            try { s.close(1000, 'Page unmounted'); } catch {}
+          };
+          s.onerror = () => {};
+        } else if (s.readyState === WebSocket.OPEN) {
+          try { s.close(1000, 'Page unmounted'); } catch {}
+        }
       }
     };
   }, [assessmentId, soundAlertsEnabled]);

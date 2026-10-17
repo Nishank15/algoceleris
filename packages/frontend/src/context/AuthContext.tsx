@@ -57,10 +57,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let isMounted = true;
 
     async function restoreSession() {
+      const hasSession = typeof window !== 'undefined' && localStorage.getItem('algoceleris_has_session') === 'true';
+      if (!hasSession) {
+        if (isMounted) {
+          setUser(GUEST_USER);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         const tokenRes = await authRefresh();
-        if (isMounted && tokenRes?.user) {
-          setUser(mapAuthUser(tokenRes.user));
+        if (isMounted) {
+          if (tokenRes?.user) {
+            setUser(mapAuthUser(tokenRes.user));
+          } else {
+            setUser(GUEST_USER);
+          }
         }
       } catch {
         // No active session or unauthenticated; remain in Guest mode
@@ -84,6 +97,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = useCallback(async (email: string, password: string) => {
     const res = await authLogin(email.trim(), password);
     if (res?.user) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('algoceleris_has_session', 'true');
+      }
       setUser(mapAuthUser(res.user));
     }
   }, []);
@@ -96,11 +112,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       college_name,
     });
     if (res?.user) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('algoceleris_has_session', 'true');
+      }
       setUser(mapAuthUser(res.user));
     }
   }, []);
 
   const loginAsGuest = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('algoceleris_has_session');
+    }
     setAccessToken(null);
     setUser(GUEST_USER);
   }, []);
@@ -109,6 +131,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authLogout();
     } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('algoceleris_has_session');
+      }
       setAccessToken(null);
       setUser(GUEST_USER);
     }

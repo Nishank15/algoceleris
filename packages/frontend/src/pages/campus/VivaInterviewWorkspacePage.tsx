@@ -212,7 +212,7 @@ export const VivaInterviewWorkspacePage: React.FC = () => {
           }
         }
       } catch (err) {
-        console.warn('Error loading viva room:', err);
+        console.debug('Error loading viva room:', err);
         if (mounted) setRoom(MOCK_VIVA_ROOM);
       } finally {
         if (mounted) setLoading(false);
@@ -261,7 +261,7 @@ export const VivaInterviewWorkspacePage: React.FC = () => {
       wsRef.current = socket;
       setWsConnected(true);
     } catch (err) {
-      console.warn('Viva WebSocket connection failed, using local simulated channel:', err);
+      console.debug('Viva WebSocket connection using local simulated channel:', err);
       setWsConnected(false);
     }
 
@@ -272,7 +272,17 @@ export const VivaInterviewWorkspacePage: React.FC = () => {
 
     return () => {
       clearInterval(pingInterval);
-      if (wsRef.current) wsRef.current.close();
+      if (wsRef.current) {
+        const s = wsRef.current;
+        if (s.readyState === WebSocket.OPEN) {
+          s.close(1000, 'Component unmounted');
+        } else if (s.readyState === WebSocket.CONNECTING) {
+          s.onopen = () => {
+            s.close(1000, 'Component unmounted');
+          };
+        }
+        wsRef.current = null;
+      }
     };
   }, [activeRoomCode]);
 

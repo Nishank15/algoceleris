@@ -545,7 +545,11 @@ async fn handle_proctor_socket(mut socket: WebSocket, assessment_id: String) {
                     break;
                 }
             }
-            Ok(Message::Close(_)) | Err(_) => break,
+            Ok(Message::Close(c)) => {
+                let _ = socket.send(Message::Close(c)).await;
+                break;
+            }
+            Err(_) => break,
             _ => {}
         }
     }
@@ -564,8 +568,10 @@ pub async fn viva_room_ws_handler(
 
 async fn handle_viva_socket(mut socket: WebSocket, room_code: String) {
     let init = serde_json::json!({
+        "event_type": "connected",
         "type": "room_joined",
         "room_code": room_code,
+        "editor_code": "// Collaborative Viva Workspace Session\n#include <iostream>\n\nint main() {\n    std::cout << \"Viva candidate live session\" << std::endl;\n    return 0;\n}\n",
         "timestamp": Utc::now().to_rfc3339(),
     });
     if socket.send(Message::Text(init.to_string().into())).await.is_err() {
@@ -576,6 +582,7 @@ async fn handle_viva_socket(mut socket: WebSocket, room_code: String) {
         match msg {
             Ok(Message::Text(text)) => {
                 let resp = serde_json::json!({
+                    "event_type": "crdt_update",
                     "status": "synced",
                     "echo": text.as_str(),
                 });
@@ -588,7 +595,11 @@ async fn handle_viva_socket(mut socket: WebSocket, room_code: String) {
                     break;
                 }
             }
-            Ok(Message::Close(_)) | Err(_) => break,
+            Ok(Message::Close(c)) => {
+                let _ = socket.send(Message::Close(c)).await;
+                break;
+            }
+            Err(_) => break,
             _ => {}
         }
     }
