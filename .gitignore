@@ -17,4 +17,4 @@ build/
 .playwright-cli/
 .playwright/
 target/
-graphify-out/
+graphify-out/graphify-out/
