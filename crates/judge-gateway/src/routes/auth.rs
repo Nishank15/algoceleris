@@ -609,9 +609,8 @@ pub async fn refresh_handler(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Response, GatewayError> {
-    let raw_refresh = extract_refresh_token(&headers).ok_or_else(|| {
-        GatewayError::Unauthorized("Refresh token required".to_string())
-    })?;
+    let raw_refresh = extract_refresh_token(&headers)
+        .ok_or_else(|| GatewayError::Unauthorized("Refresh token required".to_string()))?;
 
     let claims = decode_refresh_token(&raw_refresh, &state.jwt_secret)?;
 
@@ -627,9 +626,8 @@ pub async fn refresh_handler(
         .await?;
 
     let user_info = if let Some(ref pool) = state.db {
-        let user_uuid = Uuid::parse_str(&claims.sub).map_err(|_| {
-            GatewayError::Unauthorized("Malformed user ID in token".to_string())
-        })?;
+        let user_uuid = Uuid::parse_str(&claims.sub)
+            .map_err(|_| GatewayError::Unauthorized("Malformed user ID in token".to_string()))?;
 
         let db_user = sqlx::query_as::<sqlx::Postgres, DbUser>(
             r"

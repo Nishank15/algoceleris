@@ -14,8 +14,9 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 async fn get_test_pool() -> Option<PgPool> {
-    let url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
     sqlx::postgres::PgPoolOptions::new()
         .max_connections(5)
         .acquire_timeout(std::time::Duration::from_secs(2))
@@ -281,16 +282,14 @@ async fn test_assessment_repository_state_transitions_and_active_filter() {
         .expect("create_assessment failed");
 
     // 1. Illegal leap from Scheduled -> Draft should fail domain validation
-    let illegal_res =
-        update_assessment_status(&pool, assessment_id, AssessmentStatus::Draft).await;
+    let illegal_res = update_assessment_status(&pool, assessment_id, AssessmentStatus::Draft).await;
     assert!(
         illegal_res.is_err(),
         "Expected error on illegal state leap Scheduled -> Draft"
     );
 
     // 2. Legal transition Scheduled -> Active succeeds
-    let active_rec =
-        update_assessment_status(&pool, assessment_id, AssessmentStatus::Active).await;
+    let active_rec = update_assessment_status(&pool, assessment_id, AssessmentStatus::Active).await;
     assert!(active_rec.is_ok());
     assert_eq!(active_rec.unwrap().status, "ACTIVE");
 
@@ -304,8 +303,7 @@ async fn test_assessment_repository_state_transitions_and_active_filter() {
     );
 
     // 4. Legal transition Active -> Closed succeeds
-    let closed_rec =
-        update_assessment_status(&pool, assessment_id, AssessmentStatus::Closed).await;
+    let closed_rec = update_assessment_status(&pool, assessment_id, AssessmentStatus::Closed).await;
     assert!(closed_rec.is_ok());
     assert_eq!(closed_rec.unwrap().status, "CLOSED");
 

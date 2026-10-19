@@ -110,8 +110,8 @@ export const CampusAdminDashboard: React.FC = () => {
       {/* Top Banner */}
       <div
         style={{
-          background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
-          border: '1px solid #23252a',
+          background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px',
           marginBottom: '24px',
@@ -140,8 +140,8 @@ export const CampusAdminDashboard: React.FC = () => {
             >
               TENANT ADMINISTRATION
             </span>
-            <span style={{ color: '#62666d' }}>•</span>
-            <span style={{ color: '#8a8f98', fontSize: '13px' }}>
+            <span style={{ color: 'var(--text-muted)' }}>•</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
               Tier: Enterprise Multi-Tenant
             </span>
           </div>
@@ -152,14 +152,14 @@ export const CampusAdminDashboard: React.FC = () => {
               fontWeight: 590,
               margin: '0 0 6px 0',
               letterSpacing: '-0.02em',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             }}
           >
             {orgName} Administrative Center
           </h1>
 
-          <p style={{ color: '#8a8f98', fontSize: '14px', margin: 0 }}>
-            Manage institutional roster access, monitor Linux kernel cgroups v2 boundaries, and inspect AST plagiarism logs.
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
+            Manage institutional roster access, monitor execution security boundaries, and inspect code similarity logs.
           </p>
         </div>
 
@@ -167,8 +167,8 @@ export const CampusAdminDashboard: React.FC = () => {
           type="button"
           onClick={() => setShowAddModal(true)}
           style={{
-            background: '#e4f222',
-            color: '#08090a',
+            background: 'var(--accent-primary)',
+            color: 'var(--accent-primary-fg)',
             border: 'none',
             padding: '10px 18px',
             borderRadius: '6px',
@@ -195,58 +195,58 @@ export const CampusAdminDashboard: React.FC = () => {
       >
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Institutional Roster
             </span>
             <Users size={16} style={{ color: '#02b8cc' }} />
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', marginBottom: '4px' }}>
+          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {roster.length}
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             Enrolled students & faculty
           </div>
         </div>
 
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Active Sandboxes
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Active Evaluations
             </span>
             <Cpu size={16} style={{ color: '#22c55e' }} />
           </div>
           <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', marginBottom: '4px' }}>
             {audit ? audit.active_sandboxes_count : 1}
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
-            Zero container spin-up overhead
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            No environment startup delay
           </div>
         </div>
 
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Executions (24h)
             </span>
             <Activity size={16} style={{ color: '#e4f222' }} />
@@ -254,36 +254,36 @@ export const CampusAdminDashboard: React.FC = () => {
           <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#e4f222', marginBottom: '4px' }}>
             {audit ? audit.sandbox_executions_last_24h : 142}
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
-            Evaluated in Linux isolation
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Evaluated in an isolated environment
           </div>
         </div>
 
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '11px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Security Hardening
             </span>
             <ShieldCheck size={16} style={{ color: '#22c55e' }} />
           </div>
           <div style={{ fontSize: '16px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', marginBottom: '4px' }}>
-            cgroups v2 + seccomp
+            Dedicated Compute Allocation
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
-            Dropped net & unshare isolation
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+            Protected runtime boundaries & isolated execution
           </div>
         </div>
       </div>
 
       {/* Tabs Selector */}
-      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #23252a', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '24px' }}>
         <button
           type="button"
           onClick={() => setActiveTab('roster')}
@@ -294,7 +294,7 @@ export const CampusAdminDashboard: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'roster' ? 590 : 400,
-            color: activeTab === 'roster' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'roster' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -314,14 +314,14 @@ export const CampusAdminDashboard: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'security' ? 590 : 400,
-            color: activeTab === 'security' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'security' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
           }}
         >
-          <ShieldCheck size={15} /> Kernel Sandbox Audit ({audit?.security_audit_events.length || 0})
+          <ShieldCheck size={15} /> Evaluation Safety Audit ({audit?.security_audit_events.length || 0})
         </button>
 
         <button
@@ -334,7 +334,7 @@ export const CampusAdminDashboard: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'plagiarism' ? 590 : 400,
-            color: activeTab === 'plagiarism' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'plagiarism' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -347,11 +347,11 @@ export const CampusAdminDashboard: React.FC = () => {
 
       {/* Tab 1: Member Roster */}
       {activeTab === 'roster' && (
-        <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
           <div
             style={{
               padding: '16px 20px',
-              borderBottom: '1px solid #23252a',
+              borderBottom: '1px solid var(--border-subtle)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -360,7 +360,7 @@ export const CampusAdminDashboard: React.FC = () => {
             }}
           >
             <div style={{ position: 'relative', width: '280px' }}>
-              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#62666d' }} />
+              <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 type="text"
                 placeholder="Search by name, email, or reg no..."
@@ -368,11 +368,11 @@ export const CampusAdminDashboard: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  background: '#141517',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '6px',
                   padding: '8px 10px 8px 32px',
-                  color: '#ffffff',
+                  color: 'var(--text-primary)',
                   fontSize: '12px',
                   outline: 'none',
                   boxSizing: 'border-box',
@@ -387,9 +387,9 @@ export const CampusAdminDashboard: React.FC = () => {
                   type="button"
                   onClick={() => setRoleFilter(r)}
                   style={{
-                    background: roleFilter === r ? '#23252a' : '#141517',
-                    border: '1px solid #23252a',
-                    color: roleFilter === r ? '#e4f222' : '#8a8f98',
+                    background: roleFilter === r ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: roleFilter === r ? '#e4f222' : 'var(--text-secondary)',
                     padding: '6px 12px',
                     borderRadius: '4px',
                     fontSize: '11px',
@@ -406,27 +406,27 @@ export const CampusAdminDashboard: React.FC = () => {
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ background: '#141517', borderBottom: '1px solid #23252a' }}>
-                  <th style={{ padding: '12px 20px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Member</th>
-                  <th style={{ padding: '12px 20px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Identifier / Reg</th>
-                  <th style={{ padding: '12px 20px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Role</th>
-                  <th style={{ padding: '12px 20px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Department</th>
-                  <th style={{ padding: '12px 20px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Created</th>
+                <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <th style={{ padding: '12px 20px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Member</th>
+                  <th style={{ padding: '12px 20px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Identifier / Reg</th>
+                  <th style={{ padding: '12px 20px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Role</th>
+                  <th style={{ padding: '12px 20px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Department</th>
+                  <th style={{ padding: '12px 20px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Created</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRoster.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#62666d', fontSize: '13px' }}>
+                    <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                       No roster members found matching filter.
                     </td>
                   </tr>
                 ) : (
                   filteredRoster.map((m) => (
-                    <tr key={m.id} style={{ borderBottom: '1px solid #23252a' }}>
+                    <tr key={m.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                       <td style={{ padding: '14px 20px' }}>
-                        <div style={{ fontSize: '13px', fontWeight: 510, color: '#ffffff' }}>{m.name || m.username}</div>
-                        <div style={{ fontSize: '11px', color: '#8a8f98' }}>{m.email}</div>
+                        <div style={{ fontSize: '13px', fontWeight: 510, color: 'var(--text-primary)' }}>{m.name || m.username}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{m.email}</div>
                       </td>
                       <td style={{ padding: '14px 20px', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#e4f222' }}>
                         {m.reg_number || '—'}
@@ -462,10 +462,10 @@ export const CampusAdminDashboard: React.FC = () => {
                           {m.role.toUpperCase()}
                         </span>
                       </td>
-                      <td style={{ padding: '14px 20px', fontSize: '12px', color: '#d0d6e0' }}>
+                      <td style={{ padding: '14px 20px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                         {m.department || 'Computer Science'}
                       </td>
-                      <td style={{ padding: '14px 20px', fontSize: '12px', color: '#8a8f98' }}>
+                      <td style={{ padding: '14px 20px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                         {new Date(m.created_at).toLocaleDateString()}
                       </td>
                     </tr>
@@ -477,7 +477,7 @@ export const CampusAdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 2: Kernel Security & Cgroups Audit */}
+      {/* Tab 2: Evaluation Safety Audit */}
       {activeTab === 'security' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div
@@ -487,73 +487,73 @@ export const CampusAdminDashboard: React.FC = () => {
               gap: '16px',
             }}
           >
-            <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '20px' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#8a8f98', marginBottom: '4px' }}>
-                Kernel Control Groups
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '20px' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Resource Limits
               </div>
               <div style={{ fontSize: '16px', fontWeight: 600, color: '#22c55e', fontFamily: 'JetBrains Mono, monospace', marginBottom: '8px' }}>
-                {audit?.cgroups_status || 'cgroups v2 active (256MB RAM / 1 vCPU)'}
+                Safe execution boundaries active
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
-                Submissions execute under strictly bounded controllers. OOM-killer immediately terminates rogue memory allocations without host impact.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
+                Submissions evaluate in isolated environments with strict execution boundaries and automated memory protection.
               </p>
             </div>
 
-            <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '20px' }}>
-              <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#8a8f98', marginBottom: '4px' }}>
-                Syscall Filter
+            <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '20px' }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                Runtime Protection
               </div>
               <div style={{ fontSize: '16px', fontWeight: 600, color: '#02b8cc', fontFamily: 'JetBrains Mono, monospace', marginBottom: '8px' }}>
-                {audit?.seccomp_status || 'seccomp-bpf enforced (dropped socket)'}
+                {audit?.seccomp_status || 'Runtime protection active'}
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
-                System calls for socket creation, fork bombs, and file descriptor exfiltration are dropped via BPF bytecode rules.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
+                Submission runtimes cannot open network sockets, spawn unbounded processes, or read files outside their working directory.
               </p>
             </div>
           </div>
 
           {/* Audit Events Log */}
-          <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', overflow: 'hidden' }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #23252a' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
-                Sandbox Isolation Telemetry & Security Audit
+          <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border-subtle)' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
+                Execution Safety Telemetry & Security Audit
               </h3>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: '4px 0 0 0' }}>
-                Real-time security telemetry recorded by worker execution daemons.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: '4px 0 0 0' }}>
+                Safety events recorded automatically during evaluation runs.
               </p>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#141517', borderBottom: '1px solid #23252a' }}>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Timestamp</th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Event</th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Container ID</th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Action</th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Severity</th>
+                  <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Timestamp</th>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Event</th>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Container ID</th>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Action</th>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Severity</th>
                   </tr>
                 </thead>
                 <tbody>
                   {!audit || audit.security_audit_events.length === 0 ? (
                     <tr>
-                      <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#62666d', fontSize: '13px' }}>
+                      <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                         No audit events recorded in current cycle.
                       </td>
                     </tr>
                   ) : (
                     audit.security_audit_events.map((evt) => (
-                      <tr key={evt.id} style={{ borderBottom: '1px solid #23252a' }}>
-                        <td style={{ padding: '14px 24px', fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
+                      <tr key={evt.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                           {new Date(evt.timestamp).toLocaleTimeString()}
                         </td>
-                        <td style={{ padding: '14px 24px', fontSize: '13px', fontWeight: 510, color: '#ffffff' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '13px', fontWeight: 510, color: 'var(--text-primary)' }}>
                           {evt.event}
                         </td>
-                        <td style={{ padding: '14px 24px', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#8a8f98' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-secondary)' }}>
                           {evt.container_id}
                         </td>
-                        <td style={{ padding: '14px 24px', fontSize: '12px', color: '#d0d6e0' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                           {evt.action}
                         </td>
                         <td style={{ padding: '14px 24px' }}>
@@ -585,48 +585,48 @@ export const CampusAdminDashboard: React.FC = () => {
 
       {/* Tab 3: Plagiarism Scans */}
       {activeTab === 'plagiarism' && (
-        <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', overflow: 'hidden' }}>
-          <div style={{ padding: '18px 24px', borderBottom: '1px solid #23252a' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
-              Tree-sitter AST Plagiarism Reports
+        <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 24px', borderBottom: '1px solid var(--border-subtle)' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
+              Code Similarity & Plagiarism Reports
             </h3>
-            <p style={{ color: '#8a8f98', fontSize: '12px', margin: '4px 0 0 0' }}>
-              Structural AST winnowing scans across all submitted lab solutions.
+            <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: '4px 0 0 0' }}>
+              Structural similarity scans across all submitted lab solutions.
             </p>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr style={{ background: '#141517', borderBottom: '1px solid #23252a' }}>
-                  <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Lab ID</th>
-                  <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Comparison Pair</th>
-                  <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Similarity</th>
-                  <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Fingerprints</th>
-                  <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>Integrity Verdict</th>
+                <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                  <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Lab ID</th>
+                  <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Comparison Pair</th>
+                  <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Similarity</th>
+                  <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Similarity Matches</th>
+                  <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>Integrity Verdict</th>
                 </tr>
               </thead>
               <tbody>
                 {!audit || audit.plagiarism_scans.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#62666d', fontSize: '13px' }}>
+                    <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                       No plagiarism records found.
                     </td>
                   </tr>
                 ) : (
                   audit.plagiarism_scans.map((scan, idx) => (
-                    <tr key={idx} style={{ borderBottom: '1px solid #23252a' }}>
-                      <td style={{ padding: '14px 24px', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: '#8a8f98' }}>
+                    <tr key={idx} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+                      <td style={{ padding: '14px 24px', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-secondary)' }}>
                         {scan.lab_id}
                       </td>
-                      <td style={{ padding: '14px 24px', fontSize: '13px', color: '#ffffff', fontFamily: 'JetBrains Mono, monospace' }}>
-                        {scan.student_a} <span style={{ color: '#62666d' }}>↔</span> {scan.student_b}
+                      <td style={{ padding: '14px 24px', fontSize: '13px', color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
+                        {scan.student_a} <span style={{ color: 'var(--text-muted)' }}>↔</span> {scan.student_b}
                       </td>
                       <td style={{ padding: '14px 24px', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: '#22c55e' }}>
                         {(scan.ast_similarity_score * 100).toFixed(1)}%
                       </td>
-                      <td style={{ padding: '14px 24px', fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
-                        {scan.winnowing_fingerprints_matched} matches
+                      <td style={{ padding: '14px 24px', fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
+                        {scan.similarity_matches} similarity matches
                       </td>
                       <td style={{ padding: '14px 24px' }}>
                         <span
@@ -669,8 +669,8 @@ export const CampusAdminDashboard: React.FC = () => {
         >
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               maxWidth: '500px',
               width: '100%',
@@ -678,13 +678,13 @@ export const CampusAdminDashboard: React.FC = () => {
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
                 Add Institutional Roster Member
               </h3>
               <button
                 type="button"
                 onClick={() => setShowAddModal(false)}
-                style={{ background: 'transparent', border: 'none', color: '#8a8f98', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
               >
                 <X size={18} />
               </button>
@@ -708,7 +708,7 @@ export const CampusAdminDashboard: React.FC = () => {
 
             <form onSubmit={handleAddMember} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#8a8f98', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Full Name
                 </label>
                 <input
@@ -719,11 +719,11 @@ export const CampusAdminDashboard: React.FC = () => {
                   onChange={(e) => setNewMember({ ...newMember, name: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#141517',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '8px 12px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -732,7 +732,7 @@ export const CampusAdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#8a8f98', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Institutional Email
                 </label>
                 <input
@@ -743,11 +743,11 @@ export const CampusAdminDashboard: React.FC = () => {
                   onChange={(e) => setNewMember({ ...newMember, email: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#141517',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '8px 12px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -757,7 +757,7 @@ export const CampusAdminDashboard: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#8a8f98', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Role
                   </label>
                   <select
@@ -765,11 +765,11 @@ export const CampusAdminDashboard: React.FC = () => {
                     onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
                     style={{
                       width: '100%',
-                      background: '#141517',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       padding: '8px 12px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -782,7 +782,7 @@ export const CampusAdminDashboard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', color: '#8a8f98', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Registration / Faculty No
                   </label>
                   <input
@@ -792,11 +792,11 @@ export const CampusAdminDashboard: React.FC = () => {
                     onChange={(e) => setNewMember({ ...newMember, reg_number: e.target.value })}
                     style={{
                       width: '100%',
-                      background: '#141517',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       padding: '8px 12px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -807,7 +807,7 @@ export const CampusAdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', color: '#8a8f98', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Department
                 </label>
                 <input
@@ -816,11 +816,11 @@ export const CampusAdminDashboard: React.FC = () => {
                   onChange={(e) => setNewMember({ ...newMember, department: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#141517',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '8px 12px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -834,8 +834,8 @@ export const CampusAdminDashboard: React.FC = () => {
                   onClick={() => setShowAddModal(false)}
                   style={{
                     background: 'transparent',
-                    border: '1px solid #23252a',
-                    color: '#8a8f98',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-secondary)',
                     padding: '8px 16px',
                     borderRadius: '6px',
                     fontSize: '13px',
@@ -848,8 +848,8 @@ export const CampusAdminDashboard: React.FC = () => {
                   type="submit"
                   disabled={adding}
                   style={{
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     border: 'none',
                     padding: '8px 16px',
                     borderRadius: '6px',

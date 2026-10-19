@@ -94,30 +94,30 @@ export const HackathonsPage: React.FC = () => {
   const completedCount = hackathons.filter((h) => h.status.toUpperCase() === 'COMPLETED').length;
 
   return (
-    <div className="hackathons-catalog-page" style={{ background: '#08090a', minHeight: '100vh', color: '#f8fafc' }}>
+    <div className="hackathons-catalog-page" style={{ background: 'var(--bg-canvas)', minHeight: '100vh', color: 'var(--text-primary)' }}>
       <div className="hackathons-container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 20px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
         
         {/* Header Breadcrumb & Title */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#8a8f98' }}>
-            <Link to="/" style={{ color: '#8a8f98', textDecoration: 'none' }}>Home</Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <Link to="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Home</Link>
             <span>/</span>
-            <span style={{ color: '#e5e5e6' }}>Hackathons & Build Sprints</span>
+            <span style={{ color: 'var(--text-primary)' }}>Hackathons & Build Sprints</span>
           </div>
-          <h1 style={{ fontSize: '2.25rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: '#ffffff' }}>
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, color: 'var(--text-primary)' }}>
             National Engineering Sprints
           </h1>
-          <p style={{ margin: 0, fontSize: '0.94rem', color: '#8a8f98', maxWidth: '720px', lineHeight: 1.5 }}>
-            Production hackathons evaluated by the AlgoCeleris low-latency kernel sandbox. Form teams, solve industry track statements, and compete for verified cash bounties.
+          <p style={{ margin: 0, fontSize: '0.94rem', color: 'var(--text-secondary)', maxWidth: '720px', lineHeight: 1.5 }}>
+            High-impact national engineering hackathons with real-time automated evaluation, fair sandboxing, and verified cash awards.
           </p>
         </div>
 
         {/* Loading State */}
         {loading && (
-          <div style={{ padding: '60px 20px', textAlign: 'center', background: '#141517', border: '1px solid #23252a', borderRadius: '12px', color: '#8a8f98' }}>
+          <div style={{ padding: '60px 20px', textAlign: 'center', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', fontSize: '0.9rem' }}>
-              <div style={{ width: '16px', height: '16px', border: '2px solid #3e4149', borderTopColor: '#e4f222', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-              Connecting to Rust Axum Hackathon Store...
+              <div style={{ width: '16px', height: '16px', border: '2px solid var(--border-active)', borderTopColor: '#e4f222', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              Connecting to Hackathon Directory...
             </div>
           </div>
         )}
@@ -129,7 +129,7 @@ export const HackathonsPage: React.FC = () => {
             <div style={{ fontSize: '0.85rem' }}>{error}</div>
             <button
               onClick={() => window.location.reload()}
-              style={{ marginTop: '12px', padding: '6px 14px', background: '#23252a', border: '1px solid #3e4149', borderRadius: '6px', color: '#fff', fontSize: '0.8rem', cursor: 'pointer' }}
+              style={{ marginTop: '12px', padding: '6px 14px', background: 'var(--bg-elevated)', border: '1px solid var(--border-active)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem', cursor: 'pointer' }}
             >
               Retry Connection
             </button>
@@ -141,15 +141,15 @@ export const HackathonsPage: React.FC = () => {
           <div
             className="hackathon-hero-card"
             style={{
-              background: '#141517',
-              border: '1px solid #23252a',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '32px',
               display: 'flex',
               flexDirection: 'column',
               gap: '20px',
               position: 'relative',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
             }}
           >
             {/* Top row with Live badge & Prize */}
@@ -184,11 +184,11 @@ export const HackathonsPage: React.FC = () => {
                 <span
                   style={{
                     fontSize: '0.74rem',
-                    color: '#8a8f98',
+                    color: 'var(--text-secondary)',
                     padding: '4px 10px',
                     borderRadius: '6px',
-                    background: '#0f1011',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
                   }}
                 >
                   Flagship Event
@@ -201,25 +201,25 @@ export const HackathonsPage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
-                  background: '#08090a',
+                  background: 'var(--bg-canvas)',
                   padding: '6px 14px',
                   borderRadius: '8px',
-                  border: '1px solid #23252a',
+                  border: '1px solid var(--border-subtle)',
                   fontFamily: "'JetBrains Mono', monospace",
                   fontVariantNumeric: 'tabular-nums',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#8a8f98' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   <Clock size={13} style={{ color: '#e4f222' }} />
                   <span>STARTS IN:</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                   <span>{String(timeLeft.days).padStart(2, '0')}d</span>
-                  <span style={{ color: '#383b3f' }}>:</span>
+                  <span style={{ color: 'var(--border-divider)' }}>:</span>
                   <span>{String(timeLeft.hours).padStart(2, '0')}h</span>
-                  <span style={{ color: '#383b3f' }}>:</span>
+                  <span style={{ color: 'var(--border-divider)' }}>:</span>
                   <span>{String(timeLeft.minutes).padStart(2, '0')}m</span>
-                  <span style={{ color: '#383b3f' }}>:</span>
+                  <span style={{ color: 'var(--border-divider)' }}>:</span>
                   <span style={{ color: '#e4f222' }}>{String(timeLeft.seconds).padStart(2, '0')}s</span>
                 </div>
               </div>
@@ -227,10 +227,10 @@ export const HackathonsPage: React.FC = () => {
 
             {/* Main Title & Tagline */}
             <div>
-              <h2 style={{ fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.025em', margin: '0 0 8px 0', color: '#ffffff' }}>
+              <h2 style={{ fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.025em', margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
                 {flagship.title}
               </h2>
-              <p style={{ margin: 0, fontSize: '1rem', color: '#8a8f98', lineHeight: 1.55, maxWidth: '820px' }}>
+              <p style={{ margin: 0, fontSize: '1rem', color: 'var(--text-secondary)', lineHeight: 1.55, maxWidth: '820px' }}>
                 {flagship.tagline}
               </p>
             </div>
@@ -243,8 +243,8 @@ export const HackathonsPage: React.FC = () => {
                 gap: '24px',
                 flexWrap: 'wrap',
                 fontSize: '0.82rem',
-                color: '#8a8f98',
-                borderTop: '1px solid #23252a',
+                color: 'var(--text-secondary)',
+                borderTop: '1px solid var(--border-subtle)',
                 paddingTop: '16px',
               }}
             >
@@ -256,18 +256,18 @@ export const HackathonsPage: React.FC = () => {
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Users size={14} style={{ color: '#8a8f98' }} />
+                <Users size={14} style={{ color: 'var(--text-secondary)' }} />
                 <span>Registrations:</span>
-                <span style={{ color: '#ffffff', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
+                <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
                   {flagship.registered_count.toLocaleString()}+ Engineers
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <MapPin size={14} style={{ color: '#8a8f98' }} />
+                <MapPin size={14} style={{ color: 'var(--text-secondary)' }} />
                 <span>{flagship.location}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Calendar size={14} style={{ color: '#8a8f98' }} />
+                <Calendar size={14} style={{ color: 'var(--text-secondary)' }} />
                 <span>{flagship.start_date}</span>
               </div>
             </div>
@@ -282,10 +282,10 @@ export const HackathonsPage: React.FC = () => {
                       fontSize: '0.74rem',
                       fontWeight: 500,
                       padding: '4px 10px',
-                      background: '#0f1011',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
-                      color: '#d0d6e0',
+                      color: 'var(--text-secondary)',
                     }}
                   >
                     {track}
@@ -299,15 +299,15 @@ export const HackathonsPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   padding: '10px 22px',
                   borderRadius: '6px',
                   fontWeight: 600,
                   fontSize: '0.84rem',
                   textDecoration: 'none',
                   transition: 'all 0.15s ease',
-                  boxShadow: '0 2px 8px rgba(228, 242, 34, 0.18)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.12)',
                 }}
               >
                 <span>Enter Sprint Command Center</span>
@@ -325,22 +325,22 @@ export const HackathonsPage: React.FC = () => {
             justifyContent: 'space-between',
             flexWrap: 'wrap',
             gap: '16px',
-            background: '#0f1011',
+            background: 'var(--bg-surface)',
             padding: '10px 14px',
             borderRadius: '8px',
-            border: '1px solid #23252a',
+            border: '1px solid var(--border-subtle)',
           }}
         >
           {/* Segmented Filter Pills */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#08090a', padding: '3px', borderRadius: '6px', border: '1px solid #23252a' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-canvas)', padding: '3px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
             <button
               onClick={() => setFilter('ALL')}
               style={{
                 padding: '5px 12px',
                 borderRadius: '4px',
-                background: filter === 'ALL' ? '#141517' : 'transparent',
-                border: filter === 'ALL' ? '1px solid #3e4149' : '1px solid transparent',
-                color: filter === 'ALL' ? '#ffffff' : '#8a8f98',
+                background: filter === 'ALL' ? 'var(--bg-elevated)' : 'transparent',
+                border: filter === 'ALL' ? '1px solid var(--border-active)' : '1px solid transparent',
+                color: filter === 'ALL' ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontSize: '0.76rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -353,9 +353,9 @@ export const HackathonsPage: React.FC = () => {
               style={{
                 padding: '5px 12px',
                 borderRadius: '4px',
-                background: filter === 'LIVE' ? '#141517' : 'transparent',
-                border: filter === 'LIVE' ? '1px solid #3e4149' : '1px solid transparent',
-                color: filter === 'LIVE' ? '#22c55e' : '#8a8f98',
+                background: filter === 'LIVE' ? 'var(--bg-elevated)' : 'transparent',
+                border: filter === 'LIVE' ? '1px solid var(--border-active)' : '1px solid transparent',
+                color: filter === 'LIVE' ? '#22c55e' : 'var(--text-secondary)',
                 fontSize: '0.76rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -368,9 +368,9 @@ export const HackathonsPage: React.FC = () => {
               style={{
                 padding: '5px 12px',
                 borderRadius: '4px',
-                background: filter === 'UPCOMING' ? '#141517' : 'transparent',
-                border: filter === 'UPCOMING' ? '1px solid #3e4149' : '1px solid transparent',
-                color: filter === 'UPCOMING' ? '#60a5fa' : '#8a8f98',
+                background: filter === 'UPCOMING' ? 'var(--bg-elevated)' : 'transparent',
+                border: filter === 'UPCOMING' ? '1px solid var(--border-active)' : '1px solid transparent',
+                color: filter === 'UPCOMING' ? '#60a5fa' : 'var(--text-secondary)',
                 fontSize: '0.76rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -383,9 +383,9 @@ export const HackathonsPage: React.FC = () => {
               style={{
                 padding: '5px 12px',
                 borderRadius: '4px',
-                background: filter === 'COMPLETED' ? '#141517' : 'transparent',
-                border: filter === 'COMPLETED' ? '1px solid #3e4149' : '1px solid transparent',
-                color: filter === 'COMPLETED' ? '#e5e5e6' : '#8a8f98',
+                background: filter === 'COMPLETED' ? 'var(--bg-elevated)' : 'transparent',
+                border: filter === 'COMPLETED' ? '1px solid var(--border-active)' : '1px solid transparent',
+                color: filter === 'COMPLETED' ? 'var(--text-primary)' : 'var(--text-secondary)',
                 fontSize: '0.76rem',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -397,7 +397,7 @@ export const HackathonsPage: React.FC = () => {
 
           {/* Search Input */}
           <div style={{ position: 'relative', minWidth: '260px' }}>
-            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#62666d' }} />
+            <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input
               type="text"
               placeholder="Search by sprint name, tech stack, host..."
@@ -406,10 +406,10 @@ export const HackathonsPage: React.FC = () => {
               style={{
                 width: '100%',
                 padding: '6px 12px 6px 30px',
-                background: '#08090a',
-                border: '1px solid #23252a',
+                background: 'var(--bg-canvas)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '6px',
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontSize: '0.78rem',
                 outline: 'none',
               }}
@@ -427,8 +427,8 @@ export const HackathonsPage: React.FC = () => {
               <div
                 key={h.id}
                 style={{
-                  background: '#141517',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '10px',
                   padding: '24px',
                   display: 'flex',
@@ -437,11 +437,11 @@ export const HackathonsPage: React.FC = () => {
                   transition: 'transform 0.15s ease, border-color 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#3e4149';
+                  e.currentTarget.style.borderColor = 'var(--border-active)';
                   e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = '#23252a';
+                  e.currentTarget.style.borderColor = 'var(--border-subtle)';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
               >
@@ -461,10 +461,10 @@ export const HackathonsPage: React.FC = () => {
                         ? 'rgba(34, 197, 94, 0.12)'
                         : isUpcoming
                         ? 'rgba(59, 130, 246, 0.12)'
-                        : 'rgba(255, 255, 255, 0.05)',
-                      color: isLive ? '#22c55e' : isUpcoming ? '#60a5fa' : '#8a8f98',
+                        : 'var(--bg-surface)',
+                      color: isLive ? '#22c55e' : isUpcoming ? '#60a5fa' : 'var(--text-secondary)',
                       border: `1px solid ${
-                        isLive ? 'rgba(34, 197, 94, 0.3)' : isUpcoming ? 'rgba(59, 130, 246, 0.3)' : '#23252a'
+                        isLive ? 'rgba(34, 197, 94, 0.3)' : isUpcoming ? 'rgba(59, 130, 246, 0.3)' : 'var(--border-subtle)'
                       }`,
                     }}
                   >
@@ -499,7 +499,7 @@ export const HackathonsPage: React.FC = () => {
                     to={`/hackathons/${h.slug}`}
                     style={{
                       textDecoration: 'none',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '1.2rem',
                       fontWeight: 700,
                       letterSpacing: '-0.015em',
@@ -509,7 +509,7 @@ export const HackathonsPage: React.FC = () => {
                   >
                     {h.title}
                   </Link>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#8a8f98', lineHeight: 1.5, minHeight: '38px' }}>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.5, minHeight: '38px' }}>
                     {h.tagline}
                   </p>
                 </div>
@@ -523,17 +523,17 @@ export const HackathonsPage: React.FC = () => {
                         fontSize: '0.68rem',
                         fontWeight: 500,
                         padding: '2px 7px',
-                        background: '#0f1011',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '4px',
-                        color: '#8a8f98',
+                        color: 'var(--text-secondary)',
                       }}
                     >
                       {track}
                     </span>
                   ))}
                   {h.tracks.length > 3 && (
-                    <span style={{ fontSize: '0.68rem', color: '#62666d', alignSelf: 'center' }}>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', alignSelf: 'center' }}>
                       +{h.tracks.length - 3} more
                     </span>
                   )}
@@ -546,9 +546,9 @@ export const HackathonsPage: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     paddingTop: '12px',
-                    borderTop: '1px solid #23252a',
+                    borderTop: '1px solid var(--border-subtle)',
                     fontSize: '0.76rem',
-                    color: '#8a8f98',
+                    color: 'var(--text-secondary)',
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
@@ -564,7 +564,7 @@ export const HackathonsPage: React.FC = () => {
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px',
-                      color: '#e5e5e6',
+                      color: 'var(--text-primary)',
                       textDecoration: 'none',
                       fontWeight: 600,
                     }}
@@ -579,7 +579,7 @@ export const HackathonsPage: React.FC = () => {
         </div>
 
         {filteredHackathons.length === 0 && !loading && (
-          <div style={{ padding: '60px 20px', textAlign: 'center', background: '#141517', border: '1px solid #23252a', borderRadius: '12px', color: '#8a8f98' }}>
+          <div style={{ padding: '60px 20px', textAlign: 'center', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', borderRadius: '12px', color: 'var(--text-secondary)' }}>
             No hackathons matched the selected filter or search query.
           </div>
         )}

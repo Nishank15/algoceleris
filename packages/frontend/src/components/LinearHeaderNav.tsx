@@ -72,7 +72,7 @@ export const LinearHeaderNav: React.FC = () => {
           <button
             type="button"
             onClick={toggleTheme}
-            className="nav-theme-toggle"
+            className="nav-theme-toggle theme-toggle-btn"
             id="nav-theme-toggle"
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}

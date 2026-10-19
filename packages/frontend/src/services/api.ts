@@ -8,6 +8,7 @@ import {
   ContestDetails,
   ProctoringEvent,
   ProctoringAuditReport,
+  Problem,
 } from '../types';
 
 export const getApiBaseUrl = (_useFallback = false): string => {
@@ -74,8 +75,21 @@ export async function fetchWithFallback(
   options?: RequestInit,
   isRetry = false
 ): Promise<Response> {
+  let token = inMemoryAccessToken;
+  if (!token && typeof window !== 'undefined') {
+    try {
+      const raw = sessionStorage.getItem('algoceleris_campus_session') || localStorage.getItem('algoceleris_campus_session');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed?.token) token = parsed.token;
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   const headers: Record<string, string> = {
-    ...(inMemoryAccessToken ? { Authorization: `Bearer ${inMemoryAccessToken}` } : {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...((options?.headers as Record<string, string>) || {}),
   };
 
@@ -166,6 +180,22 @@ export async function fetchWithFallback(
     }
     throw error;
   }
+}
+
+export async function fetchProblems(): Promise<Problem[]> {
+  const response = await fetchWithFallback('/api/v1/problems');
+  if (!response.ok) {
+    throw new Error(`Failed to load problem catalog (${response.status})`);
+  }
+  return response.json();
+}
+
+export async function fetchProblem(problemId: string): Promise<Problem> {
+  const response = await fetchWithFallback(`/api/v1/problems/${encodeURIComponent(problemId)}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load problem '${problemId}' (${response.status})`);
+  }
+  return response.json();
 }
 
 export async function submitCode(
@@ -701,6 +731,8 @@ export interface HackathonMilestoneItem {
   date: string;
   status: string;
   description: string;
+  start_iso?: string;
+  end_iso?: string;
 }
 
 export interface HackathonShowcaseItem {
@@ -755,6 +787,8 @@ export interface HackathonDetailResponse {
   teams: HackathonTeamItem[];
   matchmaking: HackathonMatchmakerItem[];
   showcase: HackathonShowcaseItem[];
+  is_registered?: boolean;
+  my_team?: HackathonTeamItem | null;
 }
 
 export interface HackathonRegisterRequest {
@@ -826,7 +860,14 @@ export async function listHackathons(): Promise<HackathonSummary[]> {
 }
 
 export async function getHackathonDetail(slug: string): Promise<HackathonDetailResponse> {
-  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}`);
+  const token = getAccessToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}`, {
+    headers,
+  });
   if (!response.ok) {
     throw new Error(`Failed to load hackathon '${slug}'`);
   }
@@ -837,9 +878,14 @@ export async function registerHackathon(
   slug: string,
   data: HackathonRegisterRequest
 ): Promise<HackathonRegisterResponse> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -853,9 +899,14 @@ export async function createOrJoinHackathonTeam(
   slug: string,
   data: HackathonTeamRequest
 ): Promise<HackathonTeamResponse> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/teams`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -869,9 +920,14 @@ export async function submitHackathonProject(
   slug: string,
   data: HackathonSubmissionRequest
 ): Promise<HackathonSubmissionResponse> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   const response = await fetchWithFallback(`/api/v1/hackathons/${encodeURIComponent(slug)}/submissions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -885,11 +941,16 @@ export async function upvoteHackathonSubmission(
   slug: string,
   id: string
 ): Promise<HackathonUpvoteResponse> {
+  const token = getAccessToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   const response = await fetchWithFallback(
     `/api/v1/hackathons/${encodeURIComponent(slug)}/submissions/${encodeURIComponent(id)}/upvote`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
     }
   );
   if (!response.ok) {
@@ -902,14 +963,20 @@ export async function upvoteHackathonSubmission(
 // --- Phase 31: Multi-Tenant Campus & Institutional Auth ---
 
 export interface CampusOrgSummary {
-  id: string;
+  /**
+   * Internal tenant id. Only present when the directory was fetched with a valid session —
+   * `GET /api/v1/campus/orgs` narrows the payload for anonymous callers. Prefer `slug`, which
+   * is always present, as the stable public identifier.
+   */
+  id?: string;
   name: string;
   slug: string;
   domain_whitelist: string[];
   tier: string;
   student_count: number;
   faculty_count: number;
-  created_at: string;
+  /** Provisioning timestamp. Only present for callers with a valid session. */
+  created_at?: string;
 }
 
 export interface CampusProvisionRequest {
@@ -1347,13 +1414,13 @@ export interface PlagiarismReportItem {
   student_a: string;
   student_b: string;
   ast_similarity_score: number;
-  winnowing_fingerprints_matched: number;
+  similarity_matches: number;
   status: string;
 }
 
 export interface CampusAdminAuditResponse {
   org_slug: string;
-  cgroups_status: string;
+  runtime_status: string;
   seccomp_status: string;
   active_sandboxes_count: number;
   sandbox_executions_last_24h: number;

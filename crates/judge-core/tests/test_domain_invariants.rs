@@ -30,10 +30,7 @@ fn test_timeline_invariant_rejects_paradox() {
     let cutoff_at = now + Duration::hours(5);
 
     let result = validate_assessment_timeline(publish_at, starts_at, due_at, cutoff_at);
-    assert!(matches!(
-        result,
-        Err(DomainError::TimelineParadox { .. })
-    ));
+    assert!(matches!(result, Err(DomainError::TimelineParadox { .. })));
 
     // Due after cutoff date
     let due_after_cutoff = validate_assessment_timeline(
@@ -86,11 +83,13 @@ fn test_assessment_state_machine_valid_transitions() {
         AssessmentStatus::Active
     );
     assert_eq!(
-        transition_assessment_state(AssessmentStatus::Active, AssessmentStatus::GracePeriod).unwrap(),
+        transition_assessment_state(AssessmentStatus::Active, AssessmentStatus::GracePeriod)
+            .unwrap(),
         AssessmentStatus::GracePeriod
     );
     assert_eq!(
-        transition_assessment_state(AssessmentStatus::GracePeriod, AssessmentStatus::Closed).unwrap(),
+        transition_assessment_state(AssessmentStatus::GracePeriod, AssessmentStatus::Closed)
+            .unwrap(),
         AssessmentStatus::Closed
     );
     // Direct early termination from Active -> Closed
@@ -103,14 +102,16 @@ fn test_assessment_state_machine_valid_transitions() {
 #[test]
 fn test_assessment_state_machine_rejects_illegal_leaps() {
     // Cannot leap from Draft directly to GracePeriod
-    let invalid_leap = transition_assessment_state(AssessmentStatus::Draft, AssessmentStatus::GracePeriod);
+    let invalid_leap =
+        transition_assessment_state(AssessmentStatus::Draft, AssessmentStatus::GracePeriod);
     assert!(matches!(
         invalid_leap,
         Err(DomainError::InvalidStateTransition { .. })
     ));
 
     // Cannot transition from Closed to Active (terminal state)
-    let revive_closed = transition_assessment_state(AssessmentStatus::Closed, AssessmentStatus::Active);
+    let revive_closed =
+        transition_assessment_state(AssessmentStatus::Closed, AssessmentStatus::Active);
     assert!(matches!(
         revive_closed,
         Err(DomainError::InvalidStateTransition { .. })

@@ -4,12 +4,12 @@ use axum::body::Body;
 use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::http::{Request, StatusCode};
 use judge_gateway::auth::{encode_access_token, DEFAULT_JWT_SECRET};
+use judge_gateway::create_router;
 use judge_gateway::errors::ProblemDetails;
 use judge_gateway::routes::{
     BatchIngestResponse, CohortResponse, OrganizationResponse, RosterMemberResponse,
 };
 use judge_gateway::state::AppState;
-use judge_gateway::create_router;
 use tower::ServiceExt;
 use uuid::Uuid;
 
@@ -101,7 +101,11 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
         .body(Body::from(create_org_payload.to_string()))
         .expect("failed to build org request");
 
-    let org_resp = app.clone().oneshot(org_req).await.expect("failed to create org");
+    let org_resp = app
+        .clone()
+        .oneshot(org_req)
+        .await
+        .expect("failed to create org");
     assert_eq!(org_resp.status(), StatusCode::CREATED);
 
     let org_bytes = axum::body::to_bytes(org_resp.into_body(), usize::MAX)
@@ -127,7 +131,11 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
         .body(Body::from(create_cohort_payload.to_string()))
         .expect("failed to build cohort request");
 
-    let cohort_resp = app.clone().oneshot(cohort_req).await.expect("failed to create cohort");
+    let cohort_resp = app
+        .clone()
+        .oneshot(cohort_req)
+        .await
+        .expect("failed to create cohort");
     assert_eq!(cohort_resp.status(), StatusCode::CREATED);
 
     let cohort_bytes = axum::body::to_bytes(cohort_resp.into_body(), usize::MAX)
@@ -162,7 +170,11 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
         .body(Body::from(batch_payload.to_string()))
         .expect("failed to build batch request");
 
-    let batch_resp = app.clone().oneshot(batch_req).await.expect("failed to batch ingest");
+    let batch_resp = app
+        .clone()
+        .oneshot(batch_req)
+        .await
+        .expect("failed to batch ingest");
     assert_eq!(batch_resp.status(), StatusCode::OK);
 
     let batch_bytes = axum::body::to_bytes(batch_resp.into_body(), usize::MAX)
@@ -183,7 +195,11 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
         .body(Body::empty())
         .expect("failed to build roster request");
 
-    let roster_resp = app.clone().oneshot(roster_req).await.expect("failed to get roster");
+    let roster_resp = app
+        .clone()
+        .oneshot(roster_req)
+        .await
+        .expect("failed to get roster");
     assert_eq!(roster_resp.status(), StatusCode::OK);
 
     let roster_bytes = axum::body::to_bytes(roster_resp.into_body(), usize::MAX)
@@ -193,7 +209,9 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
         serde_json::from_slice(&roster_bytes).expect("failed to deserialize roster");
     assert_eq!(roster.len(), 2);
     assert!(roster.iter().any(|m| m.email == "student1@campus.edu"));
-    assert!(roster.iter().any(|m| m.email == "student2@university.ac.in"));
+    assert!(roster
+        .iter()
+        .any(|m| m.email == "student2@university.ac.in"));
 
     // 5. Enforce Student accessing organization details
     let student_token = generate_test_token(&Uuid::new_v4().to_string(), "student");
@@ -209,8 +227,9 @@ async fn test_org_admin_creates_cohort_and_batch_roster_and_instructor_reads() {
 
 #[tokio::test]
 async fn test_live_postgres_rbac_and_batch_ingest() {
-    let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
 
     if let Ok(pool) = judge_db::create_connection_pool(&db_url, 5).await {
         let state = AppState::new(
@@ -255,7 +274,9 @@ async fn test_live_postgres_rbac_and_batch_ingest() {
 
         let org_resp = app.clone().oneshot(org_req).await.unwrap();
         let status = org_resp.status();
-        let org_bytes = axum::body::to_bytes(org_resp.into_body(), usize::MAX).await.unwrap();
+        let org_bytes = axum::body::to_bytes(org_resp.into_body(), usize::MAX)
+            .await
+            .unwrap();
         if status != StatusCode::CREATED {
             let body_str = String::from_utf8_lossy(&org_bytes);
             panic!("Expected 201 CREATED, got {status}: {body_str}");
@@ -280,7 +301,9 @@ async fn test_live_postgres_rbac_and_batch_ingest() {
         let cohort_resp = app.clone().oneshot(cohort_req).await.unwrap();
         assert_eq!(cohort_resp.status(), StatusCode::CREATED);
 
-        let cohort_bytes = axum::body::to_bytes(cohort_resp.into_body(), usize::MAX).await.unwrap();
+        let cohort_bytes = axum::body::to_bytes(cohort_resp.into_body(), usize::MAX)
+            .await
+            .unwrap();
         let cohort: CohortResponse = serde_json::from_slice(&cohort_bytes).unwrap();
 
         // 3. Batch Ingest student into live PostgreSQL
@@ -323,4 +346,169 @@ async fn test_live_postgres_rbac_and_batch_ingest() {
             .execute(pool.inner())
             .await;
     }
+}
+
+#[tokio::test]
+async fn test_phase36_student_cannot_create_lab_or_view_audit() {
+    let state = AppState::new_test();
+    let app = create_router(state);
+
+    let student_id = Uuid::new_v4().to_string();
+    let student_token = generate_test_token(&student_id, "student");
+
+    // 1. Student attempting POST /api/v1/campus/vit-chennai/labs -> 403 Forbidden
+    let create_lab_payload = serde_json::json!({
+        "title": "Unauthorized Lab",
+        "course_code": "CS101",
+        "course_name": "Intro to CS",
+        "code": "lab-unauth",
+        "deadline": "2026-12-31T23:59:59Z",
+        "duration_minutes": 60,
+        "max_marks": 100.0,
+        "clo": "CLO-1",
+        "description": "Student should not be able to create this lab"
+    });
+
+    let lab_req = Request::builder()
+        .method("POST")
+        .uri("/api/v1/campus/vit-chennai/labs")
+        .header(AUTHORIZATION, format!("Bearer {student_token}"))
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(create_lab_payload.to_string()))
+        .expect("failed to build lab request");
+
+    let lab_resp = app.clone().oneshot(lab_req).await.expect("request failed");
+    assert_eq!(lab_resp.status(), StatusCode::FORBIDDEN);
+
+    let bytes = axum::body::to_bytes(lab_resp.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let problem: ProblemDetails = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(problem.status, 403);
+    assert_eq!(problem.r#type, "urn:problem-type:forbidden");
+    assert!(problem.detail.contains("insufficient_campus_permissions"));
+    assert!(problem.detail.contains("Required role instructor"));
+
+    // 2. Student attempting GET /api/v1/campus/vit-chennai/admin/audit -> 403 Forbidden
+    let audit_req = Request::builder()
+        .method("GET")
+        .uri("/api/v1/campus/vit-chennai/admin/audit")
+        .header(AUTHORIZATION, format!("Bearer {student_token}"))
+        .body(Body::empty())
+        .expect("failed to build audit request");
+
+    let audit_resp = app
+        .clone()
+        .oneshot(audit_req)
+        .await
+        .expect("request failed");
+    assert_eq!(audit_resp.status(), StatusCode::FORBIDDEN);
+
+    let audit_bytes = axum::body::to_bytes(audit_resp.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let audit_problem: ProblemDetails = serde_json::from_slice(&audit_bytes).unwrap();
+    assert_eq!(audit_problem.status, 403);
+    assert!(audit_problem
+        .detail
+        .contains("insufficient_campus_permissions"));
+    assert!(audit_problem.detail.contains("Required role org_admin"));
+
+    // 3. Student attempting POST /api/v1/campus/orgs/vit-chennai/roster -> 403 Forbidden
+    let add_member_payload = serde_json::json!({
+        "email": "hacker@campus.edu",
+        "username": "hacker",
+        "role": "org_admin"
+    });
+
+    let roster_req = Request::builder()
+        .method("POST")
+        .uri("/api/v1/campus/orgs/vit-chennai/roster")
+        .header(AUTHORIZATION, format!("Bearer {student_token}"))
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(add_member_payload.to_string()))
+        .expect("failed to build roster request");
+
+    let roster_resp = app
+        .clone()
+        .oneshot(roster_req)
+        .await
+        .expect("request failed");
+    assert_eq!(roster_resp.status(), StatusCode::FORBIDDEN);
+
+    let roster_bytes = axum::body::to_bytes(roster_resp.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    let roster_problem: ProblemDetails = serde_json::from_slice(&roster_bytes).unwrap();
+    assert_eq!(roster_problem.status, 403);
+    assert!(roster_problem
+        .detail
+        .contains("insufficient_campus_permissions"));
+    assert!(roster_problem.detail.contains("Required role org_admin"));
+}
+
+#[tokio::test]
+async fn test_phase36_instructor_and_admin_tier_permissions() {
+    let state = AppState::new_test();
+    let app = create_router(state);
+
+    let instructor_id = Uuid::new_v4().to_string();
+    let instructor_token = generate_test_token(&instructor_id, "instructor");
+
+    let admin_id = Uuid::new_v4().to_string();
+    let admin_token = generate_test_token(&admin_id, "org_admin");
+
+    // 1. Instructor can create lab -> 201 Created
+    let create_lab_payload = serde_json::json!({
+        "title": "Algorithms Lab 01",
+        "course_code": "CS201",
+        "course_name": "Data Structures",
+        "code": "lab-01",
+        "deadline": "2026-12-31T23:59:59Z",
+        "duration_minutes": 90,
+        "max_marks": 50.0,
+        "clo": "CLO-2",
+        "description": "Authorized instructor created lab"
+    });
+
+    let lab_req = Request::builder()
+        .method("POST")
+        .uri("/api/v1/campus/vit-chennai/labs")
+        .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(create_lab_payload.to_string()))
+        .expect("failed to build lab request");
+
+    let lab_resp = app.clone().oneshot(lab_req).await.expect("request failed");
+    assert_eq!(lab_resp.status(), StatusCode::CREATED);
+
+    // 2. Instructor cannot view admin audit -> 403 Forbidden
+    let audit_req_instructor = Request::builder()
+        .method("GET")
+        .uri("/api/v1/campus/vit-chennai/admin/audit")
+        .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
+        .body(Body::empty())
+        .expect("failed to build audit request");
+
+    let audit_resp_instructor = app
+        .clone()
+        .oneshot(audit_req_instructor)
+        .await
+        .expect("request failed");
+    assert_eq!(audit_resp_instructor.status(), StatusCode::FORBIDDEN);
+
+    // 3. Admin can view admin audit -> 200 OK
+    let audit_req_admin = Request::builder()
+        .method("GET")
+        .uri("/api/v1/campus/vit-chennai/admin/audit")
+        .header(AUTHORIZATION, format!("Bearer {admin_token}"))
+        .body(Body::empty())
+        .expect("failed to build audit request");
+
+    let audit_resp_admin = app
+        .clone()
+        .oneshot(audit_req_admin)
+        .await
+        .expect("request failed");
+    assert_eq!(audit_resp_admin.status(), StatusCode::OK);
 }

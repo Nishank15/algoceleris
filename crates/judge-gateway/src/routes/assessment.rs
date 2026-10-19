@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 use crate::errors::GatewayError;
-use crate::extractors::{role_level, RequireInstructor, RequireStudent};
+use crate::extractors::{role_level, AssessmentId, RequireInstructor, RequireStudent};
 use crate::state::AppState;
 
 /// Request payload for creating an assessment.
@@ -281,7 +281,9 @@ async fn do_create_assessment(
     let scoring_rubric = req.scoring_rubric.unwrap_or_else(|| serde_json::json!({}));
     let late_rate = req.late_penalty_percent_per_hour.unwrap_or(10.0);
     let max_penalty = req.max_late_penalty_percent.unwrap_or(100.0);
-    let proctor_cfg = req.proctoring_config.unwrap_or_else(|| serde_json::json!({}));
+    let proctor_cfg = req
+        .proctoring_config
+        .unwrap_or_else(|| serde_json::json!({}));
     let desc = req.description.unwrap_or_default();
 
     let rec = AssessmentRecord {
@@ -380,13 +382,14 @@ async fn fetch_assessment_record(
     if let Some(ref pool) = state.db {
         judge_db::repositories::assessment::get_assessment_by_id(pool.inner(), assessment_id)
             .await?
-            .ok_or_else(|| GatewayError::NotFound(format!("Assessment '{assessment_id}' not found")))
+            .ok_or_else(|| {
+                GatewayError::NotFound(format!("Assessment '{assessment_id}' not found"))
+            })
     } else {
         let assessments = state.mock_campus.assessments.read().await;
-        assessments
-            .get(&assessment_id)
-            .cloned()
-            .ok_or_else(|| GatewayError::NotFound(format!("Assessment '{assessment_id}' not found")))
+        assessments.get(&assessment_id).cloned().ok_or_else(|| {
+            GatewayError::NotFound(format!("Assessment '{assessment_id}' not found"))
+        })
     }
 }
 
@@ -398,9 +401,10 @@ async fn fetch_assessment_record(
 /// Returns [`GatewayError::NotFound`] if assessment does not exist or is hidden from students.
 pub async fn get_assessment_handler(
     State(state): State<AppState>,
-    Path(assessment_id): Path<Uuid>,
     auth: RequireStudent,
+    assessment_id: AssessmentId,
 ) -> Result<impl IntoResponse, GatewayError> {
+    let assessment_id = assessment_id.into_uuid();
     let rec = fetch_assessment_record(&state, assessment_id).await?;
     let now = Utc::now();
     let is_faculty = role_level(&auth.claims.role) >= 30;
@@ -415,9 +419,7 @@ pub async fn get_assessment_handler(
 
     // Student view masking: DRAFT or unreleased assessments are masked with 404
     if !is_faculty
-        && (rec.status.to_uppercase() == "DRAFT"
-            || dyn_status == "DRAFT"
-            || now < rec.publish_at)
+        && (rec.status.to_uppercase() == "DRAFT" || dyn_status == "DRAFT" || now < rec.publish_at)
     {
         return Err(GatewayError::NotFound("Assessment not found".to_string()));
     }
@@ -470,8 +472,7 @@ pub async fn list_cohort_assessments_handler(
     let is_faculty = role_level(&auth.claims.role) >= 30;
 
     let records = if let Some(ref pool) = state.db {
-        judge_db::repositories::assessment::list_cohort_assessments(pool.inner(), cohort_id)
-            .await?
+        judge_db::repositories::assessment::list_cohort_assessments(pool.inner(), cohort_id).await?
     } else {
         let assessments = state.mock_campus.assessments.read().await;
         assessments
@@ -542,17 +543,20 @@ pub async fn list_cohort_assessments_handler(
 #[allow(clippy::too_many_lines)]
 pub async fn submit_assessment_solution_handler(
     State(state): State<AppState>,
-    Path(assessment_id): Path<Uuid>,
     auth: RequireStudent,
+    assessment_id: AssessmentId,
     Json(req): Json<SubmitAssessmentRequest>,
 ) -> Result<impl IntoResponse, GatewayError> {
+    let assessment_id = assessment_id.into_uuid();
     let rec = fetch_assessment_record(&state, assessment_id).await?;
     let submitted_at = req.submitted_at.unwrap_or_else(Utc::now);
 
     // 1. Resolve candidate time extension accommodations
     let extension_minutes = {
         let accs = state.mock_campus.accommodations.read().await;
-        accs.get(&(assessment_id, auth.user_id)).copied().unwrap_or(0)
+        accs.get(&(assessment_id, auth.user_id))
+            .copied()
+            .unwrap_or(0)
     };
 
     let ext_duration = Duration::minutes(i64::from(extension_minutes));
@@ -712,10 +716,11 @@ pub async fn submit_assessment_solution_handler(
 /// Returns [`GatewayError`] on invalid request or database error.
 pub async fn grant_time_accommodation_handler(
     State(state): State<AppState>,
-    Path(assessment_id): Path<Uuid>,
     _instructor: RequireInstructor,
+    assessment_id: AssessmentId,
     Json(req): Json<GrantAccommodationRequest>,
 ) -> Result<impl IntoResponse, GatewayError> {
+    let assessment_id = assessment_id.into_uuid();
     let rec = fetch_assessment_record(&state, assessment_id).await?;
 
     let total = {
@@ -749,10 +754,11 @@ pub async fn grant_time_accommodation_handler(
 /// Returns [`GatewayError`] on failure.
 pub async fn force_submit_assessment_handler(
     State(state): State<AppState>,
-    Path(assessment_id): Path<Uuid>,
     _instructor: RequireInstructor,
+    assessment_id: AssessmentId,
     Json(req): Json<ForceSubmitRequest>,
 ) -> Result<impl IntoResponse, GatewayError> {
+    let assessment_id = assessment_id.into_uuid();
     let _rec = fetch_assessment_record(&state, assessment_id).await?;
     let now = Utc::now();
     let sub_id = Uuid::new_v4();
@@ -791,23 +797,22 @@ pub async fn force_submit_assessment_handler(
 /// Returns [`GatewayError::BadRequest`] on invalid status transition or failure.
 pub async fn update_assessment_status_handler(
     State(state): State<AppState>,
-    Path(assessment_id): Path<Uuid>,
     _instructor: RequireInstructor,
+    assessment_id: AssessmentId,
     Json(req): Json<UpdateAssessmentStatusRequest>,
 ) -> Result<impl IntoResponse, GatewayError> {
+    let assessment_id = assessment_id.into_uuid();
     let mut rec = fetch_assessment_record(&state, assessment_id).await?;
     rec.status = req.status.to_uppercase();
     rec.updated_at = Utc::now();
 
     if let Some(ref pool) = state.db {
-        sqlx::query(
-            "UPDATE assessments SET status = $1, updated_at = NOW() WHERE id = $2",
-        )
-        .bind(&rec.status)
-        .bind(assessment_id)
-        .execute(pool.inner())
-        .await
-        .map_err(judge_db::DbError::Sqlx)?;
+        sqlx::query("UPDATE assessments SET status = $1, updated_at = NOW() WHERE id = $2")
+            .bind(&rec.status)
+            .bind(assessment_id)
+            .execute(pool.inner())
+            .await
+            .map_err(judge_db::DbError::Sqlx)?;
     } else {
         let mut assessments = state.mock_campus.assessments.write().await;
         assessments.insert(assessment_id, rec.clone());

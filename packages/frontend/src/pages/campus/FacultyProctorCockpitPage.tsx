@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ShieldAlert,
@@ -30,31 +30,57 @@ import {
   getAssessment,
   fetchProctorEvents,
   fetchProctoredStudents,
+  postProctorEvent,
   provisionVivaRoom,
-  connectProctoringWebSocket,
-  MOCK_ASSESSMENTS,
 } from '../../services/campusApi';
 
-export const calculateRiskScore = (tabSwitches: number, fullscreenDrops: number, pasteBursts: number): number => {
-  return (Number(tabSwitches) || 0) * 5 + (Number(fullscreenDrops) || 0) * 10 + (Number(pasteBursts) || 0) * 15;
-};
+/** Poll cadence for refreshing the roster and incident feed from the gateway. */
+const PROCTOR_POLL_INTERVAL_MS = 3000;
 
-export const resolveRiskSeverity = (score: number): 'low' | 'elevated' | 'critical' => {
-  if (score >= 35) return 'critical';
-  if (score >= 15) return 'elevated';
-  return 'low';
+/** Resolves a candidate display label from real identity fields only. */
+export const candidateLabel = (candidate: ProctoredCandidateState): string =>
+  candidate.username || candidate.roll_number || candidate.user_id.slice(0, 8);
+
+/** Resolves a candidate registration label from real identity fields only. */
+export const candidateRoll = (candidate: ProctoredCandidateState): string =>
+  candidate.roll_number || candidate.user_id.slice(0, 8);
+
+/** Plays the critical-breach chirp so faculty notice a fresh high-risk incident. */
+const playCriticalAlert = () => {
+  if (typeof window === 'undefined' || !window.AudioContext) return;
+  try {
+    const ctx = new window.AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.25);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.25);
+  } catch {
+    // Ignore audio context errors
+  }
 };
 
 export const FacultyProctorCockpitPage: React.FC = () => {
-  const { id, org_slug } = useParams<{ id: string; org_slug?: string }>();
-  const assessmentId = id || 'a1111111-1111-4111-8111-111111111111';
+  const { assessmentId: routeAssessmentId, org_slug } = useParams<{
+    assessmentId?: string;
+    org_slug?: string;
+  }>();
+  const assessmentId = routeAssessmentId || '';
+  const hasAssessment = assessmentId.length > 0;
 
   // Core Data State
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
   const [students, setStudents] = useState<ProctoredCandidateState[]>([]);
   const [incidentFeed, setIncidentFeed] = useState<ProctorEventItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [wsConnected, setWsConnected] = useState<boolean>(false);
+  const [liveConnected, setLiveConnected] = useState<boolean>(false);
+  const [telemetryError, setTelemetryError] = useState<boolean>(false);
   const [currentTimeUtc, setCurrentTimeUtc] = useState<string>('');
 
   // UI Filters and Layout State
@@ -80,8 +106,6 @@ export const FacultyProctorCockpitPage: React.FC = () => {
   const [forceSubmitTargetStudent, setForceSubmitTargetStudent] = useState<ProctoredCandidateState | null>(null);
   const [actionSuccessMessage, setActionSuccessMessage] = useState<string | null>(null);
 
-  const wsRef = useRef<WebSocket | null>(null);
-
   // Live UTC Clock
   useEffect(() => {
     const updateUtcClock = () => {
@@ -98,6 +122,11 @@ export const FacultyProctorCockpitPage: React.FC = () => {
 
   // Initial Assessment & Candidate Data Fetch
   useEffect(() => {
+    if (!hasAssessment) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
     const loadInitialData = async () => {
       setLoading(true);
@@ -108,14 +137,17 @@ export const FacultyProctorCockpitPage: React.FC = () => {
           fetchProctorEvents(assessmentId),
         ]);
         if (mounted) {
-          setAssessment(assessmentData || MOCK_ASSESSMENTS[0]);
+          setAssessment(assessmentData);
           setStudents(studentsData);
           setIncidentFeed(eventsData);
+          setTelemetryError(false);
+          setLiveConnected(true);
         }
       } catch (err) {
         console.error('Failed to load cockpit data:', err);
         if (mounted) {
-          setAssessment(MOCK_ASSESSMENTS[0]);
+          setTelemetryError(true);
+          setLiveConnected(false);
         }
       } finally {
         if (mounted) setLoading(false);
@@ -125,149 +157,67 @@ export const FacultyProctorCockpitPage: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [assessmentId]);
+  }, [assessmentId, hasAssessment]);
 
-  // Live WebSocket Connection Hook
+  // Live telemetry polling: refresh roster and incident feed from the gateway
   useEffect(() => {
-    let socket: WebSocket | null = null;
-    try {
-      socket = connectProctoringWebSocket(
-        assessmentId,
-        (message: any) => {
-          if (!message) return;
+    if (!hasAssessment) return;
 
-          if (message.event_type === 'active_students_snapshot' && Array.isArray(message.data)) {
-            setStudents((prev) => {
-              const updated = [...prev];
-              message.data.forEach((incoming: any) => {
-                const idx = updated.findIndex((s) => s.user_id === incoming.user_id);
-                if (idx >= 0) {
-                  updated[idx] = {
-                    ...updated[idx],
-                    ...incoming,
-                    risk_score: calculateRiskScore(
-                      incoming.tab_switches ?? updated[idx].tab_switches,
-                      incoming.fullscreen_exits ?? updated[idx].fullscreen_exits,
-                      incoming.paste_bursts ?? updated[idx].paste_bursts
-                    ),
-                  };
-                }
-              });
-              return updated;
-            });
-            setWsConnected(true);
-          } else if (
-            message.event_type === 'tab_switch' ||
-            message.event_type === 'fullscreen_exit' ||
-            message.event_type === 'paste_burst'
-          ) {
-            const targetUserId = message.user_id;
-            const targetUsername = message.username;
+    let mounted = true;
+    let isFirstPoll = true;
+    const seenEventIds = new Set<string>();
 
-            setStudents((prev) =>
-              prev.map((student) => {
-                if (student.user_id === targetUserId || student.username === targetUsername) {
-                  const updated: ProctoredCandidateState = { ...student };
-                  if (message.event_type === 'tab_switch') updated.tab_switches = (updated.tab_switches || 0) + 1;
-                  if (message.event_type === 'fullscreen_exit') updated.fullscreen_exits = (updated.fullscreen_exits || 0) + 1;
-                  if (message.event_type === 'paste_burst') updated.paste_bursts = (updated.paste_bursts || 0) + 1;
-                  updated.risk_score = calculateRiskScore(
-                    updated.tab_switches,
-                    updated.fullscreen_exits,
-                    updated.paste_bursts
-                  );
-                  updated.last_seen = message.timestamp || new Date().toISOString();
-                  return updated;
-                }
-                return student;
-              })
-            );
+    const poll = async () => {
+      try {
+        const [studentsData, eventsData] = await Promise.all([
+          fetchProctoredStudents(assessmentId),
+          fetchProctorEvents(assessmentId),
+        ]);
+        if (!mounted) return;
 
-            // Record into Real-time Incident Feed
-            const calculatedScore = message.risk_score || 0;
-            const severity: 'critical' | 'warning' | 'info' =
-              calculatedScore >= 35 || message.event_type === 'paste_burst' ? 'critical' : 'warning';
+        setStudents(studentsData);
+        setIncidentFeed(eventsData);
+        setTelemetryError(false);
+        setLiveConnected(true);
 
-            const newEvent: ProctorEventItem = {
-              id: `ev-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-              assessment_id: assessmentId,
-              user_id: targetUserId || 'unknown',
-              username: targetUsername || 'candidate',
-              event_type: message.event_type,
-              severity: severity,
-              event_metadata: message.metadata || {},
-              created_at: message.timestamp || new Date().toISOString(),
-            };
-
-            setIncidentFeed((prev) => [newEvent, ...prev].slice(0, 100));
-
-            // Optional Audio Chirp for Critical Breaches
-            if (severity === 'critical' && soundAlertsEnabled && typeof window !== 'undefined' && window.AudioContext) {
-              try {
-                const ctx = new window.AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(880, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.25);
-                gain.gain.setValueAtTime(0.15, ctx.currentTime);
-                gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.25);
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.25);
-              } catch {
-                // Ignore audio context errors
-              }
-            }
-          } else if (message.event_type === 'heartbeat') {
-            setStudents((prev) =>
-              prev.map((student) => {
-                if (student.user_id === message.user_id || student.username === message.username) {
-                  return {
-                    ...student,
-                    status: 'connected',
-                    last_seen: message.timestamp || new Date().toISOString(),
-                  };
-                }
-                return student;
-              })
-            );
-          }
-        },
-        () => {
-          setWsConnected(false);
+        // Chirp once per newly observed critical breach, never on the first poll
+        const freshCritical = isFirstPoll
+          ? []
+          : eventsData.filter((event) => event.severity === 'critical' && !seenEventIds.has(event.id));
+        eventsData.forEach((event) => seenEventIds.add(event.id));
+        if (soundAlertsEnabled && freshCritical.length > 0) {
+          playCriticalAlert();
         }
-      );
-      wsRef.current = socket;
-      setWsConnected(true);
-    } catch (e) {
-      console.debug('Proctoring WebSocket fallback:', e);
-      setWsConnected(false);
-    }
-
-    return () => {
-      if (wsRef.current) {
-        const s = wsRef.current;
-        if (s.readyState === WebSocket.CONNECTING) {
-          s.onopen = () => {
-            try { s.close(1000, 'Page unmounted'); } catch {}
-          };
-          s.onerror = () => {};
-        } else if (s.readyState === WebSocket.OPEN) {
-          try { s.close(1000, 'Page unmounted'); } catch {}
+        isFirstPoll = false;
+      } catch (err) {
+        console.debug('Proctoring telemetry poll failed:', err);
+        if (mounted) {
+          setLiveConnected(false);
+          setTelemetryError(true);
         }
       }
     };
-  }, [assessmentId, soundAlertsEnabled]);
+
+    const interval = setInterval(() => {
+      void poll();
+    }, PROCTOR_POLL_INTERVAL_MS);
+
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [assessmentId, hasAssessment, soundAlertsEnabled]);
 
   // Aggregate Metrics & Counts
   const totalStudents = students.length;
   const onlineCount = useMemo(() => students.filter((s) => s.status === 'connected').length, [students]);
   const idleCount = useMemo(() => students.filter((s) => s.status === 'idle').length, [students]);
-  const criticalCount = useMemo(() => students.filter((s) => s.risk_score >= 35).length, [students]);
+  const criticalCount = useMemo(
+    () => students.filter((s) => s.risk_severity === 'critical').length,
+    [students]
+  );
   const elevatedCount = useMemo(
-    () => students.filter((s) => s.risk_score >= 15 && s.risk_score < 35).length,
+    () => students.filter((s) => s.risk_severity === 'elevated').length,
     [students]
   );
   const flaggedCount = criticalCount + elevatedCount;
@@ -281,19 +231,19 @@ export const FacultyProctorCockpitPage: React.FC = () => {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (s) =>
-          s.roll_number.toLowerCase().includes(q) ||
-          s.full_name.toLowerCase().includes(q) ||
-          s.username.toLowerCase().includes(q)
+          (s.roll_number || '').toLowerCase().includes(q) ||
+          (s.email || '').toLowerCase().includes(q) ||
+          candidateLabel(s).toLowerCase().includes(q)
       );
     }
 
     // Severity Filter
     if (severityFilter === 'CRITICAL') {
-      result = result.filter((s) => s.risk_score >= 35);
+      result = result.filter((s) => s.risk_severity === 'critical');
     } else if (severityFilter === 'ELEVATED') {
-      result = result.filter((s) => s.risk_score >= 15 && s.risk_score < 35);
+      result = result.filter((s) => s.risk_severity === 'elevated');
     } else if (severityFilter === 'LOW') {
-      result = result.filter((s) => s.risk_score < 15);
+      result = result.filter((s) => s.risk_severity === 'low');
     } else if (severityFilter === 'DISCONNECTED') {
       result = result.filter((s) => s.status === 'disconnected');
     }
@@ -302,9 +252,9 @@ export const FacultyProctorCockpitPage: React.FC = () => {
     if (sortBy === 'risk_desc') {
       result.sort((a, b) => b.risk_score - a.risk_score);
     } else if (sortBy === 'roll_asc') {
-      result.sort((a, b) => a.roll_number.localeCompare(b.roll_number));
+      result.sort((a, b) => (a.roll_number || '').localeCompare(b.roll_number || ''));
     } else if (sortBy === 'name_asc') {
-      result.sort((a, b) => a.full_name.localeCompare(b.full_name));
+      result.sort((a, b) => candidateLabel(a).localeCompare(candidateLabel(b)));
     }
 
     return result;
@@ -342,7 +292,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
     try {
       const room = await provisionVivaRoom(assessmentId, vivaTargetStudent.user_id);
       setVivaRoom(room);
-      showNotificationToast(`Viva room provisioned for ${vivaTargetStudent.full_name}: ${room.room_code}`);
+      showNotificationToast(`Viva room provisioned for ${candidateLabel(vivaTargetStudent)}: ${room.room_code}`);
     } catch (err) {
       console.error('Failed to provision viva room:', err);
     } finally {
@@ -371,7 +321,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
       })
     );
     showNotificationToast(
-      `Granted +${extensionMinutes}m extension to ${extensionTargetStudent.full_name} (${extensionTargetStudent.roll_number})`
+      `Granted +${extensionMinutes}m extension to ${candidateLabel(extensionTargetStudent)} (${candidateRoll(extensionTargetStudent)})`
     );
     setExtensionModalOpen(false);
     setExtensionTargetStudent(null);
@@ -385,33 +335,17 @@ export const FacultyProctorCockpitPage: React.FC = () => {
 
   const handleConfirmForceSubmit = () => {
     if (!forceSubmitTargetStudent) return;
-    setStudents((prev) =>
-      prev.map((s) => {
-        if (s.user_id === forceSubmitTargetStudent.user_id) {
-          return {
-            ...s,
-            status: 'disconnected',
-          };
-        }
-        return s;
-      })
-    );
+    const target = forceSubmitTargetStudent;
 
-    // Record violation termination event
-    const forcedEvent: ProctorEventItem = {
-      id: `ev-${Date.now()}-forced`,
-      assessment_id: assessmentId,
-      user_id: forceSubmitTargetStudent.user_id,
-      username: forceSubmitTargetStudent.username,
+    // Record the termination on the live telemetry pipeline
+    void postProctorEvent(assessmentId, {
       event_type: 'forced_session_terminated',
-      severity: 'critical',
-      event_metadata: { reason: 'proctor_invoked_submission', enforced_by: 'faculty_proctor' },
-      created_at: new Date().toISOString(),
-    };
-    setIncidentFeed((prev) => [forcedEvent, ...prev]);
+      metadata: { reason: 'proctor_invoked_submission', enforced_by: 'faculty_proctor' },
+      user_id: target.user_id,
+    });
 
     showNotificationToast(
-      `Forced session termination applied for candidate ${forceSubmitTargetStudent.full_name} (${forceSubmitTargetStudent.roll_number})`
+      `Forced session termination applied for candidate ${candidateLabel(target)} (${candidateRoll(target)})`
     );
     setForceSubmitModalOpen(false);
     setForceSubmitTargetStudent(null);
@@ -438,8 +372,25 @@ export const FacultyProctorCockpitPage: React.FC = () => {
     );
   }
 
-  const assessmentTitle = assessment?.title || 'Midterm 1: Dynamic Programming & Graphs';
-  const cohortCode = assessment?.cohort_name || 'CS301-FALL26';
+  const assessmentTitle = assessment?.title || 'Assessment Cockpit';
+  const cohortCode = assessment?.cohort_name || '';
+
+  // Cockpit availability messaging: the page never substitutes fabricated candidates.
+  const cockpitUnavailable = !hasAssessment || telemetryError;
+  const cockpitNotice = !hasAssessment
+    ? {
+        title: 'No assessment selected',
+        body: 'Open an assessment from your faculty workspace to monitor its live cohort.',
+      }
+    : telemetryError
+      ? {
+          title: 'Live telemetry unavailable',
+          body: 'The proctoring pipeline could not be reached. Retrying automatically.',
+        }
+      : {
+          title: 'No candidates enrolled yet',
+          body: 'Candidates appear here as soon as they are enrolled in this assessment cohort.',
+        };
 
   return (
     <div className={`proctor-cockpit-root ${fullscreenMode ? 'fullscreen-mode' : ''}`}>
@@ -460,12 +411,12 @@ export const FacultyProctorCockpitPage: React.FC = () => {
               PROCTOR COCKPIT
             </span>
             <h1 className="cockpit-title">{assessmentTitle}</h1>
-            <span className="cockpit-cohort-badge">{cohortCode}</span>
+            {cohortCode && <span className="cockpit-cohort-badge">{cohortCode}</span>}
           </div>
           <div className="cockpit-subtitle-row">
             <span className="connection-pill">
-              <span className={`live-pulse-dot ${wsConnected ? 'active' : 'idle'}`} />
-              {wsConnected ? 'LIVE MESH CONNECTED' : 'OFFLINE / RECONNECTING'}
+              <span className={`live-pulse-dot ${liveConnected ? 'active' : 'idle'}`} />
+              {liveConnected ? 'LIVE MESH CONNECTED' : 'OFFLINE / RECONNECTING'}
             </span>
             <span className="dot-divider">•</span>
             <span className="clock-metric tabular-nums">
@@ -626,25 +577,33 @@ export const FacultyProctorCockpitPage: React.FC = () => {
           </div>
 
           {displayedCandidates.length === 0 ? (
-            <div className="roster-empty-state">
-              <UserCheck size={36} className="text-muted" />
-              <h3>No candidates match active filter</h3>
-              <p>Try resetting the search query or switching severity filter to ALL.</p>
-              <button
-                type="button"
-                className="reset-filter-btn"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSeverityFilter('ALL');
-                }}
-              >
-                Reset Filters
-              </button>
-            </div>
+            totalStudents === 0 ? (
+              <div className="roster-empty-state">
+                <UserCheck size={36} className="text-muted" />
+                <h3>{cockpitNotice.title}</h3>
+                <p>{cockpitNotice.body}</p>
+              </div>
+            ) : (
+              <div className="roster-empty-state">
+                <UserCheck size={36} className="text-muted" />
+                <h3>No candidates match active filter</h3>
+                <p>Try resetting the search query or switching severity filter to ALL.</p>
+                <button
+                  type="button"
+                  className="reset-filter-btn"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSeverityFilter('ALL');
+                  }}
+                >
+                  Reset Filters
+                </button>
+              </div>
+            )
           ) : (
             <div className="candidate-grid">
               {displayedCandidates.map((candidate) => {
-                const severity = resolveRiskSeverity(candidate.risk_score);
+                const severity = candidate.risk_severity;
                 const isCritical = severity === 'critical';
                 const isSelected = selectedCandidate?.user_id === candidate.user_id;
 
@@ -657,9 +616,9 @@ export const FacultyProctorCockpitPage: React.FC = () => {
                     {/* Card Header: Roll No & Live State */}
                     <div className="candidate-card-header">
                       <div className="candidate-identity">
-                        <span className="candidate-roll tabular-nums">{candidate.roll_number}</span>
-                        <h4 className="candidate-name">{candidate.full_name}</h4>
-                        <span className="candidate-user">@{candidate.username}</span>
+                        <span className="candidate-roll tabular-nums">{candidateRoll(candidate)}</span>
+                        <h4 className="candidate-name">{candidateLabel(candidate)}</h4>
+                        <span className="candidate-user">{candidate.email || ''}</span>
                       </div>
 
                       <div className="candidate-badge-cluster">
@@ -780,14 +739,23 @@ export const FacultyProctorCockpitPage: React.FC = () => {
           <div className="incident-stream">
             {incidentFeed.length === 0 ? (
               <div className="incident-empty-note">
-                <CheckCircle2 size={24} className="text-acid" />
-                <p>No integrity violations logged yet. Telemetry channel nominal.</p>
+                {cockpitUnavailable ? (
+                  <>
+                    <AlertTriangle size={24} className="text-amber" />
+                    <p>{cockpitNotice.title} — no live incident feed is being served.</p>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={24} className="text-acid" />
+                    <p>No integrity violations logged yet. Telemetry channel nominal.</p>
+                  </>
+                )}
               </div>
             ) : (
               incidentFeed.map((item) => {
                 const isCrit = item.severity === 'critical';
                 const targetStudent = students.find((s) => s.user_id === item.user_id || s.username === item.username);
-                const rollDisplay = targetStudent?.roll_number || item.username;
+                const rollDisplay = targetStudent ? candidateRoll(targetStudent) : item.username || item.user_id.slice(0, 8);
 
                 return (
                   <div
@@ -806,7 +774,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
 
                     <div className="incident-candidate-meta">
                       <span className="incident-roll tabular-nums">{rollDisplay}</span>
-                      <span className="incident-user">@{item.username}</span>
+                      <span className="incident-user">@{item.username || item.user_id.slice(0, 8)}</span>
                     </div>
 
                     <div className="incident-details">
@@ -814,8 +782,15 @@ export const FacultyProctorCockpitPage: React.FC = () => {
                       {item.event_type === 'fullscreen_exit' && 'Candidate dropped fullscreen proctoring lock'}
                       {item.event_type === 'paste_burst' && (
                         <span>
-                          Clipboard burst detected:{' '}
-                          <strong className="tabular-nums">{item.event_metadata?.char_count || 140} chars</strong>
+                          Clipboard burst detected
+                          {item.event_metadata?.length || item.event_metadata?.char_count ? (
+                            <>
+                              :{' '}
+                              <strong className="tabular-nums">
+                                {item.event_metadata?.length || item.event_metadata?.char_count} chars
+                              </strong>
+                            </>
+                          ) : null}
                         </span>
                       )}
                       {item.event_type === 'forced_session_terminated' && 'Faculty supervisor terminated session'}
@@ -835,7 +810,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
             <div className="dialog-header">
               <div className="dialog-title-row">
                 <Video size={18} className="text-acid" />
-                <h3>Viva Escalation: {vivaTargetStudent.full_name}</h3>
+                <h3>Viva Escalation: {candidateLabel(vivaTargetStudent)}</h3>
               </div>
               <button
                 type="button"
@@ -851,9 +826,9 @@ export const FacultyProctorCockpitPage: React.FC = () => {
 
             <div className="dialog-body">
               <p className="dialog-description">
-                Escalate candidate <strong className="text-acid">{vivaTargetStudent.roll_number}</strong> (Risk Score:{' '}
+                Escalate candidate <strong className="text-acid">{candidateRoll(vivaTargetStudent)}</strong> (Risk Score:{' '}
                 <span className="tabular-nums font-bold text-crimson">{vivaTargetStudent.risk_score}</span>) into an
-                isolated multiplayer Viva interview room. Code state, AST winnowing markers, and collaborative Yjs editor
+                isolated multiplayer Viva interview room. Code state, similarity markers, and collaborative Yjs editor
                 are provisioned on Gateway 2.
               </p>
 
@@ -882,7 +857,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
                     </div>
                     <div className="detail-row">
                       <span className="detail-label">CANDIDATE ID:</span>
-                      <span className="detail-text">{vivaTargetStudent.roll_number}</span>
+                      <span className="detail-text">{candidateRoll(vivaTargetStudent)}</span>
                     </div>
                   </div>
                   <div className="viva-join-actions">
@@ -910,7 +885,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
             <div className="dialog-header">
               <div className="dialog-title-row">
                 <Clock3 size={18} className="text-acid" />
-                <h3>Grant Time Extension: {extensionTargetStudent.full_name}</h3>
+                <h3>Grant Time Extension: {candidateLabel(extensionTargetStudent)}</h3>
               </div>
               <button
                 type="button"
@@ -924,7 +899,7 @@ export const FacultyProctorCockpitPage: React.FC = () => {
             <div className="dialog-body">
               <p className="dialog-description">
                 Grant individualized time accommodations to candidate{' '}
-                <strong className="text-acid">{extensionTargetStudent.roll_number}</strong>. This dynamically pushes the
+                <strong className="text-acid">{candidateRoll(extensionTargetStudent)}</strong>. This dynamically pushes the
                 watchdog deadline gatekeeper forward without altering cohort schedule.
               </p>
 
@@ -993,9 +968,9 @@ export const FacultyProctorCockpitPage: React.FC = () => {
                   <p className="warning-text">
                     This will immediately terminate the exam session for{' '}
                     <strong>
-                      {forceSubmitTargetStudent.full_name} ({forceSubmitTargetStudent.roll_number})
+                      {candidateLabel(forceSubmitTargetStudent)} ({candidateRoll(forceSubmitTargetStudent)})
                     </strong>
-                    . Candidate buffers will be serialized and graded in worker daemons, and client locks will be revoked.
+                    . Candidate buffers will be serialized and graded by the evaluation service, and client locks will be revoked.
                   </p>
                 </div>
               </div>

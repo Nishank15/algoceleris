@@ -18,7 +18,6 @@ export interface Problem {
   description: string;
   constraints: string[];
   sampleCases: ProblemTestCase[];
-  hiddenCases?: ProblemTestCase[];
   timeLimitMs: number;
   memoryLimitBytes: number;
   acceptanceRate: number;
@@ -78,13 +77,14 @@ export interface SubmissionRequest {
   source_code: string;
   time_limit_ms?: number;
   memory_limit_bytes?: number;
-  test_cases?: {
-    id: number;
-    input_data: string;
-    expected_output: string;
-    is_sample?: boolean;
-  }[];
+  /** Ad-hoc input for playground runs; evaluated server-side. */
   custom_input?: string;
+  /**
+   * Evaluation scope: `run` grades only the problem's public sample cases,
+   * `submit` (default) grades every server-stored case. Test cases themselves are
+   * always resolved server-side.
+   */
+  mode?: 'run' | 'submit';
   assessment_id?: string;
 }
 
@@ -111,6 +111,8 @@ export interface AIDebugRequest {
   user_id: string;
   language: string;
   source_code: string;
+  /** Catalog slug; lets the backend resolve authoritative problem metadata. */
+  problem_slug?: string;
   problem_title: string;
   problem_description: string;
   failing_test_cases?: Array<{
@@ -123,11 +125,18 @@ export interface AIDebugRequest {
 }
 
 export interface AIDebugResponse {
-  root_cause: string;
-  complexity_analysis: string;
-  fix_explanation: string;
-  fixed_code: string;
-  code_diff: string;
+  /** Diagnosed fault behind the observed failure. */
+  root_cause?: string;
+  /** Estimated time and space cost of the submitted solution. */
+  complexity_analysis?: string;
+  /** What the proposed change does and why it addresses the root cause. */
+  fix_explanation?: string;
+  /** Headline takeaway rendered at the top of the debug modal. */
+  advice?: string;
+  /** Rewritten source; absent when the analysis produced no patch. */
+  fixed_code?: string;
+  /** Unified diff of the patch; absent when the analysis produced no patch. */
+  code_diff?: string;
 }
 
 export interface ProblemScoreInfo {

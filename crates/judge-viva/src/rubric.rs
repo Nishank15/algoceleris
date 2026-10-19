@@ -44,7 +44,9 @@ impl RubricEvaluationUpdate {
         for criterion in criteria {
             let key_str = criterion.id.to_string();
             // Allow lookup by criterion UUID string or name
-            let score_val = scores_obj.get(&key_str).or_else(|| scores_obj.get(&criterion.name));
+            let score_val = scores_obj
+                .get(&key_str)
+                .or_else(|| scores_obj.get(&criterion.name));
 
             if let Some(val) = score_val {
                 let score = val.as_f64().ok_or_else(|| {
@@ -83,7 +85,9 @@ impl RubricEvaluationUpdate {
         let mut total_score = 0.0;
         for criterion in criteria {
             let key_str = criterion.id.to_string();
-            let score_val = scores_obj.get(&key_str).or_else(|| scores_obj.get(&criterion.name));
+            let score_val = scores_obj
+                .get(&key_str)
+                .or_else(|| scores_obj.get(&criterion.name));
 
             let score = match score_val {
                 Some(val) => val.as_f64().ok_or_else(|| {

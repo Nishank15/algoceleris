@@ -51,12 +51,16 @@ impl VivaDoc {
     ///
     /// # Errors
     /// Returns [`VivaError::CrdtSyncError`] if the state vector cannot be decoded.
-    pub fn generate_diff_for_client(&self, state_vector_bytes: &[u8]) -> Result<Vec<u8>, VivaError> {
+    pub fn generate_diff_for_client(
+        &self,
+        state_vector_bytes: &[u8],
+    ) -> Result<Vec<u8>, VivaError> {
         let sv = if state_vector_bytes.is_empty() {
             StateVector::default()
         } else {
-            StateVector::decode_v1(state_vector_bytes)
-                .map_err(|e| VivaError::CrdtSyncError(format!("failed to decode state vector: {e}")))?
+            StateVector::decode_v1(state_vector_bytes).map_err(|e| {
+                VivaError::CrdtSyncError(format!("failed to decode state vector: {e}"))
+            })?
         };
         let txn = self.doc.transact();
         Ok(txn.encode_diff_v1(&sv))

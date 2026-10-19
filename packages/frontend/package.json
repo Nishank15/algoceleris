@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "rsbuild dev --port 3000",
     "build": "rsbuild build",
-    "preview": "rsbuild preview --port 3000"
+    "preview": "rsbuild preview --port 3000",
+    "test:v44-audit": "node ../../scripts/verify-v44-production.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",

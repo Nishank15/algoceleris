@@ -14,8 +14,8 @@ use crate::state::AppState;
 #[must_use]
 pub fn role_level(role: &str) -> u32 {
     match role.to_lowercase().as_str() {
-        "admin" | "org_admin" | "orgadmin" => 40,
-        "instructor" | "evaluator" | "host" => 30,
+        "admin" | "org_admin" | "orgadmin" | "administrator" | "superadmin" => 40,
+        "instructor" | "evaluator" | "host" | "faculty" => 30,
         "teaching_assistant" | "ta" => 20,
         "student" | "candidate" | "free" | "pro" => 10,
         _ => 0,
@@ -35,13 +35,18 @@ impl FromRequestParts<AppState> for AuthenticatedUser {
     type Rejection = GatewayError;
 
     #[allow(clippy::unused_async_trait_impl)]
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let auth_hdr = parts
             .headers
             .get(AUTHORIZATION)
             .ok_or_else(|| GatewayError::Unauthorized("Missing Authorization header".to_string()))?
             .to_str()
-            .map_err(|_| GatewayError::Unauthorized("Invalid Authorization header encoding".to_string()))?;
+            .map_err(|_| {
+                GatewayError::Unauthorized("Invalid Authorization header encoding".to_string())
+            })?;
 
         let token = auth_hdr
             .strip_prefix("Bearer ")
@@ -67,8 +72,13 @@ impl FromRequestParts<AppState> for OptionalUser {
     type Rejection = std::convert::Infallible;
 
     #[allow(clippy::unused_async_trait_impl)]
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
-        let auth = AuthenticatedUser::from_request_parts(parts, state).await.ok();
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
+        let auth = AuthenticatedUser::from_request_parts(parts, state)
+            .await
+            .ok();
         Ok(Self(auth))
     }
 }
@@ -76,7 +86,11 @@ impl FromRequestParts<AppState> for OptionalUser {
 /// Helper extracting target `org_id` from request headers, query, or path.
 fn resolve_target_org_id(parts: &Parts) -> Option<Uuid> {
     // 1. Header: X-Org-ID or x-org-id
-    if let Some(val) = parts.headers.get("x-org-id").or_else(|| parts.headers.get("X-Org-ID")) {
+    if let Some(val) = parts
+        .headers
+        .get("x-org-id")
+        .or_else(|| parts.headers.get("X-Org-ID"))
+    {
         if let Ok(s) = val.to_str() {
             if let Ok(uid) = Uuid::parse_str(s.trim()) {
                 return Some(uid);
@@ -159,6 +173,45 @@ fn resolve_target_assessment_id(parts: &Parts) -> Option<Uuid> {
     None
 }
 
+/// Helper extracting target `org_slug` from request path or query.
+fn resolve_target_org_slug(parts: &Parts) -> Option<String> {
+    if let Some(query) = parts.uri.query() {
+        for param in query.split('&') {
+            if let Some(val) = param.strip_prefix("org_slug=") {
+                let s = val.trim();
+                if !s.is_empty() {
+                    return Some(s.to_string());
+                }
+            }
+        }
+    }
+
+    let path = parts.uri.path();
+    let segments: Vec<&str> = path.split('/').filter(|s| !s.is_empty()).collect();
+    for i in 0..segments.len() {
+        if segments[i] == "campus" && i + 1 < segments.len() {
+            if segments[i + 1] == "orgs" && i + 2 < segments.len() {
+                let candidate = segments[i + 2];
+                if Uuid::parse_str(candidate).is_err() && candidate != "provision" {
+                    return Some(candidate.to_string());
+                }
+            } else if segments[i + 1] != "orgs"
+                && segments[i + 1] != "auth"
+                && segments[i + 1] != "assessments"
+                && segments[i + 1] != "cohorts"
+                && segments[i + 1] != "viva"
+            {
+                let candidate = segments[i + 1];
+                if Uuid::parse_str(candidate).is_err() {
+                    return Some(candidate.to_string());
+                }
+            }
+        }
+    }
+
+    None
+}
+
 /// Verifies user permissions against organization membership or token role level.
 async fn verify_role_level(
     parts: &Parts,
@@ -213,6 +266,31 @@ async fn verify_role_level(
         }
     }
 
+    // If org_id is still not found, try resolving via org_slug if present
+    if target_org_id.is_none() {
+        if let Some(org_slug) = resolve_target_org_slug(parts) {
+            if let Some(ref pool) = state.db {
+                let row = sqlx::query_scalar::<sqlx::Postgres, Uuid>(
+                    "SELECT id FROM organizations WHERE slug = $1 LIMIT 1",
+                )
+                .bind(&org_slug)
+                .fetch_optional(pool.inner())
+                .await
+                .map_err(judge_db::DbError::Sqlx)?;
+
+                target_org_id = row;
+            } else {
+                let orgs = state.mock_campus.orgs.read().await;
+                if let Some(org) = orgs
+                    .values()
+                    .find(|o| o.slug.eq_ignore_ascii_case(&org_slug))
+                {
+                    target_org_id = Some(org.id);
+                }
+            }
+        }
+    }
+
     let token_level = role_level(&auth.claims.role);
 
     // If an organization scope is specified, enforce organization membership check
@@ -238,18 +316,19 @@ async fn verify_role_level(
                     return Ok((Some(org_id), Some(mem)));
                 }
                 return Err(GatewayError::Forbidden(format!(
-                    "Required role {required_name}, but user has role '{}'",
+                    "insufficient_campus_permissions: Required role {required_name}, but user has role '{}'",
                     mem.role
                 )));
             }
 
-            // If no membership found, global system admins are still permitted
-            if token_level >= 40 {
+            // If no membership found in DB, check token role level
+            if token_level >= required_level {
                 return Ok((Some(org_id), None));
             }
 
             return Err(GatewayError::Forbidden(format!(
-                "User is not an active member of organization '{org_id}'"
+                "insufficient_campus_permissions: Required role {required_name}, but user has role '{}'",
+                auth.claims.role
             )));
         }
 
@@ -261,7 +340,7 @@ async fn verify_role_level(
                 return Ok((Some(org_id), Some(mem.clone())));
             }
             return Err(GatewayError::Forbidden(format!(
-                "Required role {required_name}, but user has role '{}'",
+                "insufficient_campus_permissions: Required role {required_name}, but user has role '{}'",
                 mem.role
             )));
         }
@@ -272,7 +351,8 @@ async fn verify_role_level(
         }
 
         return Err(GatewayError::Forbidden(format!(
-            "User is not a member of organization '{org_id}'"
+            "insufficient_campus_permissions: Required role {required_name}, but user has role '{}'",
+            auth.claims.role
         )));
     }
 
@@ -282,7 +362,7 @@ async fn verify_role_level(
     }
 
     Err(GatewayError::Forbidden(format!(
-        "Required role {required_name}, but token has role '{}'",
+        "insufficient_campus_permissions: Required role {required_name}, but token has role '{}'",
         auth.claims.role
     )))
 }
@@ -303,10 +383,12 @@ pub struct RequireOrgAdmin {
 impl FromRequestParts<AppState> for RequireOrgAdmin {
     type Rejection = GatewayError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let auth = AuthenticatedUser::from_request_parts(parts, state).await?;
-        let (org_id, membership) =
-            verify_role_level(parts, state, &auth, 40, "org_admin").await?;
+        let (org_id, membership) = verify_role_level(parts, state, &auth, 40, "org_admin").await?;
 
         Ok(Self {
             user_id: auth.user_id,
@@ -333,10 +415,12 @@ pub struct RequireInstructor {
 impl FromRequestParts<AppState> for RequireInstructor {
     type Rejection = GatewayError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let auth = AuthenticatedUser::from_request_parts(parts, state).await?;
-        let (org_id, membership) =
-            verify_role_level(parts, state, &auth, 30, "instructor").await?;
+        let (org_id, membership) = verify_role_level(parts, state, &auth, 30, "instructor").await?;
 
         Ok(Self {
             user_id: auth.user_id,
@@ -363,10 +447,12 @@ pub struct RequireStudent {
 impl FromRequestParts<AppState> for RequireStudent {
     type Rejection = GatewayError;
 
-    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &AppState,
+    ) -> Result<Self, Self::Rejection> {
         let auth = AuthenticatedUser::from_request_parts(parts, state).await?;
-        let (org_id, membership) =
-            verify_role_level(parts, state, &auth, 10, "student").await?;
+        let (org_id, membership) = verify_role_level(parts, state, &auth, 10, "student").await?;
 
         Ok(Self {
             user_id: auth.user_id,

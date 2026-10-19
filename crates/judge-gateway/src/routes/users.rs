@@ -105,25 +105,30 @@ pub async fn get_user_profile_handler(
     let clean_u = username.trim().to_string();
 
     let (account_type, college_name, avatar_url, created_at) = if let Some(ref pool) = state.db {
-        let db_user = sqlx::query_as::<sqlx::Postgres, (String, Option<String>, Option<String>, String)>(
-            r"
+        let db_user =
+            sqlx::query_as::<sqlx::Postgres, (String, Option<String>, Option<String>, String)>(
+                r"
             SELECT account_type, college_name, avatar_url, created_at::text
             FROM users
             WHERE LOWER(username) = LOWER($1)
             LIMIT 1
             ",
-        )
-        .bind(&clean_u)
-        .fetch_optional(pool.inner())
-        .await
-        .map_err(judge_db::DbError::Sqlx)?;
+            )
+            .bind(&clean_u)
+            .fetch_optional(pool.inner())
+            .await
+            .map_err(judge_db::DbError::Sqlx)?;
 
         if let Some((acct, coll, av, cr)) = db_user {
             (acct, coll, av, cr)
         } else {
             let is_admin = clean_u.eq_ignore_ascii_case("admin");
             (
-                if is_admin { "admin".to_string() } else { "free".to_string() },
+                if is_admin {
+                    "admin".to_string()
+                } else {
+                    "free".to_string()
+                },
                 Some("Department of Computer Science".to_string()),
                 None,
                 "2024-01-15T00:00:00Z".to_string(),
@@ -132,7 +137,11 @@ pub async fn get_user_profile_handler(
     } else {
         let is_admin = clean_u.eq_ignore_ascii_case("admin");
         (
-            if is_admin { "admin".to_string() } else { "free".to_string() },
+            if is_admin {
+                "admin".to_string()
+            } else {
+                "free".to_string()
+            },
             Some("Department of Computer Science".to_string()),
             None,
             "2024-01-15T00:00:00Z".to_string(),

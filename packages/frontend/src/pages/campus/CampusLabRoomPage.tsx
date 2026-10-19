@@ -174,7 +174,7 @@ export const CampusLabRoomPage: React.FC = () => {
       // Simulate real output
       setPracticeConsoleOutputs((prev) => ({
         ...prev,
-        [currentPractice.id]: `[Kernel Sandbox Execution - GCC/OpenJDK 21]\nMemory: 42.1MB / 256MB | CPU: 38ms\n\n--- Standard Output ---\n${currentPractice.sample_output}\n\n[SUCCESS] All 4 public test cases passed.\nIntegrity check verified.`,
+        [currentPractice.id]: `[Automated Evaluation - GCC/OpenJDK 21]\nMemory: 42.1MB | CPU: 38ms\n\n--- Standard Output ---\n${currentPractice.sample_output}\n\n[SUCCESS] All 4 public test cases passed.\nIntegrity check verified.`,
       }));
     } finally {
       setPracticeRunning(false);
@@ -191,7 +191,7 @@ export const CampusLabRoomPage: React.FC = () => {
         details: { code: challengingCode },
       });
       setChallengingOutput(
-        `[Kernel Sandbox Execution - GCC/OpenJDK 21]\nMemory: 68.4MB / 256MB | CPU: 112ms\n\n--- Standard Output ---\nPopped: 2\nStolen: 1\n\n[SUCCESS] 12/12 concurrency stress testcases passed with zero data races.\nLock-free CAS synchronization verified.`
+        `[Automated Evaluation - GCC/OpenJDK 21]\nMemory: 68.4MB | CPU: 112ms\n\n--- Standard Output ---\nPopped: 2\nStolen: 1\n\n[SUCCESS] 12/12 concurrency stress testcases passed with zero data races.\nLock-free CAS synchronization verified.`
       );
     } finally {
       setChallengingRunning(false);
@@ -279,8 +279,8 @@ export const CampusLabRoomPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '60px 24px', textAlign: 'center', color: '#8a8f98' }}>
-        Initializing 6-Stage Kernel Sandbox...
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '60px 24px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+        Initializing 6-Stage Evaluation Sandbox...
       </div>
     );
   }
@@ -291,19 +291,19 @@ export const CampusLabRoomPage: React.FC = () => {
         <div style={{ background: 'rgba(235, 87, 87, 0.1)', border: '1px solid #eb5757', borderRadius: '8px', padding: '24px', color: '#eb5757' }}>
           <h3>Could not load lab room</h3>
           <p>{error || 'Lab not found'}</p>
-          <Link to={`/campus/${orgSlug}/student/labs`} style={{ color: '#ffffff' }}>← Back to Labs Catalog</Link>
+          <Link to={`/campus/${orgSlug}/student/labs`} style={{ color: 'var(--text-primary)' }}>← Back to Labs Catalog</Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', background: '#08090a' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', background: 'var(--bg-canvas)' }}>
       {/* Top Breadcrumb & Stage Navigation Bar */}
       <div
         style={{
-          background: '#0f1011',
-          borderBottom: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-subtle)',
           padding: '0 24px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -315,7 +315,7 @@ export const CampusLabRoomPage: React.FC = () => {
           <Link
             to={`/campus/${orgSlug}/student/labs`}
             style={{
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
@@ -326,7 +326,7 @@ export const CampusLabRoomPage: React.FC = () => {
             <ArrowLeft size={14} />
             <span>Labs</span>
           </Link>
-          <span style={{ color: '#23252a' }}>/</span>
+          <span style={{ color: 'var(--border-subtle)' }}>/</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span
               style={{
@@ -341,12 +341,12 @@ export const CampusLabRoomPage: React.FC = () => {
             >
               {lab.code}
             </span>
-            <span style={{ color: '#ffffff', fontSize: '14px', fontWeight: 510 }}>{lab.title}</span>
+            <span style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: 510 }}>{lab.title}</span>
           </div>
         </div>
 
         {/* 6 Stage Navigation Pill Selector */}
-        <div style={{ display: 'flex', gap: '4px', background: '#141517', padding: '3px', borderRadius: '6px', border: '1px solid #23252a' }}>
+        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-elevated)', padding: '3px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
           {[
             { id: 'content', label: '01 Lecture Notes', icon: BookOpen },
             { id: 'demo', label: '02 Worked Example', icon: Code2 },
@@ -372,8 +372,8 @@ export const CampusLabRoomPage: React.FC = () => {
                   fontSize: '12px',
                   fontWeight: 500,
                   cursor: 'pointer',
-                  background: isActive ? '#08090a' : 'transparent',
-                  color: isActive ? '#e4f222' : '#8a8f98',
+                  background: isActive ? 'var(--bg-canvas)' : 'transparent',
+                  color: isActive ? '#e4f222' : 'var(--text-secondary)',
                   borderBottom: isActive ? '1px solid #e4f222' : 'none',
                   transition: 'all 120ms ease',
                 }}
@@ -395,15 +395,15 @@ export const CampusLabRoomPage: React.FC = () => {
               gap: '6px',
               padding: '6px 12px',
               borderRadius: '6px',
-              background: aiDrawerOpen ? '#6366f1' : '#141517',
-              border: '1px solid #23252a',
-              color: '#ffffff',
+              background: aiDrawerOpen ? '#6366f1' : 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
               fontSize: '12px',
               fontWeight: 500,
               cursor: 'pointer',
             }}
           >
-            <Sparkles size={13} color={aiDrawerOpen ? '#ffffff' : '#818cf8'} />
+            <Sparkles size={13} color={aiDrawerOpen ? 'var(--text-primary)' : '#818cf8'} />
             <span>AI Mentor</span>
           </button>
         </div>
@@ -417,7 +417,7 @@ export const CampusLabRoomPage: React.FC = () => {
           {activeStage === 'content' && (
             <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                   STAGE 01 · PEDAGOGY FOUNDATION
                 </span>
                 <span style={{ fontSize: '12px', color: '#818cf8', background: 'rgba(99, 102, 241, 0.1)', padding: '2px 8px', borderRadius: '4px' }}>
@@ -426,11 +426,11 @@ export const CampusLabRoomPage: React.FC = () => {
               </div>
               <div
                 style={{
-                  background: '#0f1011',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '12px',
                   padding: '32px',
-                  color: '#d0d6e0',
+                  color: 'var(--text-secondary)',
                   lineHeight: '1.7',
                   whiteSpace: 'pre-wrap',
                   fontFamily: 'Inter, sans-serif',
@@ -449,8 +449,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     gap: '8px',
                     padding: '10px 20px',
                     borderRadius: '6px',
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     fontWeight: 510,
                     fontSize: '13px',
                     border: 'none',
@@ -468,7 +468,7 @@ export const CampusLabRoomPage: React.FC = () => {
           {activeStage === 'demo' && (
             <div style={{ maxWidth: '960px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                   STAGE 02 · INTERACTIVE CODE DEMONSTRATION
                 </span>
                 <button
@@ -480,23 +480,23 @@ export const CampusLabRoomPage: React.FC = () => {
                     gap: '6px',
                     padding: '8px 16px',
                     borderRadius: '6px',
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     fontSize: '12px',
                     fontWeight: 510,
                     border: 'none',
                     cursor: 'pointer',
                   }}
                 >
-                  <Play size={13} fill="#08090a" />
+                  <Play size={13} fill="var(--accent-primary-fg)" />
                   <span>Execute Reference Demo</span>
                 </button>
               </div>
 
-              <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', color: '#ffffff', fontWeight: 510 }}>{lab.worked_demo.title}</h3>
-                <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98' }}>{lab.worked_demo.description}</p>
-                <div style={{ border: '1px solid #23252a', borderRadius: '8px', overflow: 'hidden', height: '320px' }}>
+              <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', color: 'var(--text-primary)', fontWeight: 510 }}>{lab.worked_demo.title}</h3>
+                <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>{lab.worked_demo.description}</p>
+                <div style={{ border: '1px solid var(--border-subtle)', borderRadius: '8px', overflow: 'hidden', height: '320px' }}>
                   <Editor
                     height="100%"
                     language="java"
@@ -505,8 +505,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     options={{ readOnly: true, minimap: { enabled: false }, fontSize: 13 }}
                   />
                 </div>
-                <div style={{ background: '#141517', padding: '16px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                  <span style={{ fontSize: '11px', color: '#8a8f98', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>Expected Output</span>
+                <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', fontFamily: 'JetBrains Mono, monospace' }}>Expected Output</span>
                   <pre style={{ margin: '8px 0 0 0', color: '#22c55e', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>
                     {lab.worked_demo.expected_output}
                   </pre>
@@ -523,8 +523,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     gap: '8px',
                     padding: '10px 20px',
                     borderRadius: '6px',
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     fontWeight: 510,
                     fontSize: '13px',
                     border: 'none',
@@ -542,10 +542,10 @@ export const CampusLabRoomPage: React.FC = () => {
           {activeStage === 'led' && (
             <div style={{ maxWidth: '900px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                   STAGE 03 · LAB EXERCISE DRILL (LED CONCEPT CHECK)
                 </span>
-                <span style={{ fontSize: '12px', color: '#8a8f98' }}>{lab.led_quiz.length} Questions</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{lab.led_quiz.length} Questions</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -557,8 +557,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     <div
                       key={q.id}
                       style={{
-                        background: '#0f1011',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '12px',
                         padding: '24px',
                         display: 'flex',
@@ -567,10 +567,10 @@ export const CampusLabRoomPage: React.FC = () => {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: '#141517', border: '1px solid #23252a', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: '#ffffff', fontFamily: 'JetBrains Mono, monospace' }}>
+                        <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--bg-elevated)', border: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
                           {idx + 1}
                         </span>
-                        <h4 style={{ margin: 0, fontSize: '15px', color: '#ffffff', fontWeight: 510 }}>{q.question}</h4>
+                        <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)', fontWeight: 510 }}>{q.question}</h4>
                       </div>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -585,11 +585,11 @@ export const CampusLabRoomPage: React.FC = () => {
                                 gap: '12px',
                                 padding: '12px 16px',
                                 borderRadius: '6px',
-                                background: isOptionSelected ? '#161718' : '#141517',
-                                border: isOptionSelected ? '1px solid #e4f222' : '1px solid #23252a',
+                                background: isOptionSelected ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                                border: isOptionSelected ? '1px solid #e4f222' : '1px solid var(--border-subtle)',
                                 cursor: 'pointer',
                                 fontSize: '13px',
-                                color: '#d0d6e0',
+                                color: 'var(--text-secondary)',
                               }}
                             >
                               <input
@@ -620,7 +620,7 @@ export const CampusLabRoomPage: React.FC = () => {
                           }}
                         >
                           <div style={{ fontWeight: 600 }}>{isCorrect ? '✓ Correct Answer' : '✗ Incorrect Answer'}</div>
-                          <div style={{ color: '#8a8f98' }}>{q.explanation}</div>
+                          <div style={{ color: 'var(--text-secondary)' }}>{q.explanation}</div>
                         </div>
                       )}
                     </div>
@@ -635,9 +635,9 @@ export const CampusLabRoomPage: React.FC = () => {
                   style={{
                     padding: '10px 20px',
                     borderRadius: '6px',
-                    background: '#141517',
-                    border: '1px solid #23252a',
-                    color: '#ffffff',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     cursor: 'pointer',
                   }}
@@ -653,8 +653,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     gap: '8px',
                     padding: '10px 20px',
                     borderRadius: '6px',
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     fontWeight: 510,
                     fontSize: '13px',
                     border: 'none',
@@ -681,9 +681,9 @@ export const CampusLabRoomPage: React.FC = () => {
                       style={{
                         padding: '6px 14px',
                         borderRadius: '6px',
-                        border: '1px solid #23252a',
-                        background: selectedPracticeIndex === idx ? '#e4f222' : '#0f1011',
-                        color: selectedPracticeIndex === idx ? '#08090a' : '#8a8f98',
+                        border: '1px solid var(--border-subtle)',
+                        background: selectedPracticeIndex === idx ? 'var(--accent-primary)' : 'var(--bg-surface)',
+                        color: selectedPracticeIndex === idx ? 'var(--accent-primary-fg)' : 'var(--text-secondary)',
                         fontWeight: 510,
                         fontSize: '12px',
                         cursor: 'pointer',
@@ -705,16 +705,16 @@ export const CampusLabRoomPage: React.FC = () => {
                       gap: '6px',
                       padding: '8px 18px',
                       borderRadius: '6px',
-                      background: '#e4f222',
-                      color: '#08090a',
+                      background: 'var(--accent-primary)',
+                      color: 'var(--accent-primary-fg)',
                       fontSize: '13px',
                       fontWeight: 510,
                       border: 'none',
                       cursor: 'pointer',
                     }}
                   >
-                    <Play size={13} fill="#08090a" />
-                    <span>{practiceRunning ? 'Sandboxing...' : 'Run in Linux Sandbox'}</span>
+                    <Play size={13} fill="var(--accent-primary-fg)" />
+                    <span>{practiceRunning ? 'Sandboxing...' : 'Run in Sandbox'}</span>
                   </button>
                   <button
                     type="button"
@@ -722,9 +722,9 @@ export const CampusLabRoomPage: React.FC = () => {
                     style={{
                       padding: '8px 16px',
                       borderRadius: '6px',
-                      background: '#141517',
-                      border: '1px solid #23252a',
-                      color: '#ffffff',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       cursor: 'pointer',
                     }}
@@ -737,29 +737,29 @@ export const CampusLabRoomPage: React.FC = () => {
               {/* 2-Pane Editor Layout */}
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '16px', minHeight: '480px' }}>
                 {/* Left Description Pane */}
-                <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
                     <span style={{ fontSize: '11px', color: '#e4f222', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>
                       {currentPractice.category} · {currentPractice.difficulty} · {currentPractice.marks} Marks
                     </span>
-                    <h3 style={{ margin: '6px 0 0 0', fontSize: '18px', color: '#ffffff', fontWeight: 510 }}>{currentPractice.title}</h3>
+                    <h3 style={{ margin: '6px 0 0 0', fontSize: '18px', color: 'var(--text-primary)', fontWeight: 510 }}>{currentPractice.title}</h3>
                   </div>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98', lineHeight: '1.6' }}>{currentPractice.description}</p>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>{currentPractice.description}</p>
                   
-                  <div style={{ background: '#141517', padding: '12px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                    <span style={{ fontSize: '11px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>Sample Input</span>
-                    <pre style={{ margin: '4px 0 0 0', color: '#ffffff', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>{currentPractice.sample_input}</pre>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>Sample Input</span>
+                    <pre style={{ margin: '4px 0 0 0', color: 'var(--text-primary)', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>{currentPractice.sample_input}</pre>
                   </div>
 
-                  <div style={{ background: '#141517', padding: '12px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                    <span style={{ fontSize: '11px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>Sample Output</span>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>Sample Output</span>
                     <pre style={{ margin: '4px 0 0 0', color: '#22c55e', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>{currentPractice.sample_output}</pre>
                   </div>
 
                   {practiceConsoleOutputs[currentPractice.id] && (
-                    <div style={{ background: '#08090a', padding: '14px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                      <span style={{ fontSize: '11px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>Kernel Execution Terminal</span>
-                      <pre style={{ margin: '6px 0 0 0', color: '#d0d6e0', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'pre-wrap' }}>
+                    <div style={{ background: 'var(--bg-canvas)', padding: '14px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>Evaluation Execution Terminal</span>
+                      <pre style={{ margin: '6px 0 0 0', color: 'var(--text-secondary)', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'pre-wrap' }}>
                         {practiceConsoleOutputs[currentPractice.id]}
                       </pre>
                     </div>
@@ -767,18 +767,18 @@ export const CampusLabRoomPage: React.FC = () => {
                 </div>
 
                 {/* Right Section-Locked Monaco Pane */}
-                <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                   {/* Readonly Header */}
-                  <div style={{ background: '#141517', borderBottom: '1px solid #23252a', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#8a8f98' }}>
+                  <div style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
                     <Lock size={12} color="#f59e0b" />
                     <span>Locked Harness Header (Read-Only)</span>
                   </div>
-                  <pre style={{ margin: 0, padding: '10px 14px', background: '#0d0e10', color: '#62666d', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <pre style={{ margin: 0, padding: '10px 14px', background: 'var(--bg-canvas)', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>
                     {currentPractice.locked_header}
                   </pre>
 
                   {/* User Editable Code Area */}
-                  <div style={{ flex: 1, minHeight: '260px', borderTop: '1px solid #23252a', borderBottom: '1px solid #23252a' }}>
+                  <div style={{ flex: 1, minHeight: '260px', borderTop: '1px solid var(--border-subtle)', borderBottom: '1px solid var(--border-subtle)' }}>
                     <Editor
                       height="100%"
                       language="java"
@@ -790,11 +790,11 @@ export const CampusLabRoomPage: React.FC = () => {
                   </div>
 
                   {/* Readonly Footer */}
-                  <div style={{ background: '#141517', borderTop: '1px solid #23252a', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#8a8f98' }}>
+                  <div style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-subtle)', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
                     <Lock size={12} color="#f59e0b" />
                     <span>Locked Verification Driver (Read-Only)</span>
                   </div>
-                  <pre style={{ margin: 0, padding: '10px 14px', background: '#0d0e10', color: '#62666d', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <pre style={{ margin: 0, padding: '10px 14px', background: 'var(--bg-canvas)', color: 'var(--text-muted)', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>
                     {currentPractice.locked_footer}
                   </pre>
                 </div>
@@ -810,7 +810,7 @@ export const CampusLabRoomPage: React.FC = () => {
                   <span style={{ fontSize: '11px', color: '#eb5757', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase' }}>
                     STAGE 05 · CAPSTONE CHALLENGE · {lab.challenging_problem.marks} MARKS
                   </span>
-                  <h3 style={{ margin: '4px 0 0 0', fontSize: '18px', color: '#ffffff', fontWeight: 510 }}>
+                  <h3 style={{ margin: '4px 0 0 0', fontSize: '18px', color: 'var(--text-primary)', fontWeight: 510 }}>
                     {lab.challenging_problem.title}
                   </h3>
                 </div>
@@ -826,15 +826,15 @@ export const CampusLabRoomPage: React.FC = () => {
                       gap: '6px',
                       padding: '8px 18px',
                       borderRadius: '6px',
-                      background: '#e4f222',
-                      color: '#08090a',
+                      background: 'var(--accent-primary)',
+                      color: 'var(--accent-primary-fg)',
                       fontSize: '13px',
                       fontWeight: 510,
                       border: 'none',
                       cursor: 'pointer',
                     }}
                   >
-                    <Play size={13} fill="#08090a" />
+                    <Play size={13} fill="var(--accent-primary-fg)" />
                     <span>{challengingRunning ? 'Evaluating...' : 'Run Test Cases'}</span>
                   </button>
                   <button
@@ -843,9 +843,9 @@ export const CampusLabRoomPage: React.FC = () => {
                     style={{
                       padding: '8px 16px',
                       borderRadius: '6px',
-                      background: '#141517',
-                      border: '1px solid #23252a',
-                      color: '#ffffff',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       cursor: 'pointer',
                     }}
@@ -856,19 +856,19 @@ export const CampusLabRoomPage: React.FC = () => {
               </div>
 
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: '16px', minHeight: '480px' }}>
-                <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98', lineHeight: '1.6' }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                     {lab.challenging_problem.description}
                   </p>
-                  <div style={{ background: '#141517', padding: '12px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                    <span style={{ fontSize: '11px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>Sample Spec</span>
-                    <pre style={{ margin: '4px 0 0 0', color: '#ffffff', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <div style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                    <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>Sample Spec</span>
+                    <pre style={{ margin: '4px 0 0 0', color: 'var(--text-primary)', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>
                       {lab.challenging_problem.sample_input || 'Input: Concurrency Stress Test (1000 items)'}
                     </pre>
                   </div>
                   {challengingOutput && (
-                    <div style={{ background: '#08090a', padding: '14px', borderRadius: '6px', border: '1px solid #23252a' }}>
-                      <span style={{ fontSize: '11px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>Output</span>
+                    <div style={{ background: 'var(--bg-canvas)', padding: '14px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>Output</span>
                       <pre style={{ margin: '6px 0 0 0', color: '#22c55e', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'pre-wrap' }}>
                         {challengingOutput}
                       </pre>
@@ -876,7 +876,7 @@ export const CampusLabRoomPage: React.FC = () => {
                   )}
                 </div>
 
-                <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', overflow: 'hidden' }}>
                   <Editor
                     height="100%"
                     language="java"
@@ -894,7 +894,7 @@ export const CampusLabRoomPage: React.FC = () => {
           {activeStage === 'submit' && (
             <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#8a8f98', fontFamily: 'JetBrains Mono, monospace' }}>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                   STAGE 06 · FINAL SUBMISSION & EVALUATION CHECKPOINT
                 </span>
                 <span style={{ fontSize: '12px', color: '#e4f222' }}>Max Marks: {lab.max_marks} pts</span>
@@ -903,7 +903,7 @@ export const CampusLabRoomPage: React.FC = () => {
               {submissionResult ? (
                 <div
                   style={{
-                    background: '#0f1011',
+                    background: 'var(--bg-surface)',
                     border: '1px solid #22c55e',
                     borderRadius: '12px',
                     padding: '32px',
@@ -917,24 +917,24 @@ export const CampusLabRoomPage: React.FC = () => {
                   <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(34, 197, 94, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#22c55e' }}>
                     <CheckCircle2 size={24} />
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 510, color: '#ffffff' }}>
+                  <h3 style={{ margin: 0, fontSize: '22px', fontWeight: 510, color: 'var(--text-primary)' }}>
                     Lab Evaluated & Submitted Successfully!
                   </h3>
                   <div style={{ display: 'flex', gap: '24px', margin: '12px 0' }}>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#8a8f98' }}>Marks Obtained</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Marks Obtained</div>
                       <div style={{ fontSize: '28px', fontWeight: 590, color: '#22c55e', fontFamily: 'JetBrains Mono, monospace' }}>
                         {submissionResult.obtained_marks} / {submissionResult.max_marks}
                       </div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '12px', color: '#8a8f98' }}>CLO Attainment</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>CLO Attainment</div>
                       <div style={{ fontSize: '28px', fontWeight: 590, color: '#e4f222', fontFamily: 'JetBrains Mono, monospace' }}>
                         {submissionResult.clo} MET
                       </div>
                     </div>
                   </div>
-                  <p style={{ margin: 0, fontSize: '14px', color: '#8a8f98', maxWidth: '500px' }}>
+                  <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', maxWidth: '500px' }}>
                     {submissionResult.feedback || 'All test harnesses and rubric benchmarks satisfied with optimal concurrency primitives.'}
                   </p>
                   <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
@@ -943,8 +943,8 @@ export const CampusLabRoomPage: React.FC = () => {
                       style={{
                         padding: '10px 20px',
                         borderRadius: '6px',
-                        background: '#e4f222',
-                        color: '#08090a',
+                        background: 'var(--accent-primary)',
+                        color: 'var(--accent-primary-fg)',
                         fontWeight: 510,
                         fontSize: '13px',
                         textDecoration: 'none',
@@ -957,9 +957,9 @@ export const CampusLabRoomPage: React.FC = () => {
                       style={{
                         padding: '10px 20px',
                         borderRadius: '6px',
-                        background: '#141517',
-                        border: '1px solid #23252a',
-                        color: '#ffffff',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)',
                         fontSize: '13px',
                         textDecoration: 'none',
                       }}
@@ -969,31 +969,31 @@ export const CampusLabRoomPage: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div style={{ background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: 510, color: '#ffffff' }}>
+                    <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', fontWeight: 510, color: 'var(--text-primary)' }}>
                       Ready to Submit Lab for Official Grading?
                     </h3>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98' }}>
-                      Your answers from LED MCQs, locked practice code, and capstone challenge will be verified by the Rust kernel sandbox.
+                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>
+                      Your answers from LED MCQs, locked practice code, and capstone challenge will be verified by the automated evaluation sandbox.
                     </p>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-                    <div style={{ background: '#141517', padding: '16px', borderRadius: '8px', border: '1px solid #23252a' }}>
-                      <span style={{ fontSize: '11px', color: '#8a8f98' }}>LED MCQs</span>
-                      <div style={{ fontSize: '18px', fontWeight: 590, color: '#ffffff', marginTop: '4px' }}>
+                    <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>LED MCQs</span>
+                      <div style={{ fontSize: '18px', fontWeight: 590, color: 'var(--text-primary)', marginTop: '4px' }}>
                         {Object.keys(selectedAnswers).length} / {lab.led_quiz.length} Answered
                       </div>
                     </div>
-                    <div style={{ background: '#141517', padding: '16px', borderRadius: '8px', border: '1px solid #23252a' }}>
-                      <span style={{ fontSize: '11px', color: '#8a8f98' }}>Practice Tasks</span>
-                      <div style={{ fontSize: '18px', fontWeight: 590, color: '#ffffff', marginTop: '4px' }}>
+                    <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Practice Tasks</span>
+                      <div style={{ fontSize: '18px', fontWeight: 590, color: 'var(--text-primary)', marginTop: '4px' }}>
                         {lab.practice_problems.length} / {lab.practice_problems.length} Complete
                       </div>
                     </div>
-                    <div style={{ background: '#141517', padding: '16px', borderRadius: '8px', border: '1px solid #23252a' }}>
-                      <span style={{ fontSize: '11px', color: '#8a8f98' }}>Capstone Task</span>
+                    <div style={{ background: 'var(--bg-elevated)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Capstone Task</span>
                       <div style={{ fontSize: '18px', fontWeight: 590, color: '#22c55e', marginTop: '4px' }}>
                         Ready
                       </div>
@@ -1001,7 +1001,7 @@ export const CampusLabRoomPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '13px', color: '#8a8f98' }}>Self-Assessment Rating</label>
+                    <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Self-Assessment Rating</label>
                     <div style={{ display: 'flex', gap: '8px' }}>
                       {[1, 2, 3, 4, 5].map((star) => (
                         <button
@@ -1012,9 +1012,9 @@ export const CampusLabRoomPage: React.FC = () => {
                             width: '40px',
                             height: '40px',
                             borderRadius: '6px',
-                            background: selfRating >= star ? 'rgba(228, 242, 34, 0.15)' : '#141517',
-                            border: `1px solid ${selfRating >= star ? '#e4f222' : '#23252a'}`,
-                            color: selfRating >= star ? '#e4f222' : '#8a8f98',
+                            background: selfRating >= star ? 'rgba(228, 242, 34, 0.15)' : 'var(--bg-elevated)',
+                            border: `1px solid ${selfRating >= star ? '#e4f222' : 'var(--border-subtle)'}`,
+                            color: selfRating >= star ? '#e4f222' : 'var(--text-secondary)',
                             fontSize: '14px',
                             cursor: 'pointer',
                           }}
@@ -1026,7 +1026,7 @@ export const CampusLabRoomPage: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <label style={{ fontSize: '13px', color: '#8a8f98' }}>Reflection / Invariant Notes (Optional)</label>
+                    <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Reflection / Invariant Notes (Optional)</label>
                     <textarea
                       rows={3}
                       value={feedbackText}
@@ -1035,9 +1035,9 @@ export const CampusLabRoomPage: React.FC = () => {
                       style={{
                         padding: '10px 14px',
                         borderRadius: '6px',
-                        background: '#141517',
-                        border: '1px solid #23252a',
-                        color: '#ffffff',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-primary)',
                         fontSize: '13px',
                         outline: 'none',
                         resize: 'none',
@@ -1053,8 +1053,8 @@ export const CampusLabRoomPage: React.FC = () => {
                     style={{
                       padding: '12px 24px',
                       borderRadius: '6px',
-                      background: '#e4f222',
-                      color: '#08090a',
+                      background: 'var(--accent-primary)',
+                      color: 'var(--accent-primary-fg)',
                       fontWeight: 510,
                       fontSize: '14px',
                       border: 'none',
@@ -1062,7 +1062,7 @@ export const CampusLabRoomPage: React.FC = () => {
                       letterSpacing: '-0.011em',
                     }}
                   >
-                    {isSubmitting ? 'Evaluating Submission in Kernel...' : 'Finalize & Submit Lab Evaluation'}
+                    {isSubmitting ? 'Evaluating Submission...' : 'Finalize & Submit Lab Evaluation'}
                   </button>
                 </div>
               )}
@@ -1075,21 +1075,21 @@ export const CampusLabRoomPage: React.FC = () => {
           <div
             style={{
               width: '380px',
-              borderLeft: '1px solid #23252a',
-              background: '#0f1011',
+              borderLeft: '1px solid var(--border-subtle)',
+              background: 'var(--bg-surface)',
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #23252a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Sparkles size={16} color="#6366f1" />
-                <span style={{ fontSize: '14px', fontWeight: 510, color: '#ffffff' }}>AI Sandbox Mentor</span>
+                <span style={{ fontSize: '14px', fontWeight: 510, color: 'var(--text-primary)' }}>AI Sandbox Mentor</span>
               </div>
               <button
                 type="button"
                 onClick={() => setAiDrawerOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#8a8f98', cursor: 'pointer', fontSize: '16px' }}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '16px' }}
               >
                 ✕
               </button>
@@ -1104,9 +1104,9 @@ export const CampusLabRoomPage: React.FC = () => {
                     maxWidth: '85%',
                     padding: '10px 14px',
                     borderRadius: '8px',
-                    background: msg.role === 'user' ? '#141517' : '#161718',
-                    border: '1px solid #23252a',
-                    color: msg.role === 'user' ? '#ffffff' : '#d0d6e0',
+                    background: msg.role === 'user' ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: msg.role === 'user' ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontSize: '13px',
                     lineHeight: '1.5',
                   }}
@@ -1115,13 +1115,13 @@ export const CampusLabRoomPage: React.FC = () => {
                 </div>
               ))}
               {aiLoading && (
-                <div style={{ fontSize: '12px', color: '#8a8f98', padding: '8px' }}>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', padding: '8px' }}>
                   AI Mentor is reasoning over AST & memory invariants...
                 </div>
               )}
             </div>
 
-            <div style={{ padding: '12px 16px', borderTop: '1px solid #23252a', display: 'flex', gap: '8px' }}>
+            <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: '8px' }}>
               <input
                 type="text"
                 placeholder="Ask about locks, CAS, or deadlock..."
@@ -1132,9 +1132,9 @@ export const CampusLabRoomPage: React.FC = () => {
                   flex: 1,
                   padding: '8px 12px',
                   borderRadius: '6px',
-                  background: '#141517',
-                  border: '1px solid #23252a',
-                  color: '#ffffff',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  color: 'var(--text-primary)',
                   fontSize: '13px',
                   outline: 'none',
                 }}
@@ -1146,8 +1146,8 @@ export const CampusLabRoomPage: React.FC = () => {
                 style={{
                   padding: '8px 14px',
                   borderRadius: '6px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   cursor: 'pointer',
                   fontWeight: 510,

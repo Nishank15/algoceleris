@@ -10,7 +10,7 @@ export const LandingPage: React.FC = () => {
       <section className="landing-hero-section">
         <div className="landing-badge">
           <span className="landing-badge-dot" />
-          <span>LINUX CGROUPS V2 · TRANSIENT SCOPES</span>
+          <span>ENTERPRISE SECURITY · ISOLATED EVALUATION</span>
         </div>
 
         <h1 className="landing-hero-title">
@@ -18,7 +18,7 @@ export const LandingPage: React.FC = () => {
         </h1>
 
         <p className="landing-hero-subtitle">
-          Sub-millisecond worker dispatch, kernel-enforced 256MB memory boundaries, and live per-testcase WebSocket telemetry.
+          Instant automated grading, dedicated memory boundaries, and real-time per-testcase execution streaming.
         </p>
 
         <div className="landing-cta-cluster">
@@ -37,10 +37,10 @@ export const LandingPage: React.FC = () => {
       <section className="landing-telemetry-section" aria-labelledby="telemetry-heading">
         <div className="landing-section-header">
           <h2 id="telemetry-heading" className="landing-section-title">
-            Architectural Benchmark Telemetry
+            Architectural Performance Telemetry
           </h2>
           <p className="landing-section-subtitle">
-            Measured against bare-metal Linux daemons under production load.
+            Measured against production benchmarks under continuous load.
           </p>
         </div>
 
@@ -48,48 +48,48 @@ export const LandingPage: React.FC = () => {
           <div className="telemetry-card">
             <div className="telemetry-card-top">
               <Zap size={16} className="telemetry-icon" />
-              <span className="telemetry-badge">COLD-START</span>
+              <span className="telemetry-badge">RESPONSE TIME</span>
             </div>
             <div className="telemetry-value">&lt; 15ms</div>
-            <div className="telemetry-label">Sandbox Startup</div>
+            <div className="telemetry-label">Instant Evaluation</div>
             <p className="telemetry-desc">
-              Transient systemd-run scopes bypass heavy container or VM hypervisor spinup overhead.
+              Evaluations begin immediately, so students get feedback within the same working session.
             </p>
           </div>
 
           <div className="telemetry-card">
             <div className="telemetry-card-top">
               <ShieldCheck size={16} className="telemetry-icon" />
-              <span className="telemetry-badge">MEMORY CAP</span>
+              <span className="telemetry-badge">REPRODUCIBLE</span>
             </div>
-            <div className="telemetry-value">256 MB</div>
-            <div className="telemetry-label">Strict RAM Limit</div>
+            <div className="telemetry-value">Same every run</div>
+            <div className="telemetry-label">Deterministic Grading</div>
             <p className="telemetry-desc">
-              Linux cgroup memory.max enforcement with immediate kernel OOM SIGKILL containment.
+              Every submission is evaluated in a fresh environment, so scores reflect the solution rather than the machine it ran on.
             </p>
           </div>
 
           <div className="telemetry-card">
             <div className="telemetry-card-top">
               <Server size={16} className="telemetry-icon" />
-              <span className="telemetry-badge">COMPUTE QUOTA</span>
+              <span className="telemetry-badge">FACULTY CONTROL</span>
             </div>
-            <div className="telemetry-value">1.0 vCPU</div>
-            <div className="telemetry-label">CFS CPU Allocation</div>
+            <div className="telemetry-value">Per question</div>
+            <div className="telemetry-label">Configurable Time and Memory Limits</div>
             <p className="telemetry-desc">
-              Dedicated 100,000µs quota per 100,000µs period prevents noisy neighbor starvation.
+              Faculty set the time and memory allowance for each question, and the same limits apply to every submission.
             </p>
           </div>
 
           <div className="telemetry-card">
             <div className="telemetry-card-top">
               <Activity size={16} className="telemetry-icon" />
-              <span className="telemetry-badge">NETWORK JAIL</span>
+              <span className="telemetry-badge">SECURITY</span>
             </div>
-            <div className="telemetry-value">Air-Gapped</div>
-            <div className="telemetry-label">Zero Socket Access</div>
+            <div className="telemetry-value">Isolated</div>
+            <div className="telemetry-label">No Network Access During Evaluation</div>
             <p className="telemetry-desc">
-              CLONE_NEWNET unshared network namespace drops all external socket capabilities.
+              Submissions cannot reach the network or read another student's work, keeping multi-tenant evaluations separate.
             </p>
           </div>
         </div>
@@ -126,8 +126,8 @@ export const LandingPage: React.FC = () => {
             <span className="footer-val">Redis 7.2 In-Memory Task Queue</span>
           </div>
           <div className="landing-footer-col">
-            <span className="footer-label">EXECUTION DAEMON</span>
-            <span className="footer-val">Isolated Linux cgroups v2 Worker Pool</span>
+            <span className="footer-label">EXECUTION ENGINE</span>
+            <span className="footer-val">Secure Isolated Evaluation Engine</span>
           </div>
         </div>
       </footer>

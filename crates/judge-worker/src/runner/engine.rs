@@ -51,11 +51,7 @@ impl Default for ExecutionEngine {
 impl ExecutionEngine {
     /// Creates an execution engine with customized constraints.
     #[must_use]
-    pub fn new(
-        time_limit: Duration,
-        memory_limit_bytes: u64,
-        output_limit_bytes: usize,
-    ) -> Self {
+    pub fn new(time_limit: Duration, memory_limit_bytes: u64, output_limit_bytes: usize) -> Self {
         Self {
             time_limit,
             memory_limit_bytes,

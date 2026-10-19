@@ -87,13 +87,7 @@ pub async fn handle_viva_socket(
     }
 
     // 2. Broadcast presence update indicating user has joined
-    let join_presence = PeerPresence::new(
-        user_id,
-        &username,
-        &role,
-        None,
-        "#e4f222",
-    );
+    let join_presence = PeerPresence::new(user_id, &username, &role, None, "#e4f222");
     let join_env = AwarenessEnvelope::presence_update(room.room_code(), join_presence);
     let _ = room.broadcast_awareness(join_env);
 
@@ -171,7 +165,9 @@ pub async fn handle_viva_socket(
                 }
                 Message::Text(text) => {
                     // Try parsing typed VivaWsClientMessage first
-                    if let Ok(client_frame) = serde_json::from_str::<VivaWsClientMessage>(text.as_str()) {
+                    if let Ok(client_frame) =
+                        serde_json::from_str::<VivaWsClientMessage>(text.as_str())
+                    {
                         match client_frame {
                             VivaWsClientMessage::Awareness { envelope } => {
                                 let _ = room_clone.broadcast_awareness(envelope);
@@ -186,7 +182,9 @@ pub async fn handle_viva_socket(
                                         message: "Candidates are forbidden from updating evaluation rubrics".to_string(),
                                     };
                                     if let Ok(json) = serde_json::to_string(&err_frame) {
-                                        let _ = outbound_tx_clone.send(Message::Text(json.into())).await;
+                                        let _ = outbound_tx_clone
+                                            .send(Message::Text(json.into()))
+                                            .await;
                                     }
                                 }
                             }

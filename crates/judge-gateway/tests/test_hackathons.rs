@@ -62,7 +62,7 @@ async fn test_hackathons_catalog_and_dynamic_lifecycle() {
         "participant_name": "Aayush Sharma",
         "email": "aayush.s@vitstudent.ac.in",
         "university_or_org": "VIT Chennai",
-        "track_preference": "Rust & High-Performance Systems"
+        "track_preference": "Assessment Evaluation Pipeline"
     });
 
     let req = Request::builder()
@@ -88,7 +88,7 @@ async fn test_hackathons_catalog_and_dynamic_lifecycle() {
         "team_name": "KernelPanik",
         "member_name": "Aayush Sharma",
         "member_email": "aayush.s@vitstudent.ac.in",
-        "track": "Rust & High-Performance Systems"
+        "track": "Assessment Evaluation Pipeline"
     });
 
     let req = Request::builder()
@@ -137,7 +137,7 @@ async fn test_hackathons_catalog_and_dynamic_lifecycle() {
     let sub_payload = serde_json::json!({
         "project_title": "AetherKV",
         "tagline": "Lock-free persistent key-value store with seccomp sandbox",
-        "track": "Rust & High-Performance Systems",
+        "track": "Assessment Evaluation Pipeline",
         "team_name": "KernelPanik",
         "github_url": "https://github.com/aayush/aether-kv",
         "live_url": "https://aether.algoceleris.dev"

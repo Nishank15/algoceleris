@@ -12,30 +12,51 @@ use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                tracing_subscriber::EnvFilter::new("info,sqlx::postgres::notice=warn")
+            }),
+        )
+        .with_ansi(false)
+        .init();
 
     let port: u16 = env::var("PORT")
         .unwrap_or_else(|_| "8000".to_string())
         .parse()
         .unwrap_or(8000);
 
-    let db_url = env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let db_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
 
-    let redis_url = env::var("REDIS_URL")
-        .unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
+    let redis_url = env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
 
-    let jwt_secret = env::var("JWT_SECRET_KEY")
-        .unwrap_or_else(|_| DEFAULT_JWT_SECRET.to_string());
+    let jwt_secret = env::var("JWT_SECRET_KEY").unwrap_or_else(|_| DEFAULT_JWT_SECRET.to_string());
 
     // Connect to PostgreSQL if available
     let db_pool = match judge_db::create_connection_pool(&db_url, 10).await {
         Ok(pool) => {
             info!("PostgreSQL connected successfully");
+            if let Err(e) =
+                judge_gateway::routes::hackathons::init_hackathon_tables(pool.inner()).await
+            {
+                tracing::error!("Failed to initialize hackathon tables: {e}");
+            }
+            if let Err(e) = judge_gateway::routes::campus::init_campus_tables(pool.inner()).await {
+                tracing::error!("Failed to initialize campus tables: {e}");
+            }
+            if let Err(e) =
+                judge_gateway::routes::problems::init_problem_catalog(pool.inner()).await
+            {
+                tracing::error!("Failed to initialize problem catalog: {e}");
+            }
             Some(pool)
         }
         Err(e) => {
-            tracing::warn!("PostgreSQL connection unavailable ({e}); running in standalone fallback mode");
+            tracing::warn!(
+                "PostgreSQL connection unavailable ({e}); running in standalone fallback mode"
+            );
             None
         }
     };

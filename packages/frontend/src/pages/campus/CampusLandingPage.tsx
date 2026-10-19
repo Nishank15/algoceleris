@@ -69,7 +69,12 @@ export const CampusLandingPage: React.FC = () => {
         if (isMounted) {
           if (Array.isArray(data) && data.length > 0) {
             const hasVit = data.some((o) => o.slug === 'vit-chennai');
-            setOrgs(hasVit ? data : [...data, ...DEFAULT_ORGS]);
+            // The directory cards are keyed by `slug`, so only append a showcase entry when the
+            // tenant is genuinely absent — otherwise a known slug would render twice.
+            const missing = DEFAULT_ORGS.filter(
+              (fallback) => !data.some((o) => o.slug === fallback.slug)
+            );
+            setOrgs(hasVit ? data : [...data, ...missing]);
           } else {
             setOrgs(DEFAULT_ORGS);
           }
@@ -106,15 +111,15 @@ export const CampusLandingPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: '#08090a',
-        color: '#ffffff',
+        background: 'var(--bg-canvas)',
+        color: 'var(--text-primary)',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
       {/* Top Breadcrumb & Status Ribbon */}
       <div
         style={{
-          borderBottom: '1px solid #23252a',
+          borderBottom: '1px solid var(--border-subtle)',
           background: 'rgba(15, 16, 17, 0.75)',
           backdropFilter: 'blur(12px)',
           padding: '12px 32px',
@@ -140,8 +145,8 @@ export const CampusLandingPage: React.FC = () => {
           >
             Multi-Tenant Enterprise Mesh
           </span>
-          <span style={{ color: '#62666d' }}>/</span>
-          <span style={{ color: '#8a8f98' }}>University Lab Operating System & Proctoring Engine</span>
+          <span style={{ color: 'var(--text-muted)' }}>/</span>
+          <span style={{ color: 'var(--text-secondary)' }}>University Lab Operating System & Proctoring Engine</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -156,7 +161,7 @@ export const CampusLandingPage: React.FC = () => {
               }}
             />
             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
-              CGROUP V2 SANDBOX ONLINE
+              AUTOMATED EVALUATION ENGINE ONLINE
             </span>
           </div>
           <Link
@@ -189,19 +194,19 @@ export const CampusLandingPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             padding: '6px 14px',
             borderRadius: '9999px',
             fontSize: '12px',
-            color: '#d0d6e0',
+            color: 'var(--text-secondary)',
             marginBottom: '28px',
           }}
         >
           <Building2 size={13} style={{ color: '#e4f222' }} />
-          <span>AlgoCeleris Campus v4.3 Architecture</span>
-          <span style={{ color: '#62666d' }}>•</span>
-          <span style={{ color: '#8a8f98' }}>Zero-Latency Multi-Tenant Virtual Labs</span>
+          <span>AlgoCeleris Campus Enterprise Platform</span>
+          <span style={{ color: 'var(--text-muted)' }}>•</span>
+          <span style={{ color: 'var(--text-secondary)' }}>High-Performance Multi-Tenant Virtual Labs</span>
         </div>
 
         <h1
@@ -211,18 +216,18 @@ export const CampusLandingPage: React.FC = () => {
             lineHeight: 1.08,
             letterSpacing: '-0.03em',
             margin: '0 0 20px 0',
-            color: '#ffffff',
+            color: 'var(--text-primary)',
           }}
         >
-          The Operating System for <br />
+          The modern operating platform for <br />
           <span
             style={{
-              background: 'linear-gradient(180deg, #ffffff 0%, #8a8f98 100%)',
+              background: 'linear-gradient(180deg, var(--text-primary) 0%, var(--text-secondary) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}
           >
-            University Computer Science Labs
+            computer science education.
           </span>
         </h1>
 
@@ -230,13 +235,13 @@ export const CampusLandingPage: React.FC = () => {
           style={{
             fontSize: '18px',
             lineHeight: 1.6,
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             maxWidth: '780px',
             margin: '0 auto 36px auto',
             fontWeight: 400,
           }}
         >
-          Hardware-isolated Linux cgroup sandboxes, real-time WebSocket test suite streaming,
+          Dedicated sandbox isolation, real-time automated test suite streaming,
           section-locked progressive lab environments, and automated ABET/NBA CLO curriculum
           attainment tracking built for modern engineering campuses.
         </p>
@@ -258,8 +263,8 @@ export const CampusLandingPage: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              background: '#e4f222',
-              color: '#08090a',
+              background: 'var(--accent-primary)',
+              color: 'var(--accent-primary-fg)',
               padding: '13px 26px',
               borderRadius: '8px',
               fontSize: '14px',
@@ -278,9 +283,9 @@ export const CampusLandingPage: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              background: '#0f1011',
-              color: '#d0d6e0',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border-subtle)',
               padding: '13px 24px',
               borderRadius: '8px',
               fontSize: '14px',
@@ -304,70 +309,70 @@ export const CampusLandingPage: React.FC = () => {
         >
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '20px',
             }}
           >
-            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
               Execution Overhead
             </div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#e4f222', marginBottom: '4px' }}>
               &lt; 15 ms
             </div>
-            <div style={{ color: '#62666d', fontSize: '12px' }}>Direct host cgroup isolation with zero Docker cold starts</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Evaluations begin immediately, with no environment startup delay</div>
           </div>
 
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '20px',
             }}
           >
-            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
-              Sandbox Ceiling
+            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Dedicated Compute
             </div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#ffffff', marginBottom: '4px' }}>
-              256MB / 1 CPU
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '24px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+              Dedicated Compute Allocation
             </div>
-            <div style={{ color: '#62666d', fontSize: '12px' }}>Network unshared (`unshare --net`), strict seccomp-bpf</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Guaranteed compute resources and safe evaluation boundaries</div>
           </div>
 
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '20px',
             }}
           >
-            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
               Plagiarism Engine
             </div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#22c55e', marginBottom: '4px' }}>
-              Tree-Sitter AST
+              Code Similarity
             </div>
-            <div style={{ color: '#62666d', fontSize: '12px' }}>Winnowing algorithm invariant to variable renaming & comments</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Structural similarity analysis invariant to variable renaming & comments</div>
           </div>
 
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '20px',
             }}
           >
-            <div style={{ color: '#8a8f98', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
               Academic Integrity
             </div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '28px', fontWeight: 600, color: '#02b8cc', marginBottom: '4px' }}>
               ABET / NBA
             </div>
-            <div style={{ color: '#62666d', fontSize: '12px' }}>Automated CLO-1 through CLO-4 attainment matrices</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Automated CLO-1 through CLO-4 attainment matrices</div>
           </div>
         </div>
       </div>
@@ -376,8 +381,8 @@ export const CampusLandingPage: React.FC = () => {
       <div
         id="institutions"
         style={{
-          borderTop: '1px solid #23252a',
-          borderBottom: '1px solid #23252a',
+          borderTop: '1px solid var(--border-subtle)',
+          borderBottom: '1px solid var(--border-subtle)',
           background: '#0a0b0c',
           padding: '64px 24px',
         }}
@@ -416,7 +421,7 @@ export const CampusLandingPage: React.FC = () => {
               >
                 Select Your Campus Tenant
               </h2>
-              <p style={{ color: '#8a8f98', fontSize: '14px', margin: '6px 0 0 0' }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '6px 0 0 0' }}>
                 All student, faculty, and administrative sessions are strictly authenticated against their university domain.
               </p>
             </div>
@@ -436,7 +441,7 @@ export const CampusLandingPage: React.FC = () => {
                   left: '12px',
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#62666d',
+                  color: 'var(--text-muted)',
                 }}
               />
               <input
@@ -446,11 +451,11 @@ export const CampusLandingPage: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   width: '100%',
-                  background: '#0f1011',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
                   padding: '10px 14px 10px 36px',
-                  color: '#ffffff',
+                  color: 'var(--text-primary)',
                   fontSize: '13px',
                   outline: 'none',
                   boxSizing: 'border-box',
@@ -489,8 +494,8 @@ export const CampusLandingPage: React.FC = () => {
                 <div
                   key={i}
                   style={{
-                    background: '#0f1011',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '12px',
                     padding: '24px',
                     height: '180px',
@@ -502,16 +507,16 @@ export const CampusLandingPage: React.FC = () => {
           ) : filteredOrgs.length === 0 ? (
             <div
               style={{
-                background: '#0f1011',
-                border: '1px dashed #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px dashed var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '48px 24px',
                 textAlign: 'center',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
               }}
             >
               <Building2 size={32} style={{ margin: '0 auto 12px auto', opacity: 0.5 }} />
-              <div style={{ fontSize: '15px', color: '#ffffff', marginBottom: '6px' }}>No universities matching "{searchQuery}"</div>
+              <div style={{ fontSize: '15px', color: 'var(--text-primary)', marginBottom: '6px' }}>No universities matching "{searchQuery}"</div>
               <div style={{ fontSize: '13px', marginBottom: '20px' }}>Would you like to provision a new institution tenant with this name?</div>
               <Link
                 to="/campus/register"
@@ -519,8 +524,8 @@ export const CampusLandingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   padding: '9px 18px',
                   borderRadius: '6px',
                   fontSize: '13px',
@@ -541,10 +546,10 @@ export const CampusLandingPage: React.FC = () => {
             >
               {filteredOrgs.map((org) => (
                 <div
-                  key={org.id}
+                  key={org.slug}
                   style={{
-                    background: '#0f1011',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '12px',
                     padding: '24px',
                     display: 'flex',
@@ -569,7 +574,7 @@ export const CampusLandingPage: React.FC = () => {
                             fontSize: '18px',
                             fontWeight: 590,
                             margin: '0 0 4px 0',
-                            color: '#ffffff',
+                            color: 'var(--text-primary)',
                             letterSpacing: '-0.015em',
                           }}
                         >
@@ -579,7 +584,7 @@ export const CampusLandingPage: React.FC = () => {
                           style={{
                             fontFamily: 'JetBrains Mono, monospace',
                             fontSize: '12px',
-                            color: '#8a8f98',
+                            color: 'var(--text-secondary)',
                           }}
                         >
                           /{org.slug}
@@ -592,8 +597,8 @@ export const CampusLandingPage: React.FC = () => {
                           padding: '3px 8px',
                           borderRadius: '4px',
                           background: 'rgba(255, 255, 255, 0.05)',
-                          color: '#d0d6e0',
-                          border: '1px solid #23252a',
+                          color: 'var(--text-secondary)',
+                          border: '1px solid var(--border-subtle)',
                           whiteSpace: 'nowrap',
                         }}
                       >
@@ -613,7 +618,7 @@ export const CampusLandingPage: React.FC = () => {
                             color: '#a0a6b2',
                             padding: '2px 8px',
                             borderRadius: '4px',
-                            border: '1px solid #23252a',
+                            border: '1px solid var(--border-subtle)',
                           }}
                         >
                           @{domain}
@@ -629,13 +634,13 @@ export const CampusLandingPage: React.FC = () => {
                         gap: '16px',
                         padding: '10px 14px',
                         borderRadius: '6px',
-                        background: '#141517',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
                         fontSize: '12px',
                         marginBottom: '20px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#d0d6e0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                         <GraduationCap size={14} style={{ color: '#e4f222' }} />
                         <span>
                           <strong style={{ fontFamily: 'JetBrains Mono, monospace' }}>
@@ -645,9 +650,9 @@ export const CampusLandingPage: React.FC = () => {
                         </span>
                       </div>
 
-                      <div style={{ color: '#383b3f' }}>|</div>
+                      <div style={{ color: 'var(--border-divider)' }}>|</div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#d0d6e0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
                         <Users size={14} style={{ color: '#02b8cc' }} />
                         <span>
                           <strong style={{ fontFamily: 'JetBrains Mono, monospace' }}>
@@ -665,9 +670,9 @@ export const CampusLandingPage: React.FC = () => {
                     onClick={() => navigate(`/campus/${org.slug}/login`)}
                     style={{
                       width: '100%',
-                      background: '#161718',
-                      color: '#ffffff',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid var(--border-subtle)',
                       padding: '11px 16px',
                       borderRadius: '6px',
                       fontSize: '13px',
@@ -684,8 +689,8 @@ export const CampusLandingPage: React.FC = () => {
                       e.currentTarget.style.color = '#e4f222';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = '#23252a';
-                      e.currentTarget.style.color = '#ffffff';
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                      e.currentTarget.style.color = 'var(--text-primary)';
                     }}
                   >
                     Enter Institutional Portal <ArrowRight size={14} />
@@ -696,8 +701,8 @@ export const CampusLandingPage: React.FC = () => {
               {/* Provisioning Teaser Card */}
               <div
                 style={{
-                  background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
-                  border: '1px dashed #383b3f',
+                  background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)',
+                  border: '1px dashed var(--border-divider)',
                   borderRadius: '12px',
                   padding: '24px',
                   display: 'flex',
@@ -728,12 +733,12 @@ export const CampusLandingPage: React.FC = () => {
                       fontSize: '18px',
                       fontWeight: 590,
                       margin: '0 0 6px 0',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                     }}
                   >
                     Provision Your Institution
                   </h3>
-                  <p style={{ color: '#8a8f98', fontSize: '13px', lineHeight: 1.5, margin: '0 0 16px 0' }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: 1.5, margin: '0 0 16px 0' }}>
                     Deploy a dedicated single-tenant domain space with custom single sign-on, tailored course cohorts, and dedicated grading workers.
                   </p>
                 </div>
@@ -742,8 +747,8 @@ export const CampusLandingPage: React.FC = () => {
                   to="/campus/register"
                   style={{
                     width: '100%',
-                    background: '#e4f222',
-                    color: '#08090a',
+                    background: 'var(--accent-primary)',
+                    color: 'var(--accent-primary-fg)',
                     border: 'none',
                     padding: '11px 16px',
                     borderRadius: '6px',
@@ -783,7 +788,7 @@ export const CampusLandingPage: React.FC = () => {
           <h2 style={{ fontSize: '32px', fontWeight: 590, margin: '0 0 12px 0', letterSpacing: '-0.02em' }}>
             The 6-Stage Progressive Lab Room
           </h2>
-          <p style={{ color: '#8a8f98', fontSize: '15px', maxWidth: '640px', margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '15px', maxWidth: '640px', margin: '0 auto' }}>
             Transforming standard programming assignments into structured, verifiable learning progressions with real-time feedback.
           </p>
         </div>
@@ -801,7 +806,7 @@ export const CampusLandingPage: React.FC = () => {
               title: 'Theory & Lecture Notes',
               desc: 'Interactive lecture materials with code snippets, diagrams, and explicit CLO alignment markers.',
               icon: BookOpen,
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             },
             {
               stage: '02',
@@ -842,8 +847,8 @@ export const CampusLandingPage: React.FC = () => {
             <div
               key={item.stage}
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '24px',
                 display: 'flex',
@@ -860,16 +865,16 @@ export const CampusLandingPage: React.FC = () => {
                   padding: '6px 10px',
                   borderRadius: '6px',
                   height: 'fit-content',
-                  border: '1px solid #23252a',
+                  border: '1px solid var(--border-subtle)',
                 }}
               >
                 {item.stage}
               </div>
               <div>
-                <h4 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 6px 0', color: '#ffffff' }}>
+                <h4 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 6px 0', color: 'var(--text-primary)' }}>
                   {item.title}
                 </h4>
-                <p style={{ color: '#8a8f98', fontSize: '13px', lineHeight: 1.5, margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: 1.5, margin: 0 }}>
                   {item.desc}
                 </p>
               </div>
@@ -881,11 +886,11 @@ export const CampusLandingPage: React.FC = () => {
       {/* Footer */}
       <div
         style={{
-          borderTop: '1px solid #23252a',
+          borderTop: '1px solid var(--border-subtle)',
           padding: '32px 24px',
-          background: '#08090a',
+          background: 'var(--bg-canvas)',
           fontSize: '12px',
-          color: '#62666d',
+          color: 'var(--text-muted)',
           textAlign: 'center',
         }}
       >
@@ -894,9 +899,9 @@ export const CampusLandingPage: React.FC = () => {
             AlgoCeleris Campus Platform · Refero Linear Midnight Edition · Production Milestone v4.3
           </div>
           <div style={{ display: 'flex', gap: '20px' }}>
-            <Link to="/problems" style={{ color: '#8a8f98', textDecoration: 'none' }}>Problems</Link>
-            <Link to="/contests" style={{ color: '#8a8f98', textDecoration: 'none' }}>Contests</Link>
-            <Link to="/hackathons" style={{ color: '#8a8f98', textDecoration: 'none' }}>Hackathons</Link>
+            <Link to="/problems" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Problems</Link>
+            <Link to="/contests" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Contests</Link>
+            <Link to="/hackathons" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Hackathons</Link>
             <Link to="/campus/register" style={{ color: '#e4f222', textDecoration: 'none' }}>Provision</Link>
           </div>
         </div>

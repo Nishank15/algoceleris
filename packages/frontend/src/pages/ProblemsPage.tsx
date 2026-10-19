@@ -11,7 +11,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 import { PROBLEMS } from '../constants/problems';
-import { Difficulty } from '../types';
+import { Problem, Difficulty } from '../types';
+import { fetchProblems } from '../services/api';
 import {
   getSolvedProblemIds,
   getAttemptedProblemIds,
@@ -35,22 +36,43 @@ export const ProblemsPage: React.FC = () => {
   const [solvedIds, setSolvedIds] = useState<Set<string>>(new Set());
   const [attemptedIds, setAttemptedIds] = useState<Set<string>>(new Set());
 
+  // Catalog is server-authoritative; the bundled sample-only constants keep the page
+  // usable for first paint and when the gateway is unreachable.
+  const [catalog, setCatalog] = useState<Problem[]>(PROBLEMS);
+
   // Load solved and attempted status on mount
   useEffect(() => {
     setSolvedIds(getSolvedProblemIds());
     setAttemptedIds(getAttemptedProblemIds());
   }, []);
 
+  // Hydrate the catalog from the gateway
+  useEffect(() => {
+    let cancelled = false;
+    fetchProblems()
+      .then((problems) => {
+        if (!cancelled && problems.length > 0) {
+          setCatalog(problems);
+        }
+      })
+      .catch(() => {
+        // Bundled sample-only fallback stays in place.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // Compute all unique topic tags from catalog
   const topicList = useMemo(() => {
-    return ['All Topics', ...getAllTopics(PROBLEMS)];
-  }, []);
+    return ['All Topics', ...getAllTopics(catalog)];
+  }, [catalog]);
 
   // Filter problems based on search, difficulty, and tag
   const filteredProblems = useMemo(() => {
     const diffFilter = selectedDifficulty === 'All' ? null : selectedDifficulty;
     const tagFilter = selectedTag === 'All Topics' ? null : selectedTag;
-    const matched = filterProblems(PROBLEMS, searchQuery, diffFilter, tagFilter);
+    const matched = filterProblems(catalog, searchQuery, diffFilter, tagFilter);
 
     // Apply sorting
     return [...matched].sort((a, b) => {
@@ -70,13 +92,13 @@ export const ProblemsPage: React.FC = () => {
 
       return sortOrder === 'asc' ? comparison : -comparison;
     });
-  }, [searchQuery, selectedDifficulty, selectedTag, sortField, sortOrder]);
+  }, [catalog, searchQuery, selectedDifficulty, selectedTag, sortField, sortOrder]);
 
   // Solved statistics
-  const totalCount = PROBLEMS.length;
+  const totalCount = catalog.length;
   const solvedCount = useMemo(() => {
-    return PROBLEMS.filter((p) => solvedIds.has(p.id)).length;
-  }, [solvedIds]);
+    return catalog.filter((p) => solvedIds.has(p.id)).length;
+  }, [catalog, solvedIds]);
   const progressPct = totalCount > 0 ? Math.round((solvedCount / totalCount) * 100) : 0;
 
   // Toggle sorting
@@ -91,7 +113,7 @@ export const ProblemsPage: React.FC = () => {
 
   // Pick random problem
   const handlePickRandom = () => {
-    const pool = filteredProblems.length > 0 ? filteredProblems : PROBLEMS;
+    const pool = filteredProblems.length > 0 ? filteredProblems : catalog;
     const randomIndex = Math.floor(Math.random() * pool.length);
     const chosen = pool[randomIndex];
     if (chosen) {

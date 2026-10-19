@@ -100,18 +100,18 @@ export const CampusAnalyticsPage: React.FC = () => {
         <div
           style={{
             height: '240px',
-            background: '#0f1011',
+            background: 'var(--bg-surface)',
             borderRadius: '12px',
-            border: '1px solid #23252a',
+            border: '1px solid var(--border-subtle)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '13px',
           }}
         >
-          Aggregating telemetry, cgroups metrics, and CLO attainment curves...
+          Aggregating telemetry, execution metrics, and CLO attainment curves...
         </div>
       </div>
     );
@@ -122,7 +122,7 @@ export const CampusAnalyticsPage: React.FC = () => {
       <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
         <div
           style={{
-            background: '#0f1011',
+            background: 'var(--bg-surface)',
             borderRadius: '12px',
             border: '1px solid #eb5757',
             padding: '32px',
@@ -130,18 +130,18 @@ export const CampusAnalyticsPage: React.FC = () => {
           }}
         >
           <AlertCircle size={32} style={{ color: '#eb5757', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>
             Analytics Aggregation Failed
           </h2>
-          <p style={{ color: '#8a8f98', fontSize: '14px', marginBottom: '20px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
             {error || 'Unable to fetch dynamic analytics for this student session.'}
           </p>
           <button
             type="button"
             onClick={() => window.location.reload()}
             style={{
-              background: '#e4f222',
-              color: '#08090a',
+              background: 'var(--accent-primary)',
+              color: 'var(--accent-primary-fg)',
               border: 'none',
               padding: '10px 18px',
               borderRadius: '6px',
@@ -196,8 +196,8 @@ export const CampusAnalyticsPage: React.FC = () => {
       {/* Header Banner */}
       <div
         style={{
-          background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
-          border: '1px solid #23252a',
+          background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px',
           marginBottom: '24px',
@@ -226,11 +226,11 @@ export const CampusAnalyticsPage: React.FC = () => {
             >
               REAL TELEMETRY ANALYTICS
             </span>
-            <span style={{ color: '#62666d' }}>•</span>
+            <span style={{ color: 'var(--text-muted)' }}>•</span>
             <span
               style={{
                 fontSize: '12px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 fontFamily: 'JetBrains Mono, monospace',
               }}
             >
@@ -244,13 +244,13 @@ export const CampusAnalyticsPage: React.FC = () => {
               fontWeight: 590,
               margin: '0 0 6px 0',
               letterSpacing: '-0.02em',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             }}
           >
             Academic Performance & Attainment
           </h1>
 
-          <p style={{ color: '#8a8f98', fontSize: '14px', margin: 0 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
             {analytics.student_name} · {analytics.department || analytics.course_name || 'Computer Science & Engineering'} · ABET Accreditation Tracking
           </p>
         </div>
@@ -258,8 +258,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div
             style={{
-              background: '#08090a',
-              border: '1px solid #23252a',
+              background: 'var(--bg-canvas)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '10px 16px',
               textAlign: 'right',
@@ -267,13 +267,13 @@ export const CampusAnalyticsPage: React.FC = () => {
           >
             <div
               style={{
-                color: '#62666d',
+                color: 'var(--text-muted)',
                 fontSize: '10px',
                 textTransform: 'uppercase',
                 marginBottom: '2px',
               }}
             >
-              Isolation Status
+              Evaluation Safety
             </div>
             <div
               style={{
@@ -294,7 +294,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                   boxShadow: '0 0 6px rgba(34, 197, 94, 0.6)',
                 }}
               />
-              256MB / 1 vCPU cgroups v2
+              Dedicated Compute Allocation
             </div>
           </div>
         </div>
@@ -312,8 +312,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         {/* Card 1 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
@@ -329,7 +329,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             <span
               style={{
                 fontSize: '11px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
               }}
@@ -348,9 +348,9 @@ export const CampusAnalyticsPage: React.FC = () => {
             }}
           >
             {analytics.average_marks.toFixed(1)}
-            <span style={{ fontSize: '15px', color: '#62666d' }}> / 20.0</span>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}> / 20.0</span>
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             Across {analytics.completed_labs_count} evaluated lab assessments
           </div>
         </div>
@@ -358,8 +358,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         {/* Card 2 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
@@ -375,7 +375,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             <span
               style={{
                 fontSize: '11px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
               }}
@@ -395,7 +395,7 @@ export const CampusAnalyticsPage: React.FC = () => {
           >
             {analytics.clo_attainment_percent.toFixed(1)}%
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             ABET Target Met (&gt; 75% threshold)
           </div>
         </div>
@@ -403,8 +403,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         {/* Card 3 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
@@ -420,12 +420,12 @@ export const CampusAnalyticsPage: React.FC = () => {
             <span
               style={{
                 fontSize: '11px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
               }}
             >
-              Active Sandbox Time
+              Evaluation Time
             </span>
             <Clock size={16} style={{ color: '#02b8cc' }} />
           </div>
@@ -439,9 +439,9 @@ export const CampusAnalyticsPage: React.FC = () => {
             }}
           >
             {analytics.total_active_minutes}{' '}
-            <span style={{ fontSize: '15px', color: '#62666d' }}>mins</span>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>mins</span>
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             Verified in active editor sessions
           </div>
         </div>
@@ -449,8 +449,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         {/* Card 4 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
@@ -466,7 +466,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             <span
               style={{
                 fontSize: '11px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.04em',
               }}
@@ -480,17 +480,17 @@ export const CampusAnalyticsPage: React.FC = () => {
               fontSize: '28px',
               fontWeight: 600,
               fontFamily: 'JetBrains Mono, monospace',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               marginBottom: '4px',
             }}
           >
             {analytics.code_runs_count}
-            <span style={{ fontSize: '15px', color: '#62666d' }}>
+            <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>
               {' '}
               / {analytics.submissions_count} subs
             </span>
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
             {analytics.ai_questions_count} AI mentor queries logged
           </div>
         </div>
@@ -501,7 +501,7 @@ export const CampusAnalyticsPage: React.FC = () => {
         style={{
           display: 'flex',
           gap: '8px',
-          borderBottom: '1px solid #23252a',
+          borderBottom: '1px solid var(--border-subtle)',
           marginBottom: '24px',
         }}
       >
@@ -515,7 +515,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'journey' ? 590 : 400,
-            color: activeTab === 'journey' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'journey' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -536,7 +536,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'programming' ? 590 : 400,
-            color: activeTab === 'programming' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'programming' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -556,7 +556,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'mentor' ? 590 : 400,
-            color: activeTab === 'mentor' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'mentor' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -576,7 +576,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             padding: '12px 16px',
             fontSize: '13px',
             fontWeight: activeTab === 'outcomes' ? 590 : 400,
-            color: activeTab === 'outcomes' ? '#e4f222' : '#8a8f98',
+            color: activeTab === 'outcomes' ? '#e4f222' : 'var(--text-secondary)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -601,17 +601,17 @@ export const CampusAnalyticsPage: React.FC = () => {
             {/* Marks Progression Area Chart */}
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '24px',
               }}
             >
               <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                   Marks Progression
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
                   Assessment scores across sequential labs
                 </p>
               </div>
@@ -628,17 +628,17 @@ export const CampusAnalyticsPage: React.FC = () => {
                         <stop offset="95%" stopColor="#22c55e" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid stroke="#23252a" strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" vertical={false} />
                     <XAxis
                       dataKey="lab_id"
-                      stroke="#62666d"
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       fontFamily="JetBrains Mono, monospace"
                       tickFormatter={(val) => val.replace('bacs101-lab-', 'Lab ')}
                     />
                     <YAxis
-                      stroke="#62666d"
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       domain={[0, 20]}
@@ -646,11 +646,11 @@ export const CampusAnalyticsPage: React.FC = () => {
                     />
                     <Tooltip
                       contentStyle={{
-                        background: '#161718',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        color: '#ffffff',
+                        color: 'var(--text-primary)',
                       }}
                       formatter={(value: any) => [`${value} / 20.0`, 'Score']}
                       labelFormatter={(label: any) => `Module: ${label}`}
@@ -671,17 +671,17 @@ export const CampusAnalyticsPage: React.FC = () => {
             {/* Time Spent Per Lab Bar Chart */}
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '24px',
               }}
             >
               <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                   Time Spent Per Lab Module
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
                   Active programming duration in minutes
                 </p>
               </div>
@@ -692,28 +692,28 @@ export const CampusAnalyticsPage: React.FC = () => {
                     data={normalizedTimeSpent}
                     margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                   >
-                    <CartesianGrid stroke="#23252a" strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" vertical={false} />
                     <XAxis
                       dataKey="lab_id"
-                      stroke="#62666d"
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       fontFamily="JetBrains Mono, monospace"
                       tickFormatter={(val) => val.replace('bacs101-lab-', 'Lab ')}
                     />
                     <YAxis
-                      stroke="#62666d"
+                      stroke="var(--text-muted)"
                       fontSize={11}
                       tickLine={false}
                       fontFamily="JetBrains Mono, monospace"
                     />
                     <Tooltip
                       contentStyle={{
-                        background: '#161718',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        color: '#ffffff',
+                        color: 'var(--text-primary)',
                       }}
                       formatter={(value: any) => [`${value} mins`, 'Active Time']}
                       labelFormatter={(label: any) => `Module: ${label}`}
@@ -728,8 +728,8 @@ export const CampusAnalyticsPage: React.FC = () => {
           {/* Recent Submissions Log Table */}
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               overflow: 'hidden',
             }}
@@ -737,17 +737,17 @@ export const CampusAnalyticsPage: React.FC = () => {
             <div
               style={{
                 padding: '18px 24px',
-                borderBottom: '1px solid #23252a',
+                borderBottom: '1px solid var(--border-subtle)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
                   Recent Lab Submissions Log
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: '4px 0 0 0' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: '4px 0 0 0' }}>
                   Historical telemetry and graded submissions
                 </p>
               </div>
@@ -756,20 +756,20 @@ export const CampusAnalyticsPage: React.FC = () => {
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                 <thead>
-                  <tr style={{ background: '#141517', borderBottom: '1px solid #23252a' }}>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>
+                  <tr style={{ background: 'var(--bg-elevated)', borderBottom: '1px solid var(--border-subtle)' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
                       Lab Module
                     </th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
                       Timestamp
                     </th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
                       Status
                     </th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase' }}>
                       Score
                     </th>
-                    <th style={{ padding: '12px 24px', fontSize: '11px', color: '#8a8f98', fontWeight: 600, textTransform: 'uppercase', textAlign: 'right' }}>
+                    <th style={{ padding: '12px 24px', fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, textTransform: 'uppercase', textAlign: 'right' }}>
                       Review
                     </th>
                   </tr>
@@ -777,7 +777,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                 <tbody>
                   {normalizedRecentSubmissions.length === 0 ? (
                     <tr>
-                      <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#62666d', fontSize: '13px' }}>
+                      <td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
                         No submissions recorded yet.
                       </td>
                     </tr>
@@ -786,14 +786,14 @@ export const CampusAnalyticsPage: React.FC = () => {
                       <tr
                         key={idx}
                         style={{
-                          borderBottom: '1px solid #23252a',
+                          borderBottom: '1px solid var(--border-subtle)',
                           transition: 'background 0.15s ease',
                         }}
                       >
-                        <td style={{ padding: '14px 24px', fontSize: '13px', fontWeight: 510, color: '#ffffff', fontFamily: 'JetBrains Mono, monospace' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '13px', fontWeight: 510, color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
                           {sub.lab_id}
                         </td>
-                        <td style={{ padding: '14px 24px', fontSize: '12px', color: '#8a8f98' }}>
+                        <td style={{ padding: '14px 24px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                           {sub.date}
                         </td>
                         <td style={{ padding: '14px 24px' }}>
@@ -845,17 +845,17 @@ export const CampusAnalyticsPage: React.FC = () => {
           {/* Activity Over Time Bar Chart */}
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               padding: '24px',
             }}
           >
             <div style={{ marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                 Code Execution Activity Over Time
               </h3>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0 }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
                 Daily count of code runs, submissions, and active minutes
               </p>
             </div>
@@ -866,27 +866,27 @@ export const CampusAnalyticsPage: React.FC = () => {
                   data={normalizedActivityOverTime}
                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                 >
-                  <CartesianGrid stroke="#23252a" strokeDasharray="3 3" vertical={false} />
+                  <CartesianGrid stroke="var(--border-subtle)" strokeDasharray="3 3" vertical={false} />
                   <XAxis
                     dataKey="date"
-                    stroke="#62666d"
+                    stroke="var(--text-muted)"
                     fontSize={11}
                     tickLine={false}
                     fontFamily="JetBrains Mono, monospace"
                   />
                   <YAxis
-                    stroke="#62666d"
+                    stroke="var(--text-muted)"
                     fontSize={11}
                     tickLine={false}
                     fontFamily="JetBrains Mono, monospace"
                   />
                   <Tooltip
                     contentStyle={{
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       fontSize: '12px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                     }}
                   />
                   <Bar dataKey="code_runs" fill="#e4f222" name="Code Runs" radius={[4, 4, 0, 0]} />
@@ -901,7 +901,7 @@ export const CampusAnalyticsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Sandbox & Isolation Diagnostics */}
+          {/* Evaluation Safety Diagnostics */}
           <div
             style={{
               display: 'grid',
@@ -911,8 +911,8 @@ export const CampusAnalyticsPage: React.FC = () => {
           >
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '20px',
               }}
@@ -927,22 +927,22 @@ export const CampusAnalyticsPage: React.FC = () => {
                 }}
               >
                 <Cpu size={16} />
-                <h4 style={{ margin: 0, fontSize: '14px', color: '#ffffff', fontWeight: 590 }}>
-                  cgroups v2 Enforcement
+                <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--text-primary)', fontWeight: 590 }}>
+                  Resource Limit Enforcement
                 </h4>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
-                Submissions run in dedicated control groups with hard 256MB memory cap and 1 vCPU allocation.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                Submissions evaluate in isolated environments with strict execution boundaries.
               </p>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', color: '#22c55e' }}>
-                memory.max: 268435456 bytes (256MB)
+                Safe execution boundaries active
               </div>
             </div>
 
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '20px',
               }}
@@ -957,22 +957,22 @@ export const CampusAnalyticsPage: React.FC = () => {
                 }}
               >
                 <ShieldCheck size={16} />
-                <h4 style={{ margin: 0, fontSize: '14px', color: '#ffffff', fontWeight: 590 }}>
-                  Network Namespace
+                <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--text-primary)', fontWeight: 590 }}>
+                  Network Access
                 </h4>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
-                Executed via `unshare --net`. Zero inbound or outbound socket access permitted.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                Submissions run with no network access. Outbound connections are refused before the run starts.
               </p>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', color: '#02b8cc' }}>
-                AF_INET / AF_INET6: Blocked (EPERM)
+                Network access: Disabled
               </div>
             </div>
 
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '20px',
               }}
@@ -987,15 +987,15 @@ export const CampusAnalyticsPage: React.FC = () => {
                 }}
               >
                 <Zap size={16} />
-                <h4 style={{ margin: 0, fontSize: '14px', color: '#ffffff', fontWeight: 590 }}>
+                <h4 style={{ margin: 0, fontSize: '14px', color: 'var(--text-primary)', fontWeight: 590 }}>
                   Evaluation Startup Latency
                 </h4>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
-                In-process worker daemons avoid container spin-up overhead. Sub-second execution latency.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                Runs begin immediately, with no environment startup delay between submissions.
               </p>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '12px', color: '#e4f222' }}>
-                Mean Latency: ~14ms per test case
+                Mean latency: ~14 ms per test case
               </div>
             </div>
           </div>
@@ -1016,17 +1016,17 @@ export const CampusAnalyticsPage: React.FC = () => {
             {/* Hint Categories Pie Chart */}
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '24px',
               }}
             >
               <div style={{ marginBottom: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                   AI Guidance Distribution
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
                   Breakdown of hint requests by diagnostic domain
                 </p>
               </div>
@@ -1053,11 +1053,11 @@ export const CampusAnalyticsPage: React.FC = () => {
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        background: '#161718',
-                        border: '1px solid #23252a',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
                         borderRadius: '6px',
                         fontSize: '12px',
-                        color: '#ffffff',
+                        color: 'var(--text-primary)',
                       }}
                     />
                   </PieChart>
@@ -1081,7 +1081,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                       alignItems: 'center',
                       gap: '6px',
                       fontSize: '11px',
-                      color: '#8a8f98',
+                      color: 'var(--text-secondary)',
                     }}
                   >
                     <span
@@ -1103,8 +1103,8 @@ export const CampusAnalyticsPage: React.FC = () => {
             {/* Cognitive Load & Latency Card */}
             <div
               style={{
-                background: '#0f1011',
-                border: '1px solid #23252a',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '12px',
                 padding: '24px',
                 display: 'flex',
@@ -1113,18 +1113,18 @@ export const CampusAnalyticsPage: React.FC = () => {
               }}
             >
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                   Pedagogical Integrity & Response Time
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: '0 0 16px 0' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: '0 0 16px 0' }}>
                   Socratic assistance limits and model latency
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div
                     style={{
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '8px',
                       padding: '12px',
                       display: 'flex',
@@ -1132,7 +1132,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                       alignItems: 'center',
                     }}
                   >
-                    <span style={{ fontSize: '13px', color: '#d0d6e0' }}>Avg Model Latency</span>
+                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Avg Model Latency</span>
                     <span
                       style={{
                         fontFamily: 'JetBrains Mono, monospace',
@@ -1147,8 +1147,8 @@ export const CampusAnalyticsPage: React.FC = () => {
 
                   <div
                     style={{
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '8px',
                       padding: '12px',
                       display: 'flex',
@@ -1156,7 +1156,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                       alignItems: 'center',
                     }}
                   >
-                    <span style={{ fontSize: '13px', color: '#d0d6e0' }}>Queries Initiated</span>
+                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Queries Initiated</span>
                     <span
                       style={{
                         fontFamily: 'JetBrains Mono, monospace',
@@ -1171,8 +1171,8 @@ export const CampusAnalyticsPage: React.FC = () => {
 
                   <div
                     style={{
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '8px',
                       padding: '12px',
                       display: 'flex',
@@ -1180,7 +1180,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                       alignItems: 'center',
                     }}
                   >
-                    <span style={{ fontSize: '13px', color: '#d0d6e0' }}>Cognitive Independence</span>
+                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Cognitive Independence</span>
                     <span
                       style={{
                         fontFamily: 'JetBrains Mono, monospace',
@@ -1202,7 +1202,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                   borderRadius: '6px',
                   padding: '10px 14px',
                   fontSize: '12px',
-                  color: '#8a8f98',
+                  color: 'var(--text-secondary)',
                   marginTop: '16px',
                   lineHeight: 1.5,
                 }}
@@ -1219,8 +1219,8 @@ export const CampusAnalyticsPage: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div
             style={{
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '12px',
               overflow: 'hidden',
             }}
@@ -1228,17 +1228,17 @@ export const CampusAnalyticsPage: React.FC = () => {
             <div
               style={{
                 padding: '20px 24px',
-                borderBottom: '1px solid #23252a',
+                borderBottom: '1px solid var(--border-subtle)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
             >
               <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
                   Course Learning Outcomes (CLO) Attainment Matrix
                 </h3>
-                <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0 }}>
                   ABET and NBA Criterion 3 mapping based on real lab performance
                 </p>
               </div>
@@ -1265,8 +1265,8 @@ export const CampusAnalyticsPage: React.FC = () => {
                   <div
                     key={clo.clo_id}
                     style={{
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '8px',
                       padding: '16px 20px',
                     }}
@@ -1291,7 +1291,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                         >
                           {clo.clo_id}
                         </span>
-                        <span style={{ fontSize: '14px', fontWeight: 510, color: '#ffffff' }}>
+                        <span style={{ fontSize: '14px', fontWeight: 510, color: 'var(--text-primary)' }}>
                           {clo.name}
                         </span>
                       </div>
@@ -1301,7 +1301,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                           style={{
                             fontSize: '12px',
                             fontFamily: 'JetBrains Mono, monospace',
-                            color: '#8a8f98',
+                            color: 'var(--text-secondary)',
                           }}
                         >
                           Target: {clo.target_percent}%
@@ -1334,7 +1334,7 @@ export const CampusAnalyticsPage: React.FC = () => {
                     <div
                       style={{
                         height: '6px',
-                        background: '#0f1011',
+                        background: 'var(--bg-surface)',
                         borderRadius: '3px',
                         overflow: 'hidden',
                         position: 'relative',

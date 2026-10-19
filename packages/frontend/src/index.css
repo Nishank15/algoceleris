@@ -3,16 +3,20 @@
   --bg-canvas: #08090a;            /* Void */
   --bg-surface: #0f1011;           /* Carbon */
   --bg-surface-elevated: #161718;  /* Obsidian */
+  --bg-elevated: #161718;          /* Obsidian semantic alias */
   --bg-surface-overlay: #1c1d1f;
+  --bg-glass: rgba(15, 16, 17, 0.78);
 
   /* Borders & Dividers */
   --border-subtle: #23252a;        /* Graphite hairline */
   --border-active: #383b3f;
+  --border-focus: #3e4149;
   --border-divider: #383b3f;       /* Smoke */
 
   /* Accents — Acid Lime reserved for the single primary action per view */
   --accent-primary: #e4f222;
   --accent-primary-fg: #08090a;
+  --accent-primary-ink: #08090a;
   --accent-hover: #d2e01b;
   --accent-secondary: #27282b;
   --accent-gradient: #f7f8f8;
@@ -31,7 +35,9 @@
   --text-primary: #f7f8f8;
   --text-bright: #ffffff;
   --text-secondary: #8a8f98;
-  --text-muted: #575a61;
+  /* 4.94:1 on Carbon (#0f1011) and 4.65:1 on Obsidian (#161718): WCAG 2.1 AA for
+     normal text, still a clear step beneath --text-secondary/--text-primary. */
+  --text-muted: #7d828c;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas, monospace;
   --tracking: -0.022em;
@@ -45,39 +51,44 @@
   --header-height: 52px;
 }
 
-:root[data-theme='light'] {
+:root[data-theme='light'],
+[data-theme='light'] {
   /* Surfaces — Linear Light */
-  --bg-canvas: #f7f8f9;            /* Crisp off-white */
+  --bg-canvas: #f8f9fa;            /* Crisp off-white */
   --bg-surface: #ffffff;           /* Clean white card */
-  --bg-surface-elevated: #f0f2f5;  /* Subtle elevated panel */
+  --bg-surface-elevated: #f1f3f5;  /* Subtle elevated panel */
+  --bg-elevated: #f1f3f5;
   --bg-surface-overlay: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* Borders & Dividers */
-  --border-subtle: #e2e4e8;        /* Hairline border */
-  --border-active: #c5c9d1;
+  --border-subtle: #e2e8f0;        /* Hairline border */
+  --border-active: #cbd5e1;
+  --border-focus: #cbd5e1;
   --border-divider: #e5e7eb;
 
   /* Accents — Electric Indigo */
-  --accent-primary: #5e6ad2;
+  --accent-primary: #5460c8;
   --accent-primary-fg: #ffffff;
-  --accent-hover: #4e5ac0;
+  --accent-primary-ink: #ffffff;
+  --accent-hover: #4a55bd;
   --accent-secondary: #edf0f7;
   --accent-gradient: #111827;
 
-  /* Verdict & Difficulty Colors */
+  /* Verdict & Difficulty Colors — darkened for ≥4.5:1 on light surfaces */
   --color-accepted: #15803d;       /* Forest Green */
   --color-accepted-bg: rgba(21, 128, 61, 0.10);
-  --color-wrong-answer: #dc2626;   /* Crimson */
+  --color-wrong-answer: #b91c1c;   /* Crimson (AA on white + tinted bg) */
   --color-wrong-answer-bg: rgba(220, 38, 38, 0.10);
-  --color-timeout: #d97706;        /* Warm Amber */
+  --color-timeout: #92400e;        /* Warm Amber (AA on white + tinted bg) */
   --color-timeout-bg: rgba(217, 119, 6, 0.10);
   --color-running: #4b5563;
   --color-running-bg: rgba(75, 85, 99, 0.10);
 
   /* Typography */
-  --text-primary: #111827;         /* Deep graphite */
-  --text-bright: #111827;
-  --text-secondary: #4b5563;       /* Slate neutral */
+  --text-primary: #0f172a;         /* Deep graphite */
+  --text-bright: #0f172a;
+  --text-secondary: #475569;       /* Slate neutral */
   --text-muted: #64748b;           /* Slate neutral with WCAG 2.1 AA 4.6:1 contrast against white */
 }
 
@@ -94,6 +105,14 @@
 }
 
 /* Light Mode Component Overrides */
+[data-theme='light'] .campus-hero-section {
+  background: radial-gradient(ellipse at 50% 0%, #edf0f7 0%, var(--bg-canvas) 75%);
+}
+
+[data-theme='light'] .campus-bottom-banner {
+  background: linear-gradient(180deg, var(--bg-canvas) 0%, #edf0f7 100%);
+}
+
 [data-theme='light'] .modal-backdrop {
   background: rgba(15, 23, 42, 0.45);
 }
@@ -123,6 +142,32 @@
 [data-theme='light'] .diff-token-mismatch {
   background: rgba(220, 38, 38, 0.20);
   color: #991b1b;
+}
+
+/* Difficulty badges and diff-stat labels. The base `.diff-*` rules further down this
+   stylesheet pin dark-theme pastels (#34d399 / #fbbf24 / #f87171) with a `color`
+   declaration that otherwise wins the cascade, giving 1.45–2.37:1 on light surfaces.
+   These attribute-scoped overrides take precedence and clear WCAG 2.1 AA (≥4.5:1)
+   against both the tinted badge background and the plain page canvas. */
+[data-theme='light'] .diff-easy {
+  color: #166534;
+}
+
+[data-theme='light'] .diff-medium {
+  color: #92400e;
+}
+
+[data-theme='light'] .diff-hard {
+  color: #b91c1c;
+}
+
+/* Leaderboard tier chip. The dark theme's acid lime (#e4f222) is unreadable on light
+   surfaces (≈1.13:1) because the rule hardcodes the literal instead of the theme-aware
+   accent token. The primary accent is electric indigo in light mode (5.13:1 on the
+   canvas) and identical to #e4f222 in dark mode. */
+[data-theme='light'] .fp-tier.pro {
+  color: var(--accent-primary);
+  border-color: rgba(84, 96, 200, 0.4);
 }
 
 [data-theme='light'] .version-pill {
@@ -178,6 +223,150 @@
   color: var(--text-primary);
 }
 
+/* ---------------------------------------------------------------------------
+   Route theme scopes — enforced dark surfaces
+   ---------------------------------------------------------------------------
+   `/campus/*` and `/hackathons/*` are permanently dark enterprise portals. They were
+   authored against the dark palette, pairing theme-aware tokens with hardcoded lime
+   accents (#e4f222) and dark panel literals, so they are only legible on a dark canvas.
+   Rather than rewrite every literal, the routes pin `data-theme="dark"` on their
+   outermost wrapper (see `RouteThemeScope` in App.tsx).
+
+   The dark palette itself lives on `:root` and is only *overridden* for light, so a
+   nested wrapper has to re-establish it explicitly. The block below is that mirror, plus
+   a re-assertion of the light-mode component overrides that hardcode a colour: those are
+   written as `[data-theme='light'] .foo`, which still matches inside the scope because
+   the document element remains light. Any new `[data-theme='light']` rule that hardcodes
+   a value needs its dark counterpart added here. */
+
+[data-theme='dark'] {
+  /* Surfaces — Refero Linear Midnight */
+  --bg-canvas: #08090a;
+  --bg-surface: #0f1011;
+  --bg-surface-elevated: #161718;
+  --bg-elevated: #161718;
+  --bg-surface-overlay: #1c1d1f;
+  --bg-glass: rgba(15, 16, 17, 0.78);
+
+  /* Borders & Dividers */
+  --border-subtle: #23252a;
+  --border-active: #383b3f;
+  --border-focus: #3e4149;
+  --border-divider: #383b3f;
+
+  /* Accents — Acid Lime reserved for the single primary action per view */
+  --accent-primary: #e4f222;
+  --accent-primary-fg: #08090a;
+  --accent-primary-ink: #08090a;
+  --accent-hover: #d2e01b;
+  --accent-secondary: #27282b;
+  --accent-gradient: #f7f8f8;
+
+  /* Verdict & Difficulty Colors */
+  --color-accepted: #27a644;
+  --color-accepted-bg: rgba(39, 166, 68, 0.12);
+  --color-wrong-answer: #eb5757;
+  --color-wrong-answer-bg: rgba(235, 87, 87, 0.12);
+  --color-timeout: #f59e0b;
+  --color-timeout-bg: rgba(245, 158, 11, 0.12);
+  --color-running: #8a8f98;
+  --color-running-bg: rgba(138, 143, 152, 0.12);
+
+  /* Typography */
+  --text-primary: #f7f8f8;
+  --text-bright: #ffffff;
+  --text-secondary: #8a8f98;
+  /* Mirrors the dark value on `:root`; kept in sync for enforced-dark portals. */
+  --text-muted: #7d828c;
+}
+
+/* Applied alongside `.app-container` on the routed shell, whose existing
+   `background: var(--bg-canvas)` then resolves to the dark canvas. `color-scheme` switches
+   native widgets (form controls, default scrollbars) inside the portals to dark rendering. */
+.enforced-dark-surface {
+  color-scheme: dark;
+}
+
+/* Sun/moon toggles are inert inside enforced-dark portals: the routed shell pins
+   `data-theme="dark"` for `/campus/*` and `/hackathons/*`, so flipping the document theme
+   changes nothing on screen. Hide the control rather than offer a dead affordance.
+   `!important` outranks the inline `display: flex` on the campus sidebar's button. */
+.enforced-dark-surface .theme-toggle-btn {
+  display: none !important;
+}
+
+/* Dark counterparts of the hardcoded light-mode overrides (see note above). */
+[data-theme='dark'] * {
+  scrollbar-color: #23252a transparent;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #23252a;
+}
+
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #383b3f;
+}
+
+[data-theme='dark'] .campus-hero-section {
+  background: radial-gradient(ellipse at 50% 0%, #0f244a 0%, #08090a 75%);
+}
+
+[data-theme='dark'] .campus-bottom-banner {
+  background: linear-gradient(180deg, #08090a 0%, #0d1933 100%);
+}
+
+[data-theme='dark'] .modal-backdrop {
+  background: rgba(9, 11, 16, 0.85);
+}
+
+[data-theme='dark'] .modal-container,
+[data-theme='dark'] .modal-content {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme='dark'] .pricing-modal,
+[data-theme='dark'] .leaderboard-modal {
+  box-shadow: none;
+}
+
+[data-theme='dark'] .diff-line-expected {
+  background: rgba(16, 185, 129, 0.12);
+  color: #6ee7b7;
+}
+
+[data-theme='dark'] .diff-line-actual {
+  background: rgba(244, 63, 94, 0.15);
+  color: #fda4af;
+}
+
+[data-theme='dark'] .diff-summary-badge {
+  background: rgba(235, 87, 87, 0.15);
+  color: #fda4af;
+}
+
+[data-theme='dark'] .diff-token-mismatch {
+  background: rgba(235, 87, 87, 0.38);
+  color: #ffffff;
+}
+
+[data-theme='dark'] .diff-easy {
+  color: #34d399;
+}
+
+[data-theme='dark'] .diff-medium {
+  color: #fbbf24;
+}
+
+[data-theme='dark'] .diff-hard {
+  color: #f87171;
+}
+
+[data-theme='dark'] .fp-tier.pro {
+  color: #e4f222;
+  border-color: rgba(228, 242, 34, 0.4);
+}
+
 .modal-container,
 .modal-content {
   background: var(--bg-surface);
@@ -205,6 +394,10 @@ html, body, #root {
   font-weight: 450;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
 }
 
 /* Custom Scrollbars */
@@ -368,9 +561,9 @@ html, body, #root {
 }
 
 .btn-secondary {
-  background: #141517;
-  color: #f7f8f8;
-  border-color: #1f2023;
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
 }
 
 .btn-secondary:hover {
@@ -2145,8 +2338,8 @@ html, body, #root {
 
 .iso-evaluating-card {
   padding: 48px 24px;
-  background: #08090a;
-  border: 1px solid #23252a;
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -2821,8 +3014,8 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e4f222 !important;
-  color: #08090a !important;
+  background: var(--accent-primary) !important;
+  color: var(--accent-primary-fg) !important;
   border: 1px solid transparent !important;
   border-radius: 6px !important;
   font-size: 14px;
@@ -4225,13 +4418,13 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   font-size: 32px;
   font-weight: 510;
   margin: 0 0 8px;
-  color: #ffffff;
+  color: var(--text-primary);
   letter-spacing: -0.022em;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .contests-sub {
-  color: #8a8f98;
+  color: var(--text-secondary);
   font-size: 15px;
   margin: 0 0 32px;
   line-height: 1.5;
@@ -4264,8 +4457,8 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
 }
 
 .contest-card {
-  background: #0f1011;
-  border: 1px solid #23252a;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -4322,7 +4515,7 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   margin: 0;
   font-size: 18px;
   font-weight: 510;
-  color: #ffffff;
+  color: var(--text-primary);
   letter-spacing: -0.015em;
 }
 
@@ -4330,7 +4523,7 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
 .contest-participants {
   margin: 0;
   font-size: 13px;
-  color: #8a8f98;
+  color: var(--text-secondary);
 }
 
 .countdown-timer-mono {
@@ -4374,9 +4567,9 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
   font: inherit;
   font-size: 13px;
   font-weight: 510;
-  color: #d0d6e0;
-  background: #161718;
-  border: 1px solid #23252a;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 8px 14px;
   cursor: pointer;
@@ -4385,15 +4578,15 @@ h1, h2, h3, h4, h5, h6, b, strong, th { font-weight: 590; }
 }
 
 .contest-btn:hover {
-  background: #23252a;
-  border-color: #383b3f;
-  color: #ffffff;
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-active);
+  color: var(--text-primary);
 }
 
 .contest-btn.primary {
-  background: #e4f222;
-  color: #08090a;
-  border-color: #e4f222;
+  background: var(--accent-primary);
+  color: var(--accent-primary-fg);
+  border-color: var(--accent-primary);
   font-weight: 510;
 }
 
@@ -7530,7 +7723,7 @@ body,
 
 .filter-pill.active {
   background: var(--accent-primary);
-  color: #08090a;
+  color: var(--accent-primary-fg);
   font-weight: 700;
   border-color: var(--accent-primary);
 }
@@ -7543,7 +7736,7 @@ body,
 
 .filter-pill.pill-elevated.active {
   background: #f59e0b;
-  color: #08090a;
+  color: #ffffff;
   border-color: #f59e0b;
 }
 
@@ -8678,7 +8871,7 @@ body,
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: #0f1011;
+  background: var(--bg-surface);
   box-sizing: border-box;
 }
 
@@ -9292,7 +9485,7 @@ body,
 
 .campus-landing-page {
   min-height: 100vh;
-  background: #08090a;
+  background: var(--bg-canvas);
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
@@ -9835,7 +10028,7 @@ body,
 /* Footer */
 .campus-footer {
   padding: 24px;
-  background: #08090a;
+  background: var(--bg-canvas);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -9884,7 +10077,7 @@ body,
 
 .campus-onboarding-page {
   min-height: 100vh;
-  background: #08090a;
+  background: var(--bg-canvas);
   display: flex;
   flex-direction: column;
 }
@@ -10328,7 +10521,7 @@ body,
 .hackathons-catalog-page {
   min-height: calc(100vh - 54px);
   padding: 32px 24px;
-  background: #08090a;
+  background: var(--bg-canvas);
 }
 
 .hackathons-container {
@@ -10342,8 +10535,8 @@ body,
 /* Flagship Hero Card */
 .hackathon-hero-card {
   padding: 32px;
-  background: #141517;
-  border: 1px solid #23252a;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -10429,8 +10622,8 @@ body,
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #e4f222 !important;
-  color: #08090a !important;
+  background: var(--accent-primary) !important;
+  color: var(--accent-primary-fg) !important;
   padding: 10px 20px;
   border-radius: 6px;
   font-weight: 600;
@@ -10627,8 +10820,8 @@ body,
 .campus-login-left {
   flex: 1 1 50%;
   position: relative;
-  background: radial-gradient(circle at 20% 30%, #161718 0%, #0f1011 50%, #08090a 100%);
-  border-right: 1px solid #23252a;
+  background: radial-gradient(circle at 20% 30%, var(--bg-elevated) 0%, var(--bg-surface) 50%, var(--bg-canvas) 100%);
+  border-right: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11259,9 +11452,9 @@ body,
 }
 
 .campus-nav-item.active {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid #23252a;
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   font-weight: 500;
 }
 
@@ -15938,8 +16131,8 @@ body,
   margin-top: 20px;
   padding: 20px;
   border-radius: 12px;
-  background: #141517;
-  border: 1px solid #23252a;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
   box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 4px 0px;
   display: flex;
   flex-direction: column;
@@ -15968,7 +16161,7 @@ body,
   margin: 0;
   font-size: 15px;
   font-weight: 510;
-  color: #ffffff;
+  color: var(--text-primary);
   letter-spacing: -0.015em;
   font-family: var(--font-sans);
 }
@@ -15976,7 +16169,7 @@ body,
 .auth-inst-subtitle {
   margin: 0;
   font-size: 13px;
-  color: #8a8f98;
+  color: var(--text-secondary);
   line-height: 1.5;
   font-family: var(--font-sans);
 }
@@ -16025,4 +16218,29 @@ body,
 .auth-inst-link:hover {
   color: #d0d6e0;
   text-decoration: underline;
+}
+
+/* ==========================================================================
+   Faculty Workspace Cross-View Links
+   ========================================================================== */
+
+.faculty-view-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 510;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.faculty-view-link:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }

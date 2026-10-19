@@ -88,7 +88,10 @@ impl VivaRoom {
     ///
     /// # Errors
     /// Returns [`VivaError::ProtocolError`] if broadcasting fails.
-    pub fn broadcast_rubric(&self, update: crate::rubric::RubricEvaluationUpdate) -> Result<usize, VivaError> {
+    pub fn broadcast_rubric(
+        &self,
+        update: crate::rubric::RubricEvaluationUpdate,
+    ) -> Result<usize, VivaError> {
         self.tx_rubric
             .send(update)
             .map_err(|e| VivaError::ProtocolError(e.to_string()))

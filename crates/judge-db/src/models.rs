@@ -289,7 +289,9 @@ impl SubmissionRecord {
             "cpp" | "c++" => Ok(Language::Cpp),
             "python" | "py" => Ok(Language::Python),
             "java" => Ok(Language::Java),
-            other => Err(DomainError::NotFound(format!("unsupported language: {other}"))),
+            other => Err(DomainError::NotFound(format!(
+                "unsupported language: {other}"
+            ))),
         }
     }
 
@@ -306,7 +308,9 @@ impl SubmissionRecord {
             "COMPILATION_ERROR" | "CE" => Ok(Verdict::CompilationError),
             "RUNTIME_ERROR" | "RE" => Ok(Verdict::RuntimeError),
             "PENDING" => Ok(Verdict::Pending),
-            other => Err(DomainError::NotFound(format!("unrecognized verdict: {other}"))),
+            other => Err(DomainError::NotFound(format!(
+                "unrecognized verdict: {other}"
+            ))),
         }
     }
 }
@@ -471,4 +475,96 @@ impl NewMember {
             status: status.into(),
         }
     }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
+pub struct HackathonRecord {
+    pub id: Uuid,
+    pub slug: String,
+    pub title: String,
+    pub tagline: String,
+    pub bounty_pool_inr: i32,
+    pub bounty_pool_usd: i32,
+    pub starts_at: DateTime<Utc>,
+    pub ends_at: DateTime<Utc>,
+    pub venue: String,
+    pub status: String,
+    pub tracks: serde_json::Value,
+    pub milestones: serde_json::Value,
+    pub rules: serde_json::Value,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
+pub struct HackathonRegistrationRecord {
+    pub id: Uuid,
+    pub hackathon_id: Uuid,
+    pub user_id: Uuid,
+    pub participant_name: Option<String>,
+    pub email: Option<String>,
+    pub registered_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
+pub struct HackathonTeamRecord {
+    pub id: Uuid,
+    pub hackathon_id: Uuid,
+    pub name: String,
+    pub invite_code: String,
+    pub lead_user_id: Uuid,
+    pub track_key: String,
+    pub created_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
+pub struct HackathonTeamMemberRecord {
+    pub id: Uuid,
+    pub team_id: Uuid,
+    pub user_id: Uuid,
+    pub member_name: Option<String>,
+    pub role_title: String,
+    pub joined_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, FromRow)]
+pub struct HackathonSubmissionRecord {
+    pub id: Uuid,
+    pub hackathon_id: Uuid,
+    pub team_id: Option<Uuid>,
+    pub title: String,
+    pub tagline: String,
+    pub track_key: String,
+    pub github_url: String,
+    pub demo_url: Option<String>,
+    pub architecture_url: Option<String>,
+    pub upvotes_count: i32,
+    pub rubric_scores: serde_json::Value,
+    pub submitted_at: DateTime<Utc>,
+}
+
+/// Server-authoritative problem definition row.
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
+pub struct ProblemRecord {
+    pub id: String,
+    pub title: String,
+    pub difficulty: String,
+    pub time_limit_ms: i32,
+    pub memory_limit_bytes: i64,
+    pub description: String,
+    pub constraints: serde_json::Value,
+    pub tags: serde_json::Value,
+    pub acceptance_rate: f64,
+    pub is_published: bool,
+    pub created_at: DateTime<Utc>,
+}
+
+/// Server-authoritative test case row attached to a [`ProblemRecord`].
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, FromRow)]
+pub struct ProblemTestCaseRecord {
+    pub id: Uuid,
+    pub problem_id: String,
+    pub input_data: String,
+    pub expected_output: String,
+    pub is_sample: bool,
+    pub ordinal: i32,
 }

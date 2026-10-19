@@ -68,10 +68,7 @@ impl WorkerDaemon {
         if let Some(cases) = job.get("test_cases").and_then(Value::as_array) {
             for (i, c) in cases.iter().enumerate() {
                 #[allow(clippy::cast_possible_wrap)]
-                let id = c
-                    .get("id")
-                    .and_then(Value::as_i64)
-                    .unwrap_or(i as i64 + 1);
+                let id = c.get("id").and_then(Value::as_i64).unwrap_or(i as i64 + 1);
                 let input = c
                     .get("input_data")
                     .or_else(|| c.get("input"))
@@ -129,14 +126,19 @@ impl WorkerDaemon {
 
         let Some(cmd) = exec_cmd else {
             let _ = std::fs::remove_dir_all(&tmp_dir);
+            tracing::error!(
+                "No execution command resolved for language '{lang}' on submission {sub_id}; \
+                 failing closed with SYSTEM_ERROR"
+            );
             return Ok(serde_json::json!({
                 "submission_id": sub_id,
-                "status": "COMPLETED",
-                "verdict": "ACCEPTED",
-                "test_cases_passed": test_cases.len(),
+                "status": "FAILED",
+                "verdict": "SYSTEM_ERROR",
+                "test_cases_passed": 0,
                 "total_test_cases": test_cases.len(),
-                "max_time_ms": 10,
-                "max_memory_bytes": 12_582_912,
+                "max_time_ms": 0,
+                "max_memory_bytes": 0,
+                "error_message": "Unsupported language or execution command failed to resolve",
                 "test_case_results": [],
             }));
         };
@@ -245,7 +247,8 @@ impl WorkerDaemon {
                 ],
             );
 
-            let engine = ExecutionEngine::new(Duration::from_millis(10000), mem_limit_bytes, 1_048_576);
+            let engine =
+                ExecutionEngine::new(Duration::from_millis(10000), mem_limit_bytes, 1_048_576);
             let comp_res = engine.execute(&comp_cmd, "", None).await?;
 
             if comp_res.exit_code != Some(0) {
@@ -257,7 +260,10 @@ impl WorkerDaemon {
                 return Ok((None, Some(diag)));
             }
 
-            return Ok((Some(CommandConfig::new(bin.to_string_lossy(), vec![])), None));
+            return Ok((
+                Some(CommandConfig::new(bin.to_string_lossy(), vec![])),
+                None,
+            ));
         }
 
         if lang == "python" || lang == "py" || lang == "python3" {
@@ -267,7 +273,11 @@ impl WorkerDaemon {
             return Ok((
                 Some(CommandConfig::new(
                     "python3",
-                    vec!["-u".to_string(), "-B".to_string(), src.to_string_lossy().to_string()],
+                    vec![
+                        "-u".to_string(),
+                        "-B".to_string(),
+                        src.to_string_lossy().to_string(),
+                    ],
                 )),
                 None,
             ));
@@ -286,7 +296,8 @@ impl WorkerDaemon {
                 ],
             );
 
-            let engine = ExecutionEngine::new(Duration::from_millis(10000), mem_limit_bytes, 1_048_576);
+            let engine =
+                ExecutionEngine::new(Duration::from_millis(10000), mem_limit_bytes, 1_048_576);
             let comp_res = engine.execute(&comp_cmd, "", None).await?;
 
             if comp_res.exit_code != Some(0) {
@@ -374,7 +385,10 @@ impl WorkerDaemon {
             "data": { "status": "RUNNING" }
         });
         let _: Result<(), _> = con
-            .publish(format!("submissions:{sub_id}:events"), status_ev.to_string())
+            .publish(
+                format!("submissions:{sub_id}:events"),
+                status_ev.to_string(),
+            )
             .await;
         let _: Result<(), _> = con
             .publish(format!("judge:events:{sub_id}"), status_ev.to_string())
@@ -386,10 +400,14 @@ impl WorkerDaemon {
         let verdict = report
             .get("verdict")
             .and_then(Value::as_str)
-            .unwrap_or("ACCEPTED");
+            .unwrap_or("SYSTEM_ERROR");
+        let report_status = report
+            .get("status")
+            .and_then(Value::as_str)
+            .unwrap_or("COMPLETED");
 
         // 3. Update status in Redis
-        let _: Result<(), _> = con.hset(&status_key, "status", "COMPLETED").await;
+        let _: Result<(), _> = con.hset(&status_key, "status", report_status).await;
         let _: Result<(), _> = con.hset(&status_key, "report", &report_str).await;
 
         // 4. Publish completion event
@@ -409,13 +427,26 @@ impl WorkerDaemon {
         if let Some(ref pool) = self.pool {
             if let Ok(uid) = uuid::Uuid::parse_str(&sub_id) {
                 #[allow(clippy::cast_possible_truncation)]
-                let time_ms = report.get("max_time_ms").and_then(Value::as_i64).unwrap_or(0) as i32;
+                let time_ms = report
+                    .get("max_time_ms")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0) as i32;
                 #[allow(clippy::cast_possible_truncation)]
-                let mem_kb = (report.get("max_memory_bytes").and_then(Value::as_i64).unwrap_or(0) / 1024) as i32;
+                let mem_kb = (report
+                    .get("max_memory_bytes")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0)
+                    / 1024) as i32;
                 #[allow(clippy::cast_possible_truncation)]
-                let passed = report.get("test_cases_passed").and_then(Value::as_i64).unwrap_or(0) as i32;
+                let passed = report
+                    .get("test_cases_passed")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0) as i32;
                 #[allow(clippy::cast_possible_truncation)]
-                let total = report.get("total_test_cases").and_then(Value::as_i64).unwrap_or(0) as i32;
+                let total = report
+                    .get("total_test_cases")
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0) as i32;
 
                 let _ = judge_db::repositories::submission::update_submission_status(
                     pool.inner(),

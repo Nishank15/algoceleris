@@ -74,14 +74,14 @@ export const CampusLabReviewPage: React.FC = () => {
         <div
           style={{
             height: '140px',
-            background: '#0f1011',
+            background: 'var(--bg-surface)',
             borderRadius: '12px',
-            border: '1px solid #23252a',
+            border: '1px solid var(--border-subtle)',
             marginBottom: '24px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: '13px',
           }}
@@ -97,7 +97,7 @@ export const CampusLabReviewPage: React.FC = () => {
       <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
         <div
           style={{
-            background: '#0f1011',
+            background: 'var(--bg-surface)',
             borderRadius: '12px',
             border: '1px solid #eb5757',
             padding: '32px',
@@ -105,18 +105,18 @@ export const CampusLabReviewPage: React.FC = () => {
           }}
         >
           <AlertCircle size={32} style={{ color: '#eb5757', margin: '0 auto 16px' }} />
-          <h2 style={{ fontSize: '18px', color: '#ffffff', marginBottom: '8px' }}>
+          <h2 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>
             Assessment Record Unavailable
           </h2>
-          <p style={{ color: '#8a8f98', fontSize: '14px', marginBottom: '20px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>
             {error || 'The requested lab record could not be retrieved from the campus database.'}
           </p>
           <button
             type="button"
             onClick={() => navigate(`/campus/${orgSlug}/student/labs`)}
             style={{
-              background: '#e4f222',
-              color: '#08090a',
+              background: 'var(--accent-primary)',
+              color: 'var(--accent-primary-fg)',
               border: 'none',
               padding: '10px 18px',
               borderRadius: '6px',
@@ -160,14 +160,14 @@ export const CampusLabReviewPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             textDecoration: 'none',
             fontSize: '13px',
             fontWeight: 510,
             transition: 'color 0.15s ease',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#ffffff')}
-          onMouseLeave={(e) => (e.currentTarget.style.color = '#8a8f98')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
         >
           <ArrowLeft size={14} /> Back to Lab Assessments
         </Link>
@@ -176,8 +176,8 @@ export const CampusLabReviewPage: React.FC = () => {
       {/* Main Review Hero Banner */}
       <div
         style={{
-          background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
-          border: '1px solid #23252a',
+          background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px',
           marginBottom: '24px',
@@ -209,11 +209,11 @@ export const CampusLabReviewPage: React.FC = () => {
             >
               <CheckCircle2 size={11} /> EVALUATED & VERIFIED
             </span>
-            <span style={{ color: '#62666d' }}>•</span>
+            <span style={{ color: 'var(--text-muted)' }}>•</span>
             <span
               style={{
                 fontSize: '12px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 fontFamily: 'JetBrains Mono, monospace',
               }}
             >
@@ -227,13 +227,13 @@ export const CampusLabReviewPage: React.FC = () => {
               fontWeight: 590,
               margin: '0 0 8px 0',
               letterSpacing: '-0.02em',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             }}
           >
             {labRecord?.title || 'Lab Assessment Review'}
           </h1>
 
-          <p style={{ color: '#8a8f98', fontSize: '14px', margin: '0 0 12px 0', maxWidth: '640px' }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: '0 0 12px 0', maxWidth: '640px' }}>
             {labRecord?.description}
           </p>
 
@@ -243,13 +243,13 @@ export const CampusLabReviewPage: React.FC = () => {
               alignItems: 'center',
               gap: '16px',
               fontSize: '12px',
-              color: '#62666d',
+              color: 'var(--text-muted)',
               flexWrap: 'wrap',
             }}
           >
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
               <Calendar size={13} /> Submitted:{' '}
-              <strong style={{ color: '#d0d6e0' }}>
+              <strong style={{ color: 'var(--text-secondary)' }}>
                 {progress?.submitted_at
                   ? new Date(progress.submitted_at).toLocaleDateString('en-US', {
                       month: 'short',
@@ -264,7 +264,7 @@ export const CampusLabReviewPage: React.FC = () => {
             <span>•</span>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
               <Clock size={13} /> Active Time Spent:{' '}
-              <strong style={{ color: '#d0d6e0', fontFamily: 'JetBrains Mono, monospace' }}>
+              <strong style={{ color: 'var(--text-secondary)', fontFamily: 'JetBrains Mono, monospace' }}>
                 {progress?.active_minutes
                   ? `${progress.active_minutes} mins`
                   : '45 mins'}
@@ -283,8 +283,8 @@ export const CampusLabReviewPage: React.FC = () => {
         {/* Big Score Card */}
         <div
           style={{
-            background: '#08090a',
-            border: '1px solid #23252a',
+            background: 'var(--bg-canvas)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '10px',
             padding: '20px 24px',
             textAlign: 'center',
@@ -294,7 +294,7 @@ export const CampusLabReviewPage: React.FC = () => {
           <div
             style={{
               fontSize: '11px',
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
               marginBottom: '6px',
@@ -313,7 +313,7 @@ export const CampusLabReviewPage: React.FC = () => {
             }}
           >
             {score.toFixed(1)}
-            <span style={{ fontSize: '18px', color: '#62666d' }}> / {maxScore.toFixed(1)}</span>
+            <span style={{ fontSize: '18px', color: 'var(--text-muted)' }}> / {maxScore.toFixed(1)}</span>
           </div>
           <div
             style={{
@@ -321,7 +321,7 @@ export const CampusLabReviewPage: React.FC = () => {
               alignItems: 'center',
               gap: '6px',
               fontSize: '12px',
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
             }}
           >
             <span
@@ -353,8 +353,8 @@ export const CampusLabReviewPage: React.FC = () => {
         {/* Rubric Criteria Breakdown */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '24px',
           }}
@@ -367,14 +367,14 @@ export const CampusLabReviewPage: React.FC = () => {
               marginBottom: '16px',
             }}
           >
-            <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
               Rubric Assessment Breakdown
             </h3>
             <span
               style={{
                 fontSize: '11px',
                 fontFamily: 'JetBrains Mono, monospace',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
               }}
             >
               4 Stages Evaluated
@@ -393,7 +393,7 @@ export const CampusLabReviewPage: React.FC = () => {
                   marginBottom: '6px',
                 }}
               >
-                <span style={{ color: '#d0d6e0' }}>Stage 02: Worked Example Analysis</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Stage 02: Worked Example Analysis</span>
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
                   4.0 / 4.0
                 </span>
@@ -401,7 +401,7 @@ export const CampusLabReviewPage: React.FC = () => {
               <div
                 style={{
                   height: '5px',
-                  background: '#161718',
+                  background: 'var(--bg-elevated)',
                   borderRadius: '3px',
                   overflow: 'hidden',
                 }}
@@ -421,7 +421,7 @@ export const CampusLabReviewPage: React.FC = () => {
                   marginBottom: '6px',
                 }}
               >
-                <span style={{ color: '#d0d6e0' }}>Stage 03: LED MCQs Mastery</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Stage 03: LED MCQs Mastery</span>
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
                   4.0 / 4.0
                 </span>
@@ -429,7 +429,7 @@ export const CampusLabReviewPage: React.FC = () => {
               <div
                 style={{
                   height: '5px',
-                  background: '#161718',
+                  background: 'var(--bg-elevated)',
                   borderRadius: '3px',
                   overflow: 'hidden',
                 }}
@@ -449,7 +449,7 @@ export const CampusLabReviewPage: React.FC = () => {
                   marginBottom: '6px',
                 }}
               >
-                <span style={{ color: '#d0d6e0' }}>Stage 04: Section-Locked Practice</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Stage 04: Section-Locked Practice</span>
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
                   6.0 / 6.0
                 </span>
@@ -457,7 +457,7 @@ export const CampusLabReviewPage: React.FC = () => {
               <div
                 style={{
                   height: '5px',
-                  background: '#161718',
+                  background: 'var(--bg-elevated)',
                   borderRadius: '3px',
                   overflow: 'hidden',
                 }}
@@ -477,7 +477,7 @@ export const CampusLabReviewPage: React.FC = () => {
                   marginBottom: '6px',
                 }}
               >
-                <span style={{ color: '#d0d6e0' }}>Stage 05: Capstone Execution & Invariants</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Stage 05: Capstone Execution & Invariants</span>
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', fontWeight: 590 }}>
                   {Math.max(0, score - 14).toFixed(1)} / 6.0
                 </span>
@@ -485,7 +485,7 @@ export const CampusLabReviewPage: React.FC = () => {
               <div
                 style={{
                   height: '5px',
-                  background: '#161718',
+                  background: 'var(--bg-elevated)',
                   borderRadius: '3px',
                   overflow: 'hidden',
                 }}
@@ -505,8 +505,8 @@ export const CampusLabReviewPage: React.FC = () => {
         {/* CLO Attainment & Automated Feedback */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '24px',
             display: 'flex',
@@ -525,7 +525,7 @@ export const CampusLabReviewPage: React.FC = () => {
               }}
             >
               <Sparkles size={16} />
-              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: '#ffffff' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 590, margin: 0, color: 'var(--text-primary)' }}>
                 Course Learning Outcomes (ABET / NBA)
               </h3>
             </div>
@@ -533,8 +533,8 @@ export const CampusLabReviewPage: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               <div
                 style={{
-                  background: '#161718',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '6px',
                   padding: '10px 12px',
                   display: 'flex',
@@ -543,10 +543,10 @@ export const CampusLabReviewPage: React.FC = () => {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: 510 }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 510 }}>
                     CLO-1: Core Algorithmic Techniques
                   </div>
-                  <div style={{ fontSize: '11px', color: '#8a8f98' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                     Recursive structures & invariant correctness
                   </div>
                 </div>
@@ -564,8 +564,8 @@ export const CampusLabReviewPage: React.FC = () => {
 
               <div
                 style={{
-                  background: '#161718',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '6px',
                   padding: '10px 12px',
                   display: 'flex',
@@ -574,10 +574,10 @@ export const CampusLabReviewPage: React.FC = () => {
                 }}
               >
                 <div>
-                  <div style={{ fontSize: '13px', color: '#ffffff', fontWeight: 510 }}>
+                  <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 510 }}>
                     CLO-2: Complexity Analysis & Optimization
                   </div>
-                  <div style={{ fontSize: '11px', color: '#8a8f98' }}>
+                  <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
                     Asymptotic bounds & memory constraints
                   </div>
                 </div>
@@ -597,18 +597,18 @@ export const CampusLabReviewPage: React.FC = () => {
 
           <div
             style={{
-              background: '#141517',
-              border: '1px solid #23252a',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '14px',
               fontSize: '12px',
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
               lineHeight: 1.5,
             }}
           >
             <div
               style={{
-                color: '#d0d6e0',
+                color: 'var(--text-secondary)',
                 fontWeight: 510,
                 marginBottom: '4px',
                 display: 'flex',
@@ -619,7 +619,7 @@ export const CampusLabReviewPage: React.FC = () => {
               <CheckCircle2 size={13} style={{ color: '#22c55e' }} /> Evaluation Reviewer Note:
             </div>
             {progress?.evaluation_feedback ||
-              'Excellent implementation. All 10 hidden edge test cases passed within 256MB memory boundaries. Code complies strictly with time complexity invariants without memory leaks.'}
+              'Excellent implementation. All 10 hidden edge test cases passed within memory boundaries. Code complies strictly with time complexity invariants without memory leaks.'}
           </div>
         </div>
       </div>
@@ -627,8 +627,8 @@ export const CampusLabReviewPage: React.FC = () => {
       {/* Submitted Code Viewer */}
       <div
         style={{
-          background: '#0f1011',
-          border: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           overflow: 'hidden',
           marginBottom: '32px',
@@ -636,8 +636,8 @@ export const CampusLabReviewPage: React.FC = () => {
       >
         <div
           style={{
-            background: '#141517',
-            borderBottom: '1px solid #23252a',
+            background: 'var(--bg-elevated)',
+            borderBottom: '1px solid var(--border-subtle)',
             padding: '12px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -646,18 +646,18 @@ export const CampusLabReviewPage: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Code2 size={16} style={{ color: '#e4f222' }} />
-            <span style={{ fontSize: '13px', fontWeight: 590, color: '#ffffff' }}>
+            <span style={{ fontSize: '13px', fontWeight: 590, color: 'var(--text-primary)' }}>
               Final Evaluated Code Solution
             </span>
             <span
               style={{
                 fontSize: '11px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 fontFamily: 'JetBrains Mono, monospace',
-                background: '#161718',
+                background: 'var(--bg-elevated)',
                 padding: '2px 6px',
                 borderRadius: '4px',
-                border: '1px solid #23252a',
+                border: '1px solid var(--border-subtle)',
               }}
             >
               {labRecord?.challenging_problem?.language || 'java'}
@@ -669,9 +669,9 @@ export const CampusLabReviewPage: React.FC = () => {
             onClick={handleCopyCode}
             style={{
               background: 'transparent',
-              border: '1px solid #23252a',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '6px',
-              color: copied ? '#22c55e' : '#8a8f98',
+              color: copied ? '#22c55e' : 'var(--text-secondary)',
               padding: '6px 12px',
               fontSize: '12px',
               cursor: 'pointer',
@@ -724,7 +724,7 @@ export const CampusLabReviewPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             textDecoration: 'none',
             fontSize: '13px',
             fontWeight: 510,
@@ -741,8 +741,8 @@ export const CampusLabReviewPage: React.FC = () => {
             gap: '8px',
             padding: '10px 18px',
             borderRadius: '6px',
-            background: '#e4f222',
-            color: '#08090a',
+            background: 'var(--accent-primary)',
+            color: 'var(--accent-primary-fg)',
             fontWeight: 590,
             fontSize: '13px',
             textDecoration: 'none',

@@ -178,8 +178,8 @@ export const CampusOnboardingPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: '#08090a',
-        color: '#ffffff',
+        background: 'var(--bg-canvas)',
+        color: 'var(--text-primary)',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         padding: '48px 24px',
         display: 'flex',
@@ -195,7 +195,7 @@ export const CampusOnboardingPage: React.FC = () => {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
             textDecoration: 'none',
             fontSize: '13px',
             marginBottom: '20px',
@@ -220,7 +220,7 @@ export const CampusOnboardingPage: React.FC = () => {
             Institution Provisioning Wizard
           </h1>
         </div>
-        <p style={{ color: '#8a8f98', fontSize: '14px', margin: 0 }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
           Deploy a dedicated, domain-whitelisted AlgoCeleris virtual lab cluster for your university.
         </p>
 
@@ -232,7 +232,7 @@ export const CampusOnboardingPage: React.FC = () => {
               alignItems: 'center',
               gap: '8px',
               marginTop: '24px',
-              borderBottom: '1px solid #23252a',
+              borderBottom: '1px solid var(--border-subtle)',
               paddingBottom: '16px',
             }}
           >
@@ -247,7 +247,7 @@ export const CampusOnboardingPage: React.FC = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  color: step === s.num ? '#ffffff' : step > s.num ? '#22c55e' : '#62666d',
+                  color: step === s.num ? 'var(--text-primary)' : step > s.num ? '#22c55e' : 'var(--text-muted)',
                   fontSize: '12px',
                   fontWeight: 510,
                 }}
@@ -259,11 +259,11 @@ export const CampusOnboardingPage: React.FC = () => {
                     borderRadius: '50%',
                     background:
                       step === s.num
-                        ? '#e4f222'
+                        ? 'var(--accent-primary)'
                         : step > s.num
                         ? '#22c55e'
-                        : '#141517',
-                    color: step === s.num ? '#08090a' : '#ffffff',
+                        : 'var(--bg-elevated)',
+                    color: step === s.num ? 'var(--accent-primary-fg)' : 'var(--text-primary)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -274,7 +274,7 @@ export const CampusOnboardingPage: React.FC = () => {
                   {step > s.num ? '✓' : s.num}
                 </div>
                 <span>{s.label}</span>
-                {s.num < 3 && <span style={{ color: '#23252a', margin: '0 4px' }}>—</span>}
+                {s.num < 3 && <span style={{ color: 'var(--border-subtle)', margin: '0 4px' }}>—</span>}
               </div>
             ))}
           </div>
@@ -286,8 +286,8 @@ export const CampusOnboardingPage: React.FC = () => {
         style={{
           maxWidth: '680px',
           width: '100%',
-          background: '#0f1011',
-          border: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '36px',
           boxSizing: 'border-box',
@@ -320,13 +320,13 @@ export const CampusOnboardingPage: React.FC = () => {
             <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
               1. Institutional Identity & Domain Whitelisting
             </h3>
-            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
               Specify the university credentials and student email domains permitted to register and evaluate code.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Institution / University Full Name *
                 </label>
                 <input
@@ -336,11 +336,11 @@ export const CampusOnboardingPage: React.FC = () => {
                   onChange={handleNameChange}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '11px 14px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -349,18 +349,18 @@ export const CampusOnboardingPage: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Tenant Slug Identifier (Permanent Subpath) *
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <span
                     style={{
-                      background: '#141517',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRight: 'none',
                       borderRadius: '6px 0 0 6px',
                       padding: '11px 12px',
-                      color: '#62666d',
+                      color: 'var(--text-muted)',
                       fontSize: '12px',
                       fontFamily: 'JetBrains Mono, monospace',
                     }}
@@ -379,11 +379,11 @@ export const CampusOnboardingPage: React.FC = () => {
                     }
                     style={{
                       width: '100%',
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '0 6px 6px 0',
                       padding: '11px 14px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       fontFamily: 'JetBrains Mono, monospace',
                       outline: 'none',
@@ -391,13 +391,13 @@ export const CampusOnboardingPage: React.FC = () => {
                     }}
                   />
                 </div>
-                <div style={{ fontSize: '11px', color: '#62666d', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Only lowercase alphanumeric characters and hyphens allowed.
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Allowed Student & Faculty Domains (Comma-Separated) *
                 </label>
                 <input
@@ -407,24 +407,24 @@ export const CampusOnboardingPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, allowedDomains: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '11px 14px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     fontFamily: 'JetBrains Mono, monospace',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
                 />
-                <div style={{ fontSize: '11px', color: '#62666d', marginTop: '4px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Any student logging in with an email matching these domains will be authenticated into this tenant.
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Estimated Active Student Enrollment
                 </label>
                 <input
@@ -435,11 +435,11 @@ export const CampusOnboardingPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, expectedStudents: Number(e.target.value) })}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '11px 14px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -456,8 +456,8 @@ export const CampusOnboardingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   padding: '11px 22px',
                   borderRadius: '6px',
@@ -478,8 +478,8 @@ export const CampusOnboardingPage: React.FC = () => {
             <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
               2. Select Deployment Tier & Capacity
             </h3>
-            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
-              Choose the architectural sizing for your university's sandboxed worker daemons and cohort limits.
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+              Choose the deployment tier for your university's automated evaluation environment and cohort capacity.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -487,7 +487,7 @@ export const CampusOnboardingPage: React.FC = () => {
                 {
                   tier: 'Enterprise Campus',
                   tag: 'Recommended for Universities',
-                  desc: 'Unlimited cohorts, dedicated 256MB cgroup worker nodes, full ABET/NBA CLO automated attainment, and Tree-sitter AST anti-cheat.',
+                  desc: 'Unlimited cohorts, dedicated compute worker nodes, full ABET/NBA CLO automated attainment, and advanced code similarity anti-cheat.',
                   seats: '1,000+ Students · 50 Faculty',
                 },
                 {
@@ -507,8 +507,8 @@ export const CampusOnboardingPage: React.FC = () => {
                   key={item.tier}
                   onClick={() => setFormData({ ...formData, tier: item.tier })}
                   style={{
-                    background: formData.tier === item.tier ? '#161718' : '#141517',
-                    border: `1px solid ${formData.tier === item.tier ? '#e4f222' : '#23252a'}`,
+                    background: formData.tier === item.tier ? 'var(--bg-surface)' : 'var(--bg-elevated)',
+                    border: `1px solid ${formData.tier === item.tier ? '#e4f222' : 'var(--border-subtle)'}`,
                     borderRadius: '8px',
                     padding: '18px',
                     cursor: 'pointer',
@@ -522,7 +522,7 @@ export const CampusOnboardingPage: React.FC = () => {
                           width: '16px',
                           height: '16px',
                           borderRadius: '50%',
-                          border: `2px solid ${formData.tier === item.tier ? '#e4f222' : '#62666d'}`,
+                          border: `2px solid ${formData.tier === item.tier ? '#e4f222' : 'var(--border-subtle)'}`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -534,12 +534,12 @@ export const CampusOnboardingPage: React.FC = () => {
                               width: '8px',
                               height: '8px',
                               borderRadius: '50%',
-                              background: '#e4f222',
+                              background: 'var(--accent-primary)',
                             }}
                           />
                         )}
                       </div>
-                      <span style={{ fontSize: '15px', fontWeight: 590, color: '#ffffff' }}>
+                      <span style={{ fontSize: '15px', fontWeight: 590, color: 'var(--text-primary)' }}>
                         {item.tier}
                       </span>
                     </div>
@@ -550,18 +550,18 @@ export const CampusOnboardingPage: React.FC = () => {
                         padding: '2px 8px',
                         borderRadius: '4px',
                         background: 'rgba(255, 255, 255, 0.05)',
-                        color: formData.tier === item.tier ? '#e4f222' : '#8a8f98',
-                        border: '1px solid #23252a',
+                        color: formData.tier === item.tier ? '#e4f222' : 'var(--text-secondary)',
+                        border: '1px solid var(--border-subtle)',
                       }}
                     >
                       {item.tag}
                     </span>
                   </div>
 
-                  <p style={{ color: '#8a8f98', fontSize: '12px', margin: '0 0 10px 26px', lineHeight: 1.4 }}>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: '0 0 10px 26px', lineHeight: 1.4 }}>
                     {item.desc}
                   </p>
-                  <div style={{ marginLeft: '26px', fontSize: '11px', color: '#62666d', fontFamily: 'JetBrains Mono, monospace' }}>
+                  <div style={{ marginLeft: '26px', fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>
                     {item.seats}
                   </div>
                 </div>
@@ -574,8 +574,8 @@ export const CampusOnboardingPage: React.FC = () => {
                 onClick={handleBack}
                 style={{
                   background: 'transparent',
-                  color: '#8a8f98',
-                  border: '1px solid #23252a',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '11px 18px',
                   borderRadius: '6px',
                   fontSize: '13px',
@@ -591,8 +591,8 @@ export const CampusOnboardingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   padding: '11px 22px',
                   borderRadius: '6px',
@@ -613,27 +613,27 @@ export const CampusOnboardingPage: React.FC = () => {
             <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 8px 0' }}>
               3. Lead Administrator Credentials
             </h3>
-            <p style={{ color: '#8a8f98', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '0 0 24px 0', lineHeight: 1.5 }}>
               This account will have full `org_admin` privileges to create academic cohorts, upload rosters, and manage faculty licenses.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Administrator Full Name *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Dr. Saravanan P"
+                  placeholder="e.g. Demo Faculty"
                   value={formData.adminName}
                   onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '11px 14px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -642,7 +642,7 @@ export const CampusOnboardingPage: React.FC = () => {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   Administrator Official Email *
                 </label>
                 <input
@@ -652,11 +652,11 @@ export const CampusOnboardingPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '11px 14px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -666,7 +666,7 @@ export const CampusOnboardingPage: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Master Password (min 8 chars) *
                   </label>
                   <input
@@ -676,11 +676,11 @@ export const CampusOnboardingPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
                     style={{
                       width: '100%',
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       padding: '11px 14px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -689,7 +689,7 @@ export const CampusOnboardingPage: React.FC = () => {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: '#d0d6e0', marginBottom: '6px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 510, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                     Confirm Master Password *
                   </label>
                   <input
@@ -699,11 +699,11 @@ export const CampusOnboardingPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     style={{
                       width: '100%',
-                      background: '#161718',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '6px',
                       padding: '11px 14px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '13px',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -720,8 +720,8 @@ export const CampusOnboardingPage: React.FC = () => {
                 disabled={isSubmitting}
                 style={{
                   background: 'transparent',
-                  color: '#8a8f98',
-                  border: '1px solid #23252a',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '11px 18px',
                   borderRadius: '6px',
                   fontSize: '13px',
@@ -737,8 +737,8 @@ export const CampusOnboardingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   padding: '11px 24px',
                   borderRadius: '6px',
@@ -777,14 +777,14 @@ export const CampusOnboardingPage: React.FC = () => {
             <h2 style={{ fontSize: '24px', fontWeight: 590, margin: '0 0 8px 0', letterSpacing: '-0.02em' }}>
               {provisionedResult.orgName} Provisioned!
             </h2>
-            <p style={{ color: '#8a8f98', fontSize: '14px', maxWidth: '480px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '14px', maxWidth: '480px', margin: '0 auto 24px auto', lineHeight: 1.5 }}>
               Your institutional tenant is online. A default 2026 cohort has been provisioned and your administrative JWT has been issued.
             </p>
 
             <div
               style={{
-                background: '#141517',
-                border: '1px solid #23252a',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '8px',
                 padding: '16px',
                 textAlign: 'left',
@@ -793,22 +793,22 @@ export const CampusOnboardingPage: React.FC = () => {
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ color: '#8a8f98' }}>Tenant Slug:</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Tenant Slug:</span>
                 <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#e4f222' }}>
                   /{provisionedResult.orgSlug}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ color: '#8a8f98' }}>Administrator Login:</span>
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: '#ffffff' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Administrator Login:</span>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-primary)' }}>
                   {provisionedResult.adminEmail}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#8a8f98' }}>Kernel Status:</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Evaluation Status:</span>
                 <span style={{ color: '#22c55e', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-                  cgroups v2 Isolated
+                  Isolated
                 </span>
               </div>
             </div>
@@ -821,8 +821,8 @@ export const CampusOnboardingPage: React.FC = () => {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '8px',
-                  background: '#e4f222',
-                  color: '#08090a',
+                  background: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   padding: '12px 24px',
                   borderRadius: '6px',
@@ -838,9 +838,9 @@ export const CampusOnboardingPage: React.FC = () => {
                 type="button"
                 onClick={() => navigate(`/campus/${provisionedResult.orgSlug}/login`)}
                 style={{
-                  background: '#161718',
-                  color: '#d0d6e0',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '12px 20px',
                   borderRadius: '6px',
                   fontSize: '14px',

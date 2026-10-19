@@ -83,7 +83,10 @@ impl PlagiarismDetector {
     /// Jaccard index: `|A ∩ B| / |A ∪ B|` over unique fingerprint hashes.
     #[must_use]
     #[allow(clippy::cast_precision_loss)]
-    pub fn jaccard_similarity(fingerprints_a: &[Fingerprint], fingerprints_b: &[Fingerprint]) -> f64 {
+    pub fn jaccard_similarity(
+        fingerprints_a: &[Fingerprint],
+        fingerprints_b: &[Fingerprint],
+    ) -> f64 {
         if fingerprints_a.is_empty() && fingerprints_b.is_empty() {
             return 1.0;
         }
@@ -144,8 +147,12 @@ impl PlagiarismDetector {
         let mut merged: Vec<MatchedRange> = Vec::new();
         for m in raw_matches {
             if let Some(last) = merged.last_mut() {
-                let same_diagonal = m.start_token_a + last.start_token_b == last.start_token_a + m.start_token_b;
-                if same_diagonal && m.start_token_a <= last.end_token_a && m.start_token_b <= last.end_token_b {
+                let same_diagonal =
+                    m.start_token_a + last.start_token_b == last.start_token_a + m.start_token_b;
+                if same_diagonal
+                    && m.start_token_a <= last.end_token_a
+                    && m.start_token_b <= last.end_token_b
+                {
                     last.end_token_a = last.end_token_a.max(m.end_token_a);
                     last.end_token_b = last.end_token_b.max(m.end_token_b);
                     last.length = last.end_token_a.saturating_sub(last.start_token_a);

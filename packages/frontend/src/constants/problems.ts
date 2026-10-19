@@ -1,5 +1,13 @@
 import { Problem } from '../types';
 
+/**
+ * Bundled sample-only fallback catalog.
+ *
+ * Used for first paint and offline rendering by pages that need a lightweight problem
+ * picker. Hidden test cases never ship to the browser: they live server-side in
+ * `problems` / `problem_test_cases` and are exposed only to the judge. The catalog and
+ * workspace pages hydrate from `GET /api/v1/problems`.
+ */
 export const PROBLEMS: Problem[] = [
   {
     id: 'two-sum',
@@ -36,20 +44,6 @@ Output the two indices separated by a single space in increasing order.`,
         input_data: '2\n3 3\n6',
         expected_output: '0 1',
         is_sample: true,
-      },
-    ],
-    hiddenCases: [
-      {
-        id: 4,
-        input_data: '5\n1 5 3 7 9\n12',
-        expected_output: '1 3',
-        is_sample: false,
-      },
-      {
-        id: 5,
-        input_data: '6\n-3 4 3 90 2 1\n0',
-        expected_output: '0 2',
-        is_sample: false,
       },
     ],
     timeLimitMs: 2000,
@@ -115,20 +109,6 @@ Each time you can either climb \`1\` or \`2\` steps. In how many distinct ways c
         input_data: '3',
         expected_output: '3',
         is_sample: true,
-      },
-    ],
-    hiddenCases: [
-      {
-        id: 3,
-        input_data: '5',
-        expected_output: '8',
-        is_sample: false,
-      },
-      {
-        id: 4,
-        input_data: '10',
-        expected_output: '89',
-        is_sample: false,
       },
     ],
     timeLimitMs: 2000,

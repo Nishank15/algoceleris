@@ -4,8 +4,8 @@ use axum::body::Body;
 use axum::http::header::{COOKIE, SET_COOKIE};
 use axum::http::{Request, StatusCode};
 use judge_gateway::auth::{
-    decode_access_token, encode_access_token, encode_refresh_token, hash_password,
-    verify_password, TokenStore, DEFAULT_JWT_SECRET,
+    decode_access_token, encode_access_token, encode_refresh_token, hash_password, verify_password,
+    TokenStore, DEFAULT_JWT_SECRET,
 };
 use judge_gateway::errors::{GatewayError, ProblemDetails};
 use judge_gateway::routes::{HealthResponse, TokenResponse};
@@ -91,10 +91,7 @@ fn test_argon2id_password_hashing() -> Result<(), GatewayError> {
     );
 
     // 5. Verify empty password rejected
-    assert!(
-        !verify_password("", &hashed),
-        "Accepted empty password"
-    );
+    assert!(!verify_password("", &hashed), "Accepted empty password");
 
     Ok(())
 }
@@ -116,10 +113,7 @@ fn test_access_jwt_generation_claims_and_expiration() -> Result<(), GatewayError
     assert_eq!(claims.email, email);
     assert_eq!(claims.role, role);
     assert_eq!(claims.r#type, "access");
-    assert_eq!(
-        claims.exp - claims.iat,
-        ACCESS_TOKEN_EXPIRATION_SECONDS
-    );
+    assert_eq!(claims.exp - claims.iat, ACCESS_TOKEN_EXPIRATION_SECONDS);
 
     // 2. Signature verification / tamper rejection
     let tampered_token = format!("{token}tampered");
@@ -248,12 +242,7 @@ async fn test_auth_http_login_refresh_logout_flow() {
     assert!(set_cookie_hdr.contains("SameSite=Lax"));
     assert!(set_cookie_hdr.contains("refresh_token="));
 
-    let refresh_cookie_val = set_cookie_hdr
-        .split(';')
-        .next()
-        .unwrap()
-        .trim()
-        .to_string();
+    let refresh_cookie_val = set_cookie_hdr.split(';').next().unwrap().trim().to_string();
 
     let login_bytes = axum::body::to_bytes(login_resp.into_body(), usize::MAX)
         .await
@@ -281,12 +270,7 @@ async fn test_auth_http_login_refresh_logout_flow() {
         .to_str()
         .unwrap()
         .to_string();
-    let new_refresh_cookie = new_set_cookie
-        .split(';')
-        .next()
-        .unwrap()
-        .trim()
-        .to_string();
+    let new_refresh_cookie = new_set_cookie.split(';').next().unwrap().trim().to_string();
 
     assert_ne!(refresh_cookie_val, new_refresh_cookie);
 
@@ -445,7 +429,10 @@ async fn test_signup_and_registration_flow() {
     // 7. Verify /api/v1/auth/me returns the signed-in user profile
     let me_req = Request::builder()
         .uri("/api/v1/auth/me")
-        .header("authorization", format!("Bearer {}", token_resp.access_token))
+        .header(
+            "authorization",
+            format!("Bearer {}", token_resp.access_token),
+        )
         .body(Body::empty())
         .unwrap();
     let me_resp = app.clone().oneshot(me_req).await.unwrap();
@@ -453,8 +440,7 @@ async fn test_signup_and_registration_flow() {
     let me_bytes = axum::body::to_bytes(me_resp.into_body(), usize::MAX)
         .await
         .unwrap();
-    let me_user: judge_gateway::routes::UserResponse =
-        serde_json::from_slice(&me_bytes).unwrap();
+    let me_user: judge_gateway::routes::UserResponse = serde_json::from_slice(&me_bytes).unwrap();
     assert_eq!(me_user.username, "newcoder");
     assert_eq!(me_user.email, "newcoder@test.com");
     assert_eq!(me_user.account_type, "free");

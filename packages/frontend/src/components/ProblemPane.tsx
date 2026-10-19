@@ -6,6 +6,58 @@ interface ProblemPaneProps {
   problem: Problem;
 }
 
+/**
+ * Inline Markdown tokens used by authored problem statements.
+ * Captured groups are returned by `String.split`, so the delimiters stay in the stream.
+ */
+const INLINE_MARKDOWN = /(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*|_[^_]+_|\[[^\]]+\]\([^)\s]+\))/g;
+
+/**
+ * Renders authored inline Markdown as React nodes.
+ *
+ * No Markdown dependency is installed in this package, and the problem statements only use
+ * inline emphasis (`**bold**`) and `` `code` ``. Resolving the tokens straight to elements
+ * means authored text is never parsed as HTML, so it cannot inject markup
+ * (there is no `dangerouslySetInnerHTML` anywhere in this path).
+ */
+const renderInlineMarkdown = (text: string, keyPrefix: string): React.ReactNode[] =>
+  text
+    .split(INLINE_MARKDOWN)
+    .filter((part) => part !== '')
+    .map((part, i) => {
+      const key = `${keyPrefix}-${i}`;
+
+      const bold = /^\*\*([^*]+)\*\*$/.exec(part);
+      if (bold) {
+        return <strong key={key}>{renderInlineMarkdown(bold[1], key)}</strong>;
+      }
+
+      const italic = /^[*_]([^*_]+)[*_]$/.exec(part);
+      if (italic) {
+        return <em key={key}>{renderInlineMarkdown(italic[1], key)}</em>;
+      }
+
+      const code = /^`([^`]+)`$/.exec(part);
+      if (code) {
+        return (
+          <code key={key} className="inline-code">
+            {code[1]}
+          </code>
+        );
+      }
+
+      const link = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);
+      if (link) {
+        return (
+          <a key={key} href={link[2]} target="_blank" rel="noopener noreferrer">
+            {link[1]}
+          </a>
+        );
+      }
+
+      return <React.Fragment key={key}>{part}</React.Fragment>;
+    });
+
 export const ProblemPane: React.FC<ProblemPaneProps> = ({ problem }) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
@@ -52,17 +104,7 @@ export const ProblemPane: React.FC<ProblemPaneProps> = ({ problem }) => {
       <div className="problem-content">
         <div className="problem-description">
           {problem.description.split('\n\n').map((paragraph, i) => (
-            <p key={i}>
-              {paragraph.split('`').map((part, j) =>
-                j % 2 === 1 ? (
-                  <code key={j} className="inline-code">
-                    {part}
-                  </code>
-                ) : (
-                  part
-                )
-              )}
-            </p>
+            <p key={i}>{renderInlineMarkdown(paragraph, `p${i}`)}</p>
           ))}
         </div>
 

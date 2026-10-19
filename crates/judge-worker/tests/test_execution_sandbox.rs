@@ -35,13 +35,18 @@ fn test_runner_argument_formatting_across_languages() {
     assert_eq!(JavaRunner::language(), Language::Java);
     let java_compile = JavaRunner::compile_command(Path::new("/tmp/Solution.java"));
     assert_eq!(java_compile.program, "javac");
-    assert_eq!(java_compile.args, vec!["-encoding", "UTF-8", "/tmp/Solution.java"]);
+    assert_eq!(
+        java_compile.args,
+        vec!["-encoding", "UTF-8", "/tmp/Solution.java"]
+    );
 
     let java_exec = JavaRunner::execution_command(Path::new("/tmp"), "Solution");
     assert_eq!(java_exec.program, "java");
     assert!(java_exec.args.contains(&"-Xmx256m".to_string()));
     assert!(java_exec.args.contains(&"-XX:+UseSerialGC".to_string()));
-    assert!(java_exec.args.contains(&"-Dfile.encoding=UTF-8".to_string()));
+    assert!(java_exec
+        .args
+        .contains(&"-Dfile.encoding=UTF-8".to_string()));
     assert_eq!(java_exec.args.last().expect("class name"), "Solution");
 }
 
@@ -119,10 +124,7 @@ print(f"OUTPUT: {line}")
 sys.stderr.write("DEBUG_LOG: execution completed\n")
 "#;
 
-    let command = CommandConfig::new(
-        "python3",
-        vec!["-c".to_string(), script.to_string()],
-    );
+    let command = CommandConfig::new("python3", vec!["-c".to_string(), script.to_string()]);
 
     let input_data = "42\n100 200";
     let result = engine

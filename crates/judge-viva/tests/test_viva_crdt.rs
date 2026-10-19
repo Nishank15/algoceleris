@@ -81,7 +81,10 @@ fn test_state_vector_diff_exchange() -> Result<(), VivaError> {
         doc_server.export_code_snapshot(),
         doc_client.export_code_snapshot()
     );
-    assert_eq!(doc_server.export_code_snapshot(), "let x = 42;\nlet y = 100;");
+    assert_eq!(
+        doc_server.export_code_snapshot(),
+        "let x = 42;\nlet y = 100;"
+    );
 
     Ok(())
 }
@@ -119,7 +122,12 @@ fn test_awareness_envelope_serialization() -> Result<(), VivaError> {
     let json_cursor = env_cursor.to_json()?;
     let decoded_cursor = AwarenessEnvelope::from_json(&json_cursor)?;
 
-    if let AwarenessMessage::CursorMove { user_id: uid, cursor: c, .. } = decoded_cursor.message {
+    if let AwarenessMessage::CursorMove {
+        user_id: uid,
+        cursor: c,
+        ..
+    } = decoded_cursor.message
+    {
         assert_eq!(uid, user_id);
         assert_eq!(c.line, 42);
         assert_eq!(c.column, 10);

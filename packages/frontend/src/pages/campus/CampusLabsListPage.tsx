@@ -53,7 +53,7 @@ export const CampusLabsListPage: React.FC = () => {
   }, [orgSlug, session?.loginId]);
 
   const filteredLabs = labs.filter((lab) => {
-    const isEvaluated = lab.student_status === 'Evaluated' || lab.status === 'evaluated';
+    const isEvaluated = lab.student_status === 'Evaluated';
     if (filterTab === 'active' && isEvaluated) return false;
     if (filterTab === 'evaluated' && !isEvaluated) return false;
     if (searchQuery.trim()) {
@@ -73,14 +73,14 @@ export const CampusLabsListPage: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-            <span style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Academic Course Labs
             </span>
           </div>
-          <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 510, color: '#ffffff', letterSpacing: '-0.022em' }}>
+          <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 510, color: 'var(--text-primary)', letterSpacing: '-0.022em' }}>
             Laboratory Assessments & Continuous Evaluation
           </h1>
-          <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#8a8f98' }}>
+          <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
             6-stage progressive evaluation sandbox with section-locked code and ABET CLO attainment
           </p>
         </div>
@@ -93,13 +93,13 @@ export const CampusLabsListPage: React.FC = () => {
               gap: '8px',
               padding: '8px 14px',
               borderRadius: '6px',
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               fontSize: '13px',
-              color: '#d0d6e0',
+              color: 'var(--text-secondary)',
             }}
           >
-            <BookOpen size={14} color="#8a8f98" />
+            <BookOpen size={14} color="var(--text-secondary)" />
             <span>BACS101 · Problem Solving Using Java</span>
           </div>
         </div>
@@ -120,8 +120,8 @@ export const CampusLabsListPage: React.FC = () => {
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '16px',
-          background: '#0f1011',
-          border: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '8px',
           padding: '8px 12px',
         }}
@@ -141,8 +141,8 @@ export const CampusLabsListPage: React.FC = () => {
                   fontSize: '13px',
                   fontWeight: 500,
                   cursor: 'pointer',
-                  background: isActive ? '#141517' : 'transparent',
-                  color: isActive ? '#ffffff' : '#8a8f98',
+                  background: isActive ? 'var(--bg-elevated)' : 'transparent',
+                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                   transition: 'all 120ms ease',
                 }}
               >
@@ -153,7 +153,7 @@ export const CampusLabsListPage: React.FC = () => {
         </div>
 
         <div style={{ position: 'relative', minWidth: '260px' }}>
-          <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#62666d' }} />
+          <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input
             type="text"
             placeholder="Search by topic, code, or CLO..."
@@ -163,9 +163,9 @@ export const CampusLabsListPage: React.FC = () => {
               width: '100%',
               padding: '8px 12px 8px 34px',
               borderRadius: '6px',
-              background: '#141517',
-              border: '1px solid #23252a',
-              color: '#ffffff',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
               fontSize: '13px',
               outline: 'none',
               boxSizing: 'border-box',
@@ -176,23 +176,23 @@ export const CampusLabsListPage: React.FC = () => {
 
       {/* Lab List Grid */}
       {loading ? (
-        <div style={{ padding: '60px', textAlign: 'center', color: '#8a8f98', fontSize: '14px' }}>
+        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
           Loading institutional curriculum...
         </div>
       ) : filteredLabs.length === 0 ? (
-        <div style={{ padding: '60px', textAlign: 'center', color: '#8a8f98', fontSize: '14px', background: '#0f1011', border: '1px solid #23252a', borderRadius: '12px' }}>
+        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '12px' }}>
           No laboratory assessments match your search criteria.
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {filteredLabs.map((lab) => {
-            const isEvaluated = lab.student_status === 'Evaluated' || lab.status === 'evaluated';
+            const isEvaluated = lab.student_status === 'Evaluated';
             return (
               <div
                 key={lab.id}
                 style={{
-                  background: '#0f1011',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '12px',
                   padding: '24px 28px',
                   display: 'flex',
@@ -237,26 +237,49 @@ export const CampusLabsListPage: React.FC = () => {
                         borderRadius: '9999px',
                         fontSize: '11px',
                         fontWeight: 500,
-                        background: isEvaluated ? 'rgba(34, 197, 94, 0.1)' : 'rgba(228, 242, 34, 0.1)',
-                        color: isEvaluated ? '#22c55e' : '#e4f222',
+                        background: isEvaluated
+                          ? 'rgba(34, 197, 94, 0.1)'
+                          : lab.student_status === 'In Progress'
+                          ? 'rgba(245, 158, 11, 0.1)'
+                          : 'rgba(228, 242, 34, 0.1)',
+                        color: isEvaluated
+                          ? '#22c55e'
+                          : lab.student_status === 'In Progress'
+                          ? '#f59e0b'
+                          : '#e4f222',
                         display: 'inline-flex',
                         alignItems: 'center',
                         gap: '5px',
                       }}
                     >
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isEvaluated ? '#22c55e' : '#e4f222' }} />
-                      {isEvaluated ? 'Evaluated' : 'Active'}
+                      <span
+                        style={{
+                          width: '5px',
+                          height: '5px',
+                          borderRadius: '50%',
+                          background: isEvaluated
+                            ? '#22c55e'
+                            : lab.student_status === 'In Progress'
+                            ? '#f59e0b'
+                            : '#e4f222',
+                        }}
+                      />
+                      {isEvaluated
+                        ? 'Evaluated'
+                        : lab.student_status === 'In Progress'
+                        ? 'In Progress'
+                        : 'Active'}
                     </span>
                   </div>
 
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 510, color: '#ffffff', letterSpacing: '-0.015em' }}>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 510, color: 'var(--text-primary)', letterSpacing: '-0.015em' }}>
                     {lab.title}
                   </h3>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#8a8f98', lineHeight: '1.5' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
                     {lab.description}
                   </p>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '4px', fontSize: '12px', color: '#62666d' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <Clock size={13} />
                       {lab.duration_minutes} minutes
@@ -267,7 +290,7 @@ export const CampusLabsListPage: React.FC = () => {
                     </span>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                       <Award size={13} />
-                      {isEvaluated ? `Score: ${lab.student_marks ?? 19.5} / ${lab.max_marks}` : `Max Marks: ${lab.max_marks}`}
+                      {isEvaluated && lab.student_marks != null ? `Score: ${lab.student_marks} / ${lab.max_marks}` : `Max Marks: ${lab.max_marks}`}
                     </span>
                   </div>
                 </div>
@@ -282,9 +305,9 @@ export const CampusLabsListPage: React.FC = () => {
                         gap: '8px',
                         padding: '10px 18px',
                         borderRadius: '6px',
-                        background: '#141517',
-                        border: '1px solid #23252a',
-                        color: '#d0d6e0',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-secondary)',
                         fontSize: '13px',
                         fontWeight: 500,
                         textDecoration: 'none',
@@ -303,8 +326,8 @@ export const CampusLabsListPage: React.FC = () => {
                         gap: '8px',
                         padding: '10px 18px',
                         borderRadius: '6px',
-                        background: '#e4f222',
-                        color: '#08090a',
+                        background: 'var(--accent-primary)',
+                        color: 'var(--accent-primary-fg)',
                         fontSize: '13px',
                         fontWeight: 510,
                         textDecoration: 'none',

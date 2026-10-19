@@ -97,7 +97,10 @@ pub fn encode_access_token(
 ///
 /// # Errors
 /// Returns [`GatewayError::TokenExpired`] or [`GatewayError::Unauthorized`] if invalid.
-pub fn decode_access_token(token_str: &str, secret: &str) -> Result<AccessTokenClaims, GatewayError> {
+pub fn decode_access_token(
+    token_str: &str,
+    secret: &str,
+) -> Result<AccessTokenClaims, GatewayError> {
     let mut validation = Validation::default();
     validation.validate_exp = true;
     validation.leeway = 0;
@@ -115,7 +118,9 @@ pub fn decode_access_token(token_str: &str, secret: &str) -> Result<AccessTokenC
     })?;
 
     if token_data.claims.r#type != "access" {
-        return Err(GatewayError::Unauthorized("Not an access token".to_string()));
+        return Err(GatewayError::Unauthorized(
+            "Not an access token".to_string(),
+        ));
     }
 
     Ok(token_data.claims)
@@ -159,7 +164,10 @@ pub fn encode_refresh_token(
 ///
 /// # Errors
 /// Returns [`GatewayError::TokenExpired`] or [`GatewayError::Unauthorized`] if invalid.
-pub fn decode_refresh_token(token_str: &str, secret: &str) -> Result<RefreshTokenClaims, GatewayError> {
+pub fn decode_refresh_token(
+    token_str: &str,
+    secret: &str,
+) -> Result<RefreshTokenClaims, GatewayError> {
     let mut validation = Validation::default();
     validation.validate_exp = true;
     validation.leeway = 0;
@@ -177,7 +185,9 @@ pub fn decode_refresh_token(token_str: &str, secret: &str) -> Result<RefreshToke
     })?;
 
     if token_data.claims.r#type != "refresh" {
-        return Err(GatewayError::Unauthorized("Not a refresh token".to_string()));
+        return Err(GatewayError::Unauthorized(
+            "Not a refresh token".to_string(),
+        ));
     }
 
     Ok(token_data.claims)
@@ -332,14 +342,21 @@ impl TokenStore {
     ///
     /// # Errors
     /// Returns [`GatewayError`] on Redis failure.
-    pub async fn revoke_token(&self, token_id: &str, family_id: Option<&str>) -> Result<(), GatewayError> {
+    pub async fn revoke_token(
+        &self,
+        token_id: &str,
+        family_id: Option<&str>,
+    ) -> Result<(), GatewayError> {
         self.consume_refresh_token(token_id).await?;
 
         if let Some(fam) = family_id {
             if let Some(ref client) = self.redis_client {
                 if let Ok(mut conn) = client.get_multiplexed_async_connection().await {
                     let family_key = format!("auth:family:{fam}");
-                    let _: () = conn.srem(&family_key, token_id).await.map_err(GatewayError::Redis)?;
+                    let _: () = conn
+                        .srem(&family_key, token_id)
+                        .await
+                        .map_err(GatewayError::Redis)?;
                     return Ok(());
                 }
             }
@@ -380,7 +397,8 @@ impl TokenStore {
             );
             self.revoke_family(family_id).await?;
             return Err(GatewayError::ReplayDetected(
-                "Refresh token reuse detected. Your session has been revoked for security.".to_string(),
+                "Refresh token reuse detected. Your session has been revoked for security."
+                    .to_string(),
             ));
         }
 

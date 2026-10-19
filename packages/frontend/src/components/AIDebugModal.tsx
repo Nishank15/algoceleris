@@ -7,6 +7,7 @@ import {
   AlertCircle,
   FileCode,
   ArrowRight,
+  Lightbulb,
   Zap,
 } from 'lucide-react';
 import { AIDebugResponse } from '../types';
@@ -19,6 +20,25 @@ interface AIDebugModalProps {
   onApplyFix: (fixedCode: string) => void;
 }
 
+/**
+ * Renders a narrative field from the debug response.
+ *
+ * The gateway omits sections it has no detail for, so an absent or blank value is shown as a
+ * muted placeholder rather than an empty box or a raw `undefined`.
+ */
+const Narrative: React.FC<{ value?: string; style: React.CSSProperties }> = ({
+  value,
+  style,
+}) => {
+  const text = value?.trim();
+  if (text) return <div style={style}>{text}</div>;
+  return (
+    <div style={{ ...style, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+      No detail returned for this section.
+    </div>
+  );
+};
+
 export const AIDebugModal: React.FC<AIDebugModalProps> = ({
   isOpen,
   onClose,
@@ -29,6 +49,10 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
   const [applied, setApplied] = useState(false);
 
   if (!isOpen) return null;
+
+  // The gateway only sends a patch when the analysis produced a rewrite, so the apply action is
+  // gated on that field rather than on the response object as a whole.
+  const canApplyFix = Boolean(debugResponse?.fixed_code);
 
   const handleApply = () => {
     if (debugResponse?.fixed_code) {
@@ -41,7 +65,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
     }
   };
 
-  const renderDiffLines = (diffText: string) => {
+  const renderDiffLines = (diffText?: string) => {
     if (!diffText) {
       return (
         <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', padding: '12px' }}>
@@ -66,7 +90,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
         borderLeft = '3px solid var(--color-wrong-answer)';
       } else if (line.startsWith('@@')) {
         bg = 'var(--accent-secondary)';
-        color = 'var(--accent-primary)';
+        color = '#e4f222';
       }
 
       return (
@@ -138,7 +162,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'var(--accent-primary)',
+                color: '#e4f222',
               }}
             >
               <Sparkles size={18} />
@@ -156,7 +180,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     padding: '2px 6px',
                     borderRadius: '4px',
                     background: 'var(--accent-secondary)',
-                    color: 'var(--accent-primary)',
+                    color: '#e4f222',
                     border: '1px solid var(--border-subtle)',
                   }}
                 >
@@ -213,7 +237,7 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                   height: '48px',
                   borderRadius: '50%',
                   border: '2px solid rgba(94, 106, 210, 0.2)',
-                  borderTopColor: '#8a8f98',
+                  borderTopColor: '#e4f222',
                   animation: 'spin 1s linear infinite',
                 }}
               />
@@ -228,6 +252,37 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
             </div>
           ) : debugResponse ? (
             <>
+              {/* Key Takeaway (advice) */}
+              <div
+                style={{
+                  background: 'var(--bg-surface-elevated)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: '8px',
+                  padding: '14px 16px',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.05em',
+                    color: 'var(--accent-primary)',
+                    marginBottom: '6px',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  <Lightbulb size={14} />
+                  <span>Key Takeaway</span>
+                </div>
+                <Narrative
+                  value={debugResponse.advice}
+                  style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-primary)' }}
+                />
+              </div>
+
               {/* Root Cause Card */}
               <div
                 style={{
@@ -253,9 +308,10 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                   <AlertCircle size={14} />
                   <span>Root Cause Analysis</span>
                 </div>
-                <div style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-primary)' }}>
-                  {debugResponse.root_cause}
-                </div>
+                <Narrative
+                  value={debugResponse.root_cause}
+                  style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-primary)' }}
+                />
               </div>
 
               {/* Complexity & Fix Details Grid */}
@@ -284,9 +340,10 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     <Cpu size={14} />
                     <span>Complexity Inspection</span>
                   </div>
-                  <div style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}>
-                    {debugResponse.complexity_analysis}
-                  </div>
+                  <Narrative
+                    value={debugResponse.complexity_analysis}
+                    style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}
+                  />
                 </div>
 
                 <div
@@ -313,9 +370,10 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                     <Zap size={14} />
                     <span>Fix Explanation</span>
                   </div>
-                  <div style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}>
-                    {debugResponse.fix_explanation}
-                  </div>
+                  <Narrative
+                    value={debugResponse.fix_explanation}
+                    style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}
+                  />
                 </div>
               </div>
 
@@ -408,7 +466,12 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
           {debugResponse && (
             <button
               onClick={handleApply}
-              disabled={applied || isLoading}
+              disabled={applied || isLoading || !canApplyFix}
+              title={
+                canApplyFix
+                  ? undefined
+                  : 'The analysis did not return a patch for this submission.'
+              }
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -420,7 +483,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
                   : 'var(--accent-primary)',
                 border: 'none',
                 color: applied ? '#ffffff' : 'var(--accent-primary-fg)',
-                cursor: applied ? 'default' : 'pointer',
+                cursor: applied || !canApplyFix ? 'default' : 'pointer',
+                opacity: !applied && !canApplyFix ? 0.55 : 1,
                 fontSize: '13px',
                 fontWeight: 600,
                 boxShadow: applied
@@ -437,8 +501,8 @@ export const AIDebugModal: React.FC<AIDebugModalProps> = ({
               ) : (
                 <>
                   <Sparkles size={16} />
-                  <span>Apply Fix to Editor</span>
-                  <ArrowRight size={14} />
+                  <span>{canApplyFix ? 'Apply Fix to Editor' : 'No Patch Available'}</span>
+                  {canApplyFix && <ArrowRight size={14} />}
                 </>
               )}
             </button>

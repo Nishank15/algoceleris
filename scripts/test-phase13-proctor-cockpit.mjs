@@ -86,7 +86,10 @@ assert(campusApiSrc.includes('fetchProctorEvents') || campusApiSrc.includes('get
 
 // 6. Verify Route Registration in App.tsx
 console.log('[Test 5] Verifying route registration in App.tsx...');
-assert(appTsxSrc.includes('/campus/assessments/:id/cockpit'), 'FAIL: /campus/assessments/:id/cockpit route missing in App.tsx');
+assert(
+  appTsxSrc.includes('faculty/cockpit/:assessmentId'),
+  'FAIL: faculty/cockpit/:assessmentId route missing in App.tsx'
+);
 assert(appTsxSrc.includes('FacultyProctorCockpitPage'), 'FAIL: FacultyProctorCockpitPage import missing in App.tsx');
 
 // 7. Verify CSS Tokens, Dark Glass Cards, and Invariants in index.css

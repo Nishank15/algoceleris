@@ -1,7 +1,7 @@
 //! Error types and RFC 7807 problem details representations for the gateway.
 
-use axum::http::header::CONTENT_TYPE;
-use axum::http::StatusCode;
+use axum::http::header::{CONTENT_TYPE, RETRY_AFTER};
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde::{Deserialize, Serialize};
@@ -72,6 +72,15 @@ pub enum GatewayError {
     #[error("Conflict: {0}")]
     Conflict(String),
 
+    /// 429 Too Many Requests - caller exhausted a per-user quota.
+    #[error("Too many requests: {detail}")]
+    TooManyRequests {
+        /// Human-readable explanation of the exhausted quota.
+        detail: String,
+        /// Seconds the caller should wait before retrying.
+        retry_after_seconds: u64,
+    },
+
     /// 500 Internal Server Error - Unexpected server condition.
     #[error("Internal server error: {0}")]
     InternalError(String),
@@ -96,6 +105,14 @@ pub enum GatewayError {
 impl IntoResponse for GatewayError {
     #[allow(clippy::too_many_lines)]
     fn into_response(self) -> Response {
+        let retry_after = match &self {
+            Self::TooManyRequests {
+                retry_after_seconds,
+                ..
+            } => Some(*retry_after_seconds),
+            _ => None,
+        };
+
         let (status, problem_type, title, detail) = match self {
             Self::InvalidCredentials(msg) => (
                 StatusCode::UNAUTHORIZED,
@@ -145,6 +162,12 @@ impl IntoResponse for GatewayError {
                 "Conflict",
                 msg,
             ),
+            Self::TooManyRequests { detail, .. } => (
+                StatusCode::TOO_MANY_REQUESTS,
+                "urn:problem-type:too-many-requests",
+                "Too Many Requests",
+                detail,
+            ),
             Self::InternalError(msg) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "urn:problem-type:internal-error",
@@ -176,9 +199,9 @@ impl IntoResponse for GatewayError {
                     "Invalid Rubric Evaluation",
                     msg,
                 ),
-                judge_viva::VivaError::Domain(judge_core::DomainError::UnbalancedRubricWeights {
-                    sum,
-                }) => (
+                judge_viva::VivaError::Domain(
+                    judge_core::DomainError::UnbalancedRubricWeights { sum },
+                ) => (
                     StatusCode::BAD_REQUEST,
                     "urn:problem-type:bad-request",
                     "Unbalanced Rubric Weights",
@@ -208,11 +231,17 @@ impl IntoResponse for GatewayError {
         };
 
         let problem = ProblemDetails::new(problem_type, title, status, &detail);
-        (
-            status,
-            [(CONTENT_TYPE, "application/problem+json")],
-            Json(problem),
-        )
-            .into_response()
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            CONTENT_TYPE,
+            HeaderValue::from_static("application/problem+json"),
+        );
+        if let Some(seconds) = retry_after {
+            if let Ok(value) = HeaderValue::from_str(&seconds.to_string()) {
+                headers.insert(RETRY_AFTER, value);
+            }
+        }
+
+        (status, headers, Json(problem)).into_response()
     }
 }

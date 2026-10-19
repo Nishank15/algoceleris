@@ -138,8 +138,7 @@ impl AwarenessEnvelope {
     /// # Errors
     /// Returns [`VivaError::SerializationError`] if serialization fails.
     pub fn to_json(&self) -> Result<String, VivaError> {
-        serde_json::to_string(self)
-            .map_err(|e| VivaError::SerializationError(e.to_string()))
+        serde_json::to_string(self).map_err(|e| VivaError::SerializationError(e.to_string()))
     }
 
     /// Deserializes envelope from a JSON string.
@@ -147,7 +146,6 @@ impl AwarenessEnvelope {
     /// # Errors
     /// Returns [`VivaError::SerializationError`] if parsing fails.
     pub fn from_json(json: &str) -> Result<Self, VivaError> {
-        serde_json::from_str(json)
-            .map_err(|e| VivaError::SerializationError(e.to_string()))
+        serde_json::from_str(json).map_err(|e| VivaError::SerializationError(e.to_string()))
     }
 }

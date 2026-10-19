@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::auth::token::DEFAULT_JWT_SECRET;
 use crate::auth::TokenStore;
+use crate::services::rate_limit::AiDebugRateLimiter;
 
 /// Hackathon track item.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -37,6 +38,10 @@ pub struct HackathonMilestoneItem {
     pub date: String,
     pub status: String,
     pub description: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub start_iso: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub end_iso: Option<String>,
 }
 
 /// Hackathon project showcase item.
@@ -133,8 +138,8 @@ impl Default for HackathonStore {
             id: Uuid::parse_str("11111111-1111-1111-1111-111111111111").unwrap(),
             slug: "devshouse-26".to_string(),
             title: "DevsHouse '26".to_string(),
-            tagline: "National Systems, Distributed Infrastructure & AI Buildathon".to_string(),
-            host: "VIT Chennai Developers Club & CSI".to_string(),
+            tagline: "Campus Assessment Engineering & Evaluation Platform Buildathon".to_string(),
+            host: "VIT Chennai Developers Club & AlgoCeleris".to_string(),
             mode: "Hybrid (VIT Chennai Campus + Online Discord)".to_string(),
             location: "Netaji Subhash Chandra Bose Block, VIT Chennai".to_string(),
             prize_pool: "₹5,00,000 / $6,000".to_string(),
@@ -145,36 +150,36 @@ impl Default for HackathonStore {
             is_flagship: true,
             tracks: vec![
                 HackathonTrackItem {
-                    id: "rust-systems".to_string(),
-                    title: "Rust & High-Performance Systems".to_string(),
-                    description: "Build ultra-low-latency network proxies, rate limiters, or sandboxed execution runtimes.".to_string(),
+                    id: "evaluation-pipeline".to_string(),
+                    title: "Assessment Evaluation Pipeline".to_string(),
+                    description: "Extend the grading pipeline with custom checkers, weighted test groups and per-language runtimes.".to_string(),
                     prize: "₹1,50,000 First Prize".to_string(),
-                    problem_statement: "High-Throughput Distributed Rate Limiter: Implement a token bucket or sliding window algorithm capable of handling 500,000 req/sec with sub-millisecond tail latency.".to_string(),
-                    sponsor: Some("CloudFlare & AlgoCeleris".to_string()),
+                    problem_statement: "Build a custom checker plugin that awards partial credit across weighted test groups and reports the result back into an assessment rubric.".to_string(),
+                    sponsor: Some("AlgoCeleris Platform".to_string()),
                 },
                 HackathonTrackItem {
-                    id: "agentic-ai".to_string(),
-                    title: "Agentic AI & Multimodal Workflows".to_string(),
-                    description: "Develop autonomous multi-agent reasoning systems that self-correct, debug, and coordinate.".to_string(),
+                    id: "integrity-signals".to_string(),
+                    title: "Integrity & Proctoring Signals".to_string(),
+                    description: "Session telemetry, anomaly scoring and faculty review workflows for supervised assessments.".to_string(),
                     prize: "₹1,50,000 First Prize".to_string(),
-                    problem_statement: "Emergency Dispatch Intelligence: Autonomous multi-agent coordination between dispatchers, traffic networks, and hospital triage units.".to_string(),
-                    sponsor: Some("Google Cloud".to_string()),
+                    problem_statement: "Design an anomaly score over existing session telemetry (focus loss, clipboard bursts, submission timing) that produces explainable risk bands for faculty review.".to_string(),
+                    sponsor: Some("AlgoCeleris Sentinel".to_string()),
                 },
                 HackathonTrackItem {
-                    id: "fintech-quant".to_string(),
-                    title: "FinTech, Order Books & Quant Systems".to_string(),
-                    description: "High-frequency limit order books, risk engines, and programmable settlement layers.".to_string(),
+                    id: "faculty-tooling".to_string(),
+                    title: "Faculty Assessment Tooling".to_string(),
+                    description: "Question authoring, cohort scheduling, rubric design and curriculum outcome reporting.".to_string(),
                     prize: "₹1,00,000 First Prize".to_string(),
-                    problem_statement: "Microsecond LOB Engine: Order matching engine with price-time priority in pure Rust.".to_string(),
-                    sponsor: Some("Zerodha Tech".to_string()),
+                    problem_statement: "Build a rubric builder that maps each question to a course learning outcome and reports cohort attainment per outcome.".to_string(),
+                    sponsor: Some("VIT Chennai".to_string()),
                 },
                 HackathonTrackItem {
-                    id: "open-innovation".to_string(),
-                    title: "Open Innovation & Campus Tech".to_string(),
-                    description: "Next-generation developer platforms, learning copilots, and institutional automation.".to_string(),
+                    id: "student-experience".to_string(),
+                    title: "Student Learning Experience".to_string(),
+                    description: "Progressive lab stages, practice catalogs and feedback surfaces for students.".to_string(),
                     prize: "₹1,00,000 First Prize".to_string(),
-                    problem_statement: "Solve any pressing engineering challenge with zero technical constraints.".to_string(),
-                    sponsor: Some("VIT Chennai Alumni".to_string()),
+                    problem_statement: "Design a progressive hint system for lab stages that guides students without revealing hidden test cases.".to_string(),
+                    sponsor: Some("AlgoCeleris Campus".to_string()),
                 },
             ],
             milestones: vec![
@@ -182,45 +187,55 @@ impl Default for HackathonStore {
                     phase: 1,
                     title: "Registration & Team Formation".to_string(),
                     date: "Oct 01 – Oct 15, 2026".to_string(),
-                    status: "COMPLETED".to_string(),
-                    description: "Solo registrations and matchmaking lobby.".to_string(),
+                    status: String::new(),
+                    description: "Solo registrations, team formation and matchmaking.".to_string(),
+                    start_iso: Some("2026-10-01T09:00:00+05:30".to_string()),
+                    end_iso: Some("2026-10-15T18:00:00+05:30".to_string()),
                 },
                 HackathonMilestoneItem {
                     phase: 2,
                     title: "Algorithmic Qualifier Round".to_string(),
-                    date: "Oct 16, 2026 · 06:00 PM".to_string(),
-                    status: "ACTIVE".to_string(),
-                    description: "Timed 3-problem algorithmic challenge judged by the Rust sandbox.".to_string(),
+                    date: "Oct 15 (06:00 PM) – Oct 16 (06:00 PM)".to_string(),
+                    status: String::new(),
+                    description: "Timed three-problem set evaluated automatically against public and hidden test cases.".to_string(),
+                    start_iso: Some("2026-10-15T18:00:00+05:30".to_string()),
+                    end_iso: Some("2026-10-16T18:00:00+05:30".to_string()),
                 },
                 HackathonMilestoneItem {
                     phase: 3,
                     title: "Idea & Architecture Abstract Review".to_string(),
-                    date: "Oct 17, 2026".to_string(),
-                    status: "UPCOMING".to_string(),
-                    description: "System design proposals evaluated by engineering mentors.".to_string(),
+                    date: "Oct 16 (06:00 PM) – Oct 17 (11:59 PM)".to_string(),
+                    status: String::new(),
+                    description: "Proposals reviewed by platform engineers for scope and feasibility.".to_string(),
+                    start_iso: Some("2026-10-16T18:00:00+05:30".to_string()),
+                    end_iso: Some("2026-10-17T23:59:59+05:30".to_string()),
                 },
                 HackathonMilestoneItem {
                     phase: 4,
                     title: "48-Hour Live Build Sprint".to_string(),
                     date: "Oct 18 (09:00 AM) – Oct 20 (09:00 AM)".to_string(),
-                    status: "UPCOMING".to_string(),
-                    description: "Non-stop code development with checkpoint mentor reviews.".to_string(),
+                    status: String::new(),
+                    description: "Extended build window with scheduled mentor checkpoints.".to_string(),
+                    start_iso: Some("2026-10-18T09:00:00+05:30".to_string()),
+                    end_iso: Some("2026-10-20T09:00:00+05:30".to_string()),
                 },
                 HackathonMilestoneItem {
                     phase: 5,
                     title: "Live Rubric Demos & Award Ceremony".to_string(),
                     date: "Oct 20, 2026 · 02:00 PM".to_string(),
-                    status: "UPCOMING".to_string(),
-                    description: "Top 10 finalists present live before jury on stage.".to_string(),
+                    status: String::new(),
+                    description: "Top ten finalists demo to the review panel.".to_string(),
+                    start_iso: Some("2026-10-20T14:00:00+05:30".to_string()),
+                    end_iso: Some("2026-10-20T18:00:00+05:30".to_string()),
                 },
             ],
             rules: vec![
-                "Teams must consist of 2 to 4 eligible university or early-career engineers.".to_string(),
+                "Teams of 2 to 4 students or early-career engineers.".to_string(),
                 "All project code must be written during the 48-hour build sprint.".to_string(),
-                "Use of open-source libraries and LLM APIs is allowed with explicit attribution in README.".to_string(),
-                "Zero tolerance for plagiarism; all repositories scanned via AST Winnowing.".to_string(),
+                "Open-source libraries are permitted with attribution in the project README.".to_string(),
+                "Submissions are screened for code similarity before final scoring.".to_string(),
             ],
-            eligibility: "Open to undergraduate & postgraduate students globally, as well as working professionals within 2 years of graduation.".to_string(),
+            eligibility: "Open to undergraduate and postgraduate students, and to working professionals within two years of graduation.".to_string(),
         };
 
         hackathons.insert("devshouse-26".to_string(), devshouse);
@@ -232,8 +247,8 @@ impl Default for HackathonStore {
                 id: Uuid::parse_str("22222222-2222-2222-2222-222222222222").unwrap(),
                 slug: "csi-origin-2026".to_string(),
                 title: "CSI ORIGIN 2026".to_string(),
-                tagline: "High-Performance Cloud & Real-time Evaluation Hackathon".to_string(),
-                host: "Computer Society of India".to_string(),
+                tagline: "Automated Evaluation at Scale & Institutional Rollout".to_string(),
+                host: "Computer Society of India & AlgoCeleris".to_string(),
                 mode: "Online".to_string(),
                 location: "Global Remote".to_string(),
                 prize_pool: "₹2,50,000".to_string(),
@@ -244,25 +259,31 @@ impl Default for HackathonStore {
                 is_flagship: false,
                 tracks: vec![
                     HackathonTrackItem {
-                        id: "cloud-architecture".to_string(),
-                        title: "Cloud Architecture".to_string(),
-                        description: "Distributed infrastructure and multi-region microservices.".to_string(),
+                        id: "platform-integration".to_string(),
+                        title: "Platform Integration".to_string(),
+                        description: "Roster sync, single sign-on and course tooling for campus deployments."
+                            .to_string(),
                         prize: "₹1,50,000".to_string(),
-                        problem_statement: "Design resilient low-cost multi-region edge mesh.".to_string(),
-                        sponsor: Some("AWS & Cloud Native Foundation".to_string()),
+                        problem_statement: "Sync a cohort roster from a university LMS into an AlgoCeleris organisation, including role mapping."
+                            .to_string(),
+                        sponsor: Some("Computer Society of India".to_string()),
                     },
                     HackathonTrackItem {
-                        id: "zk-proofs".to_string(),
-                        title: "Web3 & Zero-Knowledge".to_string(),
-                        description: "Succinct verifiable computation and cryptographic state proofs.".to_string(),
+                        id: "academic-integrity".to_string(),
+                        title: "Academic Integrity".to_string(),
+                        description:
+                            "Code similarity analysis, submission provenance and reviewer triage."
+                                .to_string(),
                         prize: "₹1,00,000".to_string(),
-                        problem_statement: "Zero-knowledge verification of competitive programming test results.".to_string(),
-                        sponsor: Some("Polygon Labs".to_string()),
+                        problem_statement:
+                            "Build a reviewer triage view over similarity results that ranks submission pairs and records the adjudication outcome."
+                                .to_string(),
+                        sponsor: Some("Computer Society of India".to_string()),
                     },
                 ],
                 milestones: vec![],
-                rules: vec!["Teams of 1-4 members.".to_string()],
-                eligibility: "Open globally.".to_string(),
+                rules: vec!["Teams of 1 to 4 members.".to_string()],
+                eligibility: "Open to students and working professionals.".to_string(),
             },
         );
 
@@ -273,8 +294,8 @@ impl Default for HackathonStore {
                 id: Uuid::parse_str("33333333-3333-3333-3333-333333333333").unwrap(),
                 slug: "build-with-gemma".to_string(),
                 title: "Build With Gemma AI Challenge".to_string(),
-                tagline: "Edge AI, Socratic Mentorship & Local LLM Applications".to_string(),
-                host: "Google Cloud & Open Source Community".to_string(),
+                tagline: "AI-Assisted Feedback for Programming Courses".to_string(),
+                host: "Google Cloud & AlgoCeleris".to_string(),
                 mode: "Online".to_string(),
                 location: "Global Virtual".to_string(),
                 prize_pool: "$10,000".to_string(),
@@ -283,19 +304,20 @@ impl Default for HackathonStore {
                 end_date: "Oct 25, 2026".to_string(),
                 base_registered_count: 2150,
                 is_flagship: false,
-                tracks: vec![
-                    HackathonTrackItem {
-                        id: "multimodal-llms".to_string(),
-                        title: "Multimodal LLMs".to_string(),
-                        description: "Audio, vision, and code generation with Gemma 2B/9B/27B.".to_string(),
-                        prize: "$6,000".to_string(),
-                        problem_statement: "Deploy edge-quantized model for real-time multimodal developer assistance.".to_string(),
-                        sponsor: Some("Google Cloud AI".to_string()),
-                    },
-                ],
+                tracks: vec![HackathonTrackItem {
+                    id: "assisted-feedback".to_string(),
+                    title: "Assisted Feedback".to_string(),
+                    description: "Turn compiler diagnostics and failing test cases into actionable student guidance."
+                        .to_string(),
+                    prize: "$6,000".to_string(),
+                    problem_statement:
+                        "Using Gemma, generate a targeted hint for a failing submission that references the failing test case without revealing the expected output."
+                            .to_string(),
+                    sponsor: Some("Google Cloud AI".to_string()),
+                }],
                 milestones: vec![],
-                rules: vec!["Must utilize Gemma weights.".to_string()],
-                eligibility: "Open globally.".to_string(),
+                rules: vec!["Projects must use Gemma model weights.".to_string()],
+                eligibility: "Open to students and working professionals.".to_string(),
             },
         );
 
@@ -306,8 +328,8 @@ impl Default for HackathonStore {
                 id: Uuid::parse_str("44444444-4444-4444-4444-444444444444").unwrap(),
                 slug: "algoceleris-rust-sprint".to_string(),
                 title: "AlgoCeleris Global Rust Sprint".to_string(),
-                tagline: "Low-latency Kernel Sandbox & WebAssembly Benchmarking".to_string(),
-                host: "AlgoCeleris Core Foundation".to_string(),
+                tagline: "Evaluation Runtime Reliability & Throughput Sprint".to_string(),
+                host: "AlgoCeleris".to_string(),
                 mode: "Online".to_string(),
                 location: "Remote".to_string(),
                 prize_pool: "₹1,50,000".to_string(),
@@ -319,7 +341,7 @@ impl Default for HackathonStore {
                 tracks: vec![],
                 milestones: vec![],
                 rules: vec![],
-                eligibility: "Completed".to_string(),
+                eligibility: "Open to Rust developers worldwide.".to_string(),
             },
         );
 
@@ -329,34 +351,34 @@ impl Default for HackathonStore {
             vec![
                 HackathonTeamItem {
                     id: Uuid::new_v4(),
-                    team_name: "FlowControl".to_string(),
-                    invite_code: "FLOW26".to_string(),
+                    team_name: "PartialCredit".to_string(),
+                    invite_code: "PART26".to_string(),
                     members: vec![
-                        "Aditya Sharma (Lead)".to_string(),
-                        "Kavya R (Rust Engineer)".to_string(),
-                        "Nishank (Systems)".to_string(),
+                        "Student 1 (Lead)".to_string(),
+                        "Student 2 (Backend)".to_string(),
+                        "Student 6 (Checkers)".to_string(),
                     ],
-                    track: Some("Rust & High-Performance Systems".to_string()),
+                    track: Some("Assessment Evaluation Pipeline".to_string()),
                 },
                 HackathonTeamItem {
                     id: Uuid::new_v4(),
-                    team_name: "ByteWizards".to_string(),
-                    invite_code: "BYTE26".to_string(),
+                    team_name: "SignalReview".to_string(),
+                    invite_code: "SIGN26".to_string(),
                     members: vec![
-                        "Rohan Gupta (ML Lead)".to_string(),
-                        "Priya Verma (Frontend)".to_string(),
+                        "Student 3 (ML Lead)".to_string(),
+                        "Student 7 (Frontend)".to_string(),
                     ],
-                    track: Some("Agentic AI & Multimodal Workflows".to_string()),
+                    track: Some("Integrity & Proctoring Signals".to_string()),
                 },
                 HackathonTeamItem {
                     id: Uuid::new_v4(),
-                    team_name: "QuantLeap".to_string(),
-                    invite_code: "QUAN26".to_string(),
+                    team_name: "OutcomeMap".to_string(),
+                    invite_code: "OUTM26".to_string(),
                     members: vec![
-                        "Arjun Mehta (Lead)".to_string(),
-                        "Siddharth N (Quant Dev)".to_string(),
+                        "Student 8 (Lead)".to_string(),
+                        "Student 9 (Data)".to_string(),
                     ],
-                    track: Some("FinTech, Order Books & Quant Systems".to_string()),
+                    track: Some("Faculty Assessment Tooling".to_string()),
                 },
             ],
         );
@@ -367,35 +389,57 @@ impl Default for HackathonStore {
             vec![
                 HackathonMatchmakerItem {
                     id: "mm-01".to_string(),
-                    name: "Aarav Patel".to_string(),
-                    role: "Systems Engineer".to_string(),
-                    skills: vec!["Rust".to_string(), "eBPF".to_string(), "Tokio".to_string(), "gRPC".to_string()],
-                    looking_for: "Team targeting Systems / Kernel track".to_string(),
-                    contact: "aarav.p@vitstudent.ac.in".to_string(),
+                    name: "Student 10".to_string(),
+                    role: "Backend Engineer".to_string(),
+                    skills: vec![
+                        "Rust".to_string(),
+                        "PostgreSQL".to_string(),
+                        "Axum".to_string(),
+                        "Docker".to_string(),
+                    ],
+                    looking_for: "Team working on the evaluation pipeline track".to_string(),
+                    contact: "student10@vitstudent.ac.in".to_string(),
                 },
                 HackathonMatchmakerItem {
                     id: "mm-02".to_string(),
-                    name: "Sneha Sundaram".to_string(),
-                    role: "AI & Full-Stack Engineer".to_string(),
-                    skills: vec!["TypeScript".to_string(), "PyTorch".to_string(), "React".to_string(), "Gemini API".to_string()],
-                    looking_for: "Team targeting Agentic AI track".to_string(),
-                    contact: "sneha.s@vitstudent.ac.in".to_string(),
+                    name: "Student 11".to_string(),
+                    role: "Frontend Engineer".to_string(),
+                    skills: vec![
+                        "TypeScript".to_string(),
+                        "React".to_string(),
+                        "Recharts".to_string(),
+                        "Vite".to_string(),
+                    ],
+                    looking_for: "Team working on the faculty tooling track".to_string(),
+                    contact: "student11@vitstudent.ac.in".to_string(),
                 },
                 HackathonMatchmakerItem {
                     id: "mm-03".to_string(),
-                    name: "Vikramaditya S".to_string(),
-                    role: "Quantitative Developer".to_string(),
-                    skills: vec!["C++20".to_string(), "Python".to_string(), "Order Books".to_string(), "NumPy".to_string()],
-                    looking_for: "Need 1 more teammate for FinTech track".to_string(),
-                    contact: "vikram.s@vitstudent.ac.in".to_string(),
+                    name: "Student 12".to_string(),
+                    role: "Data Engineer".to_string(),
+                    skills: vec![
+                        "Python".to_string(),
+                        "SQL".to_string(),
+                        "pandas".to_string(),
+                        "Recharts".to_string(),
+                    ],
+                    looking_for: "Need one more teammate for the integrity signals track"
+                        .to_string(),
+                    contact: "student12@vitstudent.ac.in".to_string(),
                 },
                 HackathonMatchmakerItem {
                     id: "mm-04".to_string(),
-                    name: "Divya Krishnan".to_string(),
-                    role: "Security & Cloud Architect".to_string(),
-                    skills: vec!["Linux Namespaces".to_string(), "Docker".to_string(), "AWS".to_string(), "Go".to_string()],
-                    looking_for: "Open to join any team targeting security/distributed systems".to_string(),
-                    contact: "divya.k@vitstudent.ac.in".to_string(),
+                    name: "Student 13".to_string(),
+                    role: "Platform Engineer".to_string(),
+                    skills: vec![
+                        "Linux".to_string(),
+                        "Docker".to_string(),
+                        "Redis".to_string(),
+                        "Observability".to_string(),
+                    ],
+                    looking_for: "Open to any team working on deployment or integration"
+                        .to_string(),
+                    contact: "student13@vitstudent.ac.in".to_string(),
                 },
             ],
         );
@@ -406,31 +450,49 @@ impl Default for HackathonStore {
             vec![
                 HackathonShowcaseItem {
                     id: "proj-01".to_string(),
-                    team_name: "FlowControl".to_string(),
-                    project_title: "Nirnay".to_string(),
-                    tagline: "Autonomous emergency response coordination mesh with sub-10ms routing".to_string(),
-                    track: "Rust & High-Performance Systems".to_string(),
-                    github_url: "https://github.com/algo-celeris/nirnay-engine".to_string(),
-                    live_url: Some("https://nirnay.algoceleris.dev".to_string()),
-                    demo_video_url: Some("https://youtube.com/watch?v=nirnay-demo".to_string()),
-                    architecture_deck_url: Some("https://algoceleris.dev/decks/nirnay-arch.pdf".to_string()),
+                    team_name: "PartialCredit".to_string(),
+                    project_title: "GroupScorer".to_string(),
+                    tagline:
+                        "Checker plugin that awards partial credit across weighted test groups"
+                            .to_string(),
+                    track: "Assessment Evaluation Pipeline".to_string(),
+                    github_url: "https://github.com/algo-celeris/group-scorer".to_string(),
+                    live_url: Some("https://groupscorer.algoceleris.dev".to_string()),
+                    demo_video_url: Some(
+                        "https://youtube.com/watch?v=groupscorer-demo".to_string(),
+                    ),
+                    architecture_deck_url: Some(
+                        "https://algoceleris.dev/decks/group-scorer.pdf".to_string(),
+                    ),
                     upvotes: 184,
                     rubric_score: 9.6,
-                    tech_stack: vec!["Rust".to_string(), "Axum".to_string(), "Postgres".to_string(), "WebSockets".to_string()],
+                    tech_stack: vec![
+                        "Rust".to_string(),
+                        "Axum".to_string(),
+                        "PostgreSQL".to_string(),
+                        "WebSockets".to_string(),
+                    ],
                 },
                 HackathonShowcaseItem {
                     id: "proj-02".to_string(),
-                    team_name: "ByteWizards".to_string(),
-                    project_title: "SocraticJudge".to_string(),
-                    tagline: "Compiler diagnostic tutor that guides beginners through AST-level hints".to_string(),
-                    track: "Agentic AI & Multimodal Workflows".to_string(),
-                    github_url: "https://github.com/algo-celeris/socratic-judge".to_string(),
-                    live_url: Some("https://socratic.algoceleris.dev".to_string()),
-                    demo_video_url: Some("https://youtube.com/watch?v=socratic-demo".to_string()),
-                    architecture_deck_url: Some("https://algoceleris.dev/decks/socratic-arch.pdf".to_string()),
+                    team_name: "SignalReview".to_string(),
+                    project_title: "RiskBands".to_string(),
+                    tagline: "Explainable anomaly bands for faculty review of proctored sessions"
+                        .to_string(),
+                    track: "Integrity & Proctoring Signals".to_string(),
+                    github_url: "https://github.com/algo-celeris/risk-bands".to_string(),
+                    live_url: Some("https://riskbands.algoceleris.dev".to_string()),
+                    demo_video_url: Some("https://youtube.com/watch?v=riskbands-demo".to_string()),
+                    architecture_deck_url: Some(
+                        "https://algoceleris.dev/decks/risk-bands.pdf".to_string(),
+                    ),
                     upvotes: 142,
                     rubric_score: 9.3,
-                    tech_stack: vec!["TypeScript".to_string(), "Gemini 2.5".to_string(), "React".to_string()],
+                    tech_stack: vec![
+                        "TypeScript".to_string(),
+                        "React".to_string(),
+                        "Recharts".to_string(),
+                    ],
                 },
             ],
         );
@@ -554,7 +616,7 @@ pub struct StudentActivityLog {
     pub timestamp: DateTime<Utc>,
 }
 
-/// Security audit log item for Kernel & Sandbox isolation.
+/// Evaluation safety audit log item.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SecurityAuditItem {
     pub id: Uuid,
@@ -572,7 +634,8 @@ pub struct PlagiarismReportItem {
     pub student_a: String,
     pub student_b: String,
     pub ast_similarity_score: f64,
-    pub winnowing_fingerprints_matched: u32,
+    #[serde(alias = "winnowing_fingerprints_matched")]
+    pub similarity_matches: u32,
     pub status: String,
 }
 
@@ -591,11 +654,13 @@ pub struct MockCampusStore {
     pub assessment_submissions: Arc<RwLock<HashMap<Uuid, AssessmentSubmissionRecord>>>,
     pub submission_queue: Arc<RwLock<Vec<serde_json::Value>>>,
     pub submission_results: Arc<RwLock<HashMap<Uuid, Vec<serde_json::Value>>>>,
-    pub submission_broadcasts: Arc<RwLock<HashMap<Uuid, tokio::sync::broadcast::Sender<serde_json::Value>>>>,
+    pub submission_broadcasts:
+        Arc<RwLock<HashMap<Uuid, tokio::sync::broadcast::Sender<serde_json::Value>>>>,
     pub proctor_events: Arc<RwLock<HashMap<(Uuid, Uuid), Vec<ProctorEventRecord>>>>,
     pub candidate_proctor_counts: Arc<RwLock<HashMap<(Uuid, Uuid), ProctorEventCounts>>>,
     pub interview_rooms: Arc<RwLock<HashMap<String, InterviewRoomRecord>>>,
-    pub in_memory_users: Arc<RwLock<HashMap<Uuid, (String, String, String, String, Option<String>)>>>,
+    pub in_memory_users:
+        Arc<RwLock<HashMap<Uuid, (String, String, String, String, Option<String>)>>>,
     pub labs: Arc<RwLock<HashMap<String, LabRecord>>>,
     pub student_progress: Arc<RwLock<HashMap<(String, Uuid), StudentLabProgress>>>,
     pub activity_logs: Arc<RwLock<Vec<StudentActivityLog>>>,
@@ -612,8 +677,8 @@ impl Default for MockCampusStore {
         let mut member_reg_numbers = HashMap::new();
         let mut in_memory_users = HashMap::new();
         let now = Utc::now();
-        let default_pw_hash = crate::auth::hash_password("Campus@2026")
-            .unwrap_or_else(|_| "Campus@2026".to_string());
+        let default_pw_hash =
+            crate::auth::hash_password("Campus@2026").unwrap_or_else(|_| "Campus@2026".to_string());
 
         // 1. VIT Chennai (Enterprise Campus)
         let vit_id = Uuid::parse_str("10000000-0000-0000-0000-000000000001").unwrap();
@@ -648,25 +713,73 @@ impl Default for MockCampusStore {
         );
 
         let vit_members = vec![
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000001").unwrap(), "adityasharma", "aditya.sharma2025@vitstudent.ac.in", "student", "25BAI1234"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000002").unwrap(), "kavyar", "kavya.r2025@vitstudent.ac.in", "student", "25BCE1802"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000003").unwrap(), "rohangupta", "rohan.gupta2025@vitstudent.ac.in", "student", "25BCE1120"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000004").unwrap(), "saravanan.p", "saravanan.p@vit.ac.in", "faculty", "FAC-9842"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000005").unwrap(), "preetha.s", "preetha.s@vit.ac.in", "faculty", "FAC-7104"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000006").unwrap(), "dean.academics", "dean.academics@vit.ac.in", "org_admin", "ADM-001"),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000001").unwrap(),
+                "student1",
+                "student1@vitstudent.ac.in",
+                "student",
+                "DEMO-001",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000002").unwrap(),
+                "student2",
+                "student2@vitstudent.ac.in",
+                "student",
+                "DEMO-002",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000003").unwrap(),
+                "student3",
+                "student3@vitstudent.ac.in",
+                "student",
+                "DEMO-003",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000004").unwrap(),
+                "demofaculty",
+                "demofaculty@vit.ac.in",
+                "faculty",
+                "FAC-VIT-01",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000005").unwrap(),
+                "demofaculty2",
+                "demofaculty2@vit.ac.in",
+                "faculty",
+                "FAC-VIT-02",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000006").unwrap(),
+                "demoadmin",
+                "demoadmin@vit.ac.in",
+                "org_admin",
+                "ADM-VIT-01",
+            ),
         ];
         for (uid, uname, email, role, reg) in vit_members {
             users.insert(uid, (uname.to_string(), email.to_string()));
-            in_memory_users.insert(uid, (uname.to_string(), email.to_string(), default_pw_hash.clone(), role.to_string(), Some("VIT Chennai".to_string())));
-            memberships.insert((vit_id, uid), OrgMembershipRecord {
-                id: Uuid::new_v4(),
-                org_id: vit_id,
-                user_id: uid,
-                cohort_id: Some(vit_cohort_id),
-                role: role.to_string(),
-                status: "active".to_string(),
-                created_at: now,
-            });
+            in_memory_users.insert(
+                uid,
+                (
+                    uname.to_string(),
+                    email.to_string(),
+                    default_pw_hash.clone(),
+                    role.to_string(),
+                    Some("VIT Chennai".to_string()),
+                ),
+            );
+            memberships.insert(
+                (vit_id, uid),
+                OrgMembershipRecord {
+                    id: Uuid::new_v4(),
+                    org_id: vit_id,
+                    user_id: uid,
+                    cohort_id: Some(vit_cohort_id),
+                    role: role.to_string(),
+                    status: "active".to_string(),
+                    created_at: now,
+                },
+            );
             member_reg_numbers.insert((vit_id, uid), reg.to_string());
         }
 
@@ -702,22 +815,52 @@ impl Default for MockCampusStore {
             },
         );
         let iitm_members = vec![
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000007").unwrap(), "sandeepnair", "sandeep.n@smail.iitm.ac.in", "student", "CS22B001"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000008").unwrap(), "cpandurangan", "cpandurangan@iitm.ac.in", "faculty", "FAC-IITM-01"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000009").unwrap(), "hod.cse", "hod.cse@iitm.ac.in", "org_admin", "ADM-IITM-01"),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000007").unwrap(),
+                "student4",
+                "student4@smail.iitm.ac.in",
+                "student",
+                "DEMO-004",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000008").unwrap(),
+                "demofaculty.iitm",
+                "demofaculty@iitm.ac.in",
+                "faculty",
+                "FAC-IITM-01",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000009").unwrap(),
+                "demoadmin.iitm",
+                "demoadmin@iitm.ac.in",
+                "org_admin",
+                "ADM-IITM-01",
+            ),
         ];
         for (uid, uname, email, role, reg) in iitm_members {
             users.insert(uid, (uname.to_string(), email.to_string()));
-            in_memory_users.insert(uid, (uname.to_string(), email.to_string(), default_pw_hash.clone(), role.to_string(), Some("IIT Madras".to_string())));
-            memberships.insert((iitm_id, uid), OrgMembershipRecord {
-                id: Uuid::new_v4(),
-                org_id: iitm_id,
-                user_id: uid,
-                cohort_id: Some(iitm_cohort_id),
-                role: role.to_string(),
-                status: "active".to_string(),
-                created_at: now,
-            });
+            in_memory_users.insert(
+                uid,
+                (
+                    uname.to_string(),
+                    email.to_string(),
+                    default_pw_hash.clone(),
+                    role.to_string(),
+                    Some("IIT Madras".to_string()),
+                ),
+            );
+            memberships.insert(
+                (iitm_id, uid),
+                OrgMembershipRecord {
+                    id: Uuid::new_v4(),
+                    org_id: iitm_id,
+                    user_id: uid,
+                    cohort_id: Some(iitm_cohort_id),
+                    role: role.to_string(),
+                    status: "active".to_string(),
+                    created_at: now,
+                },
+            );
             member_reg_numbers.insert((iitm_id, uid), reg.to_string());
         }
 
@@ -753,22 +896,52 @@ impl Default for MockCampusStore {
             },
         );
         let bits_members = vec![
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000010").unwrap(), "mihirs", "f20220042@pilani.bits-pilani.ac.in", "student", "2022A7PS0042P"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000011").unwrap(), "yash.s", "yash@pilani.bits-pilani.ac.in", "faculty", "FAC-BITS-12"),
-            (Uuid::parse_str("30000000-0000-0000-0000-000000000012").unwrap(), "dean.ps", "dean.ps@pilani.bits-pilani.ac.in", "org_admin", "ADM-BITS-01"),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000010").unwrap(),
+                "student5",
+                "student5@pilani.bits-pilani.ac.in",
+                "student",
+                "DEMO-005",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000011").unwrap(),
+                "demofaculty.bits",
+                "demofaculty@pilani.bits-pilani.ac.in",
+                "faculty",
+                "FAC-BITS-01",
+            ),
+            (
+                Uuid::parse_str("30000000-0000-0000-0000-000000000012").unwrap(),
+                "demoadmin.bits",
+                "demoadmin@pilani.bits-pilani.ac.in",
+                "org_admin",
+                "ADM-BITS-01",
+            ),
         ];
         for (uid, uname, email, role, reg) in bits_members {
             users.insert(uid, (uname.to_string(), email.to_string()));
-            in_memory_users.insert(uid, (uname.to_string(), email.to_string(), default_pw_hash.clone(), role.to_string(), Some("BITS Pilani".to_string())));
-            memberships.insert((bits_id, uid), OrgMembershipRecord {
-                id: Uuid::new_v4(),
-                org_id: bits_id,
-                user_id: uid,
-                cohort_id: Some(bits_cohort_id),
-                role: role.to_string(),
-                status: "active".to_string(),
-                created_at: now,
-            });
+            in_memory_users.insert(
+                uid,
+                (
+                    uname.to_string(),
+                    email.to_string(),
+                    default_pw_hash.clone(),
+                    role.to_string(),
+                    Some("BITS Pilani".to_string()),
+                ),
+            );
+            memberships.insert(
+                (bits_id, uid),
+                OrgMembershipRecord {
+                    id: Uuid::new_v4(),
+                    org_id: bits_id,
+                    user_id: uid,
+                    cohort_id: Some(bits_cohort_id),
+                    role: role.to_string(),
+                    status: "active".to_string(),
+                    created_at: now,
+                },
+            );
             member_reg_numbers.insert((bits_id, uid), reg.to_string());
         }
 
@@ -781,9 +954,9 @@ impl Default for MockCampusStore {
         let mut security_audit_logs = Vec::new();
         let mut plagiarism_reports = Vec::new();
 
-        let aditya_id = Uuid::parse_str("30000000-0000-0000-0000-000000000001").unwrap();
-        let aditya_email = "aditya.sharma2025@vitstudent.ac.in".to_string();
-        let aditya_reg = "25BAI1234".to_string();
+        let student1_id = Uuid::parse_str("30000000-0000-0000-0000-000000000001").unwrap();
+        let student1_email = "student1@vitstudent.ac.in".to_string();
+        let student1_reg = "DEMO-001".to_string();
 
         // Lab 11: Multithreaded Programming & Concurrency Models (ACTIVE)
         let lab_11 = LabRecord {
@@ -968,14 +1141,86 @@ public class Main {
             max_marks: 20.0,
             status: "evaluated".to_string(),
             clo: "CLO-2".to_string(),
-            description: "Binary semaphores, counting semaphores, Peterson's algorithm, and mutex lock contention.".to_string(),
-            lecture_notes: "Lecture notes on mutual exclusion and semaphores.".to_string(),
+            description: "Bounded-buffer synchronization with counting semaphores, lock ordering and deadlock-free resource acquisition.".to_string(),
+            lecture_notes: r#"# Week 10: Process Synchronization & Mutex Primitives
+
+## 1. The Critical Section Problem
+A critical section is any region that reads or writes shared mutable state. A correct solution must satisfy three conditions: mutual exclusion, progress, and bounded waiting.
+
+## 2. Binary vs Counting Semaphores
+A binary semaphore holds only 0 and 1 and behaves as a mutex. A counting semaphore holds any non-negative value and tracks how many units of a resource remain available.
+
+```java
+Semaphore slots = new Semaphore(5); // counting: five free buffers
+Semaphore mutex = new Semaphore(1); // binary: guards the buffer index
+```
+
+## 3. Bounded Buffer
+Producer/consumer coordination needs two counting semaphores (`empty`, `full`) plus one binary semaphore guarding the buffer index. A single mutex is not enough: the producer must block when the buffer is full without holding the lock, otherwise consumers can never make progress.
+
+## 4. Deadlock and Lock Ordering
+If every thread acquires its locks in one global order, circular wait is impossible. The Dining Philosophers problem is the standard illustration: acquire by resource index rather than by seating order.
+
+## 5. Assessment Notes
+The test harness drives `put` and `take` from concurrent threads and checks the final buffer contents and ordering invariants. Correctness matters more than throughput here."#.to_string(),
             worked_demo: WorkedDemoSpec {
-                title: "Semaphore Coordination".to_string(),
-                description: "Counting semaphore demo.".to_string(),
-                code: "class Demo {}".to_string(),
+                title: "Bounded Buffer with Counting Semaphores".to_string(),
+                description: "Producer/consumer coordination where a counting semaphore tracks free slots and a binary semaphore guards the buffer index.".to_string(),
                 language: "java".to_string(),
-                expected_output: "Done".to_string(),
+                code: r#"import java.util.concurrent.Semaphore;
+
+class BoundedBuffer<T> {
+    private final Object[] items;
+    private int head = 0, tail = 0;
+    private final Semaphore empty;
+    private final Semaphore full = new Semaphore(0);
+    private final Semaphore mutex = new Semaphore(1);
+
+    public BoundedBuffer(int capacity) {
+        items = new Object[capacity];
+        empty = new Semaphore(capacity);
+    }
+
+    public void put(T item) throws InterruptedException {
+        empty.acquire();   // wait until a slot is free
+        mutex.acquire();   // enter the critical section
+        try {
+            items[tail] = item;
+            tail = (tail + 1) % items.length;
+        } finally {
+            mutex.release();
+        }
+        full.release();    // announce the new item
+    }
+
+    @SuppressWarnings("unchecked")
+    public T take() throws InterruptedException {
+        full.acquire();    // wait until an item exists
+        mutex.acquire();
+        T item;
+        try {
+            item = (T) items[head];
+            head = (head + 1) % items.length;
+        } finally {
+            mutex.release();
+        }
+        empty.release();   // announce the freed slot
+        return item;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        BoundedBuffer<Integer> buffer = new BoundedBuffer<>(2);
+        buffer.put(1);
+        System.out.println("Produced: 1");
+        System.out.println("Consumed: " + buffer.take());
+        buffer.put(2);
+        System.out.println("Produced: 2");
+        System.out.println("Consumed: " + buffer.take());
+    }
+}"#.to_string(),
+                expected_output: "Produced: 1\nConsumed: 1\nProduced: 2\nConsumed: 2".to_string(),
             },
             led_quiz: vec![],
             practice_problems: vec![],
@@ -984,10 +1229,10 @@ public class Main {
                 title: "Dining Philosophers without Deadlock".to_string(),
                 difficulty: "Hard".to_string(),
                 marks: 20.0,
-                description: "Resource hierarchy solution for Dining Philosophers.".to_string(),
+                description: "Five philosophers share five forks. Acquire forks in a global order so that no circular wait can form, and print the order in which each philosopher eats.".to_string(),
                 sample_input: "5".to_string(),
-                sample_output: "Done".to_string(),
-                starter_code: "// Dining Philosophers".to_string(),
+                sample_output: "Philosopher 0 eats\nPhilosopher 2 eats\nPhilosopher 4 eats\nPhilosopher 1 eats\nPhilosopher 3 eats".to_string(),
+                starter_code: "// Acquire forks by index (lower index first) so circular wait is impossible.\nclass DiningTable {\n    private final Object[] forks;\n\n    public DiningTable(int n) {\n        forks = new Object[n];\n        for (int i = 0; i < n; i++) forks[i] = new Object();\n    }\n\n    // TODO: implement eat(int philosopher)\n}".to_string(),
                 test_cases_count: 8,
             },
         };
@@ -1005,26 +1250,83 @@ public class Main {
             max_marks: 20.0,
             status: "evaluated".to_string(),
             clo: "CLO-1".to_string(),
-            description: "JVM memory layout, Eden/Survivor spaces, G1GC compaction, and reference types.".to_string(),
-            lecture_notes: "JVM memory architecture notes.".to_string(),
+            description:
+                "JVM heap layout, generational collection, G1 compaction and the four reference strengths."
+                    .to_string(),
+            lecture_notes: r#"# Week 09: Java Memory Model & Garbage Collection Internals
+
+## 1. Heap Layout
+The heap is split into a young generation (Eden plus two survivor spaces) and an old generation. New objects are allocated in Eden; a minor collection copies survivors between the survivor spaces and promotes objects that outlive a threshold.
+
+## 2. G1 and Compaction
+G1 divides the heap into equal-sized regions and collects the regions with the most garbage first. Because it copies live objects between regions, G1 compacts incrementally rather than stopping the world for a full mark-sweep-compact.
+
+## 3. Reference Strengths
+Java defines four reference strengths, from strongest to weakest:
+
+| Type | Collected when | Typical use |
+|---|---|---|
+| `StrongReference` | Never while reachable | Ordinary fields |
+| `SoftReference` | Under memory pressure | Memory-sensitive caches |
+| `WeakReference` | At the next GC | Canonicalising maps |
+| `PhantomReference` | After finalisation | Cleanup notification |
+
+## 4. Why SoftReferences Suit Caches
+A cache built on `SoftReference` keeps entries while memory is available and lets the collector reclaim them when it is not. The trade-off is that cache hits are no longer guaranteed, so every lookup must be able to recompute its value.
+
+## 5. Assessment Notes
+The test harness allocates until pressure is applied, then checks that reclaimed entries were recomputed correctly rather than lost."#.to_string(),
             worked_demo: WorkedDemoSpec {
-                title: "SoftReference Cache".to_string(),
-                description: "Memory-sensitive cache implementation.".to_string(),
-                code: "class Cache {}".to_string(),
+                title: "Memory-Sensitive Cache with SoftReference".to_string(),
+                description: "A cache that holds values softly and transparently recomputes anything the collector has reclaimed.".to_string(),
+                code: r#"import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+class SoftCache<K, V> {
+    private final Map<K, SoftReference<V>> entries = new HashMap<>();
+    private final Function<K, V> loader;
+
+    public SoftCache(Function<K, V> loader) {
+        this.loader = loader;
+    }
+
+    public V get(K key) {
+        SoftReference<V> ref = entries.get(key);
+        V value = (ref == null) ? null : ref.get();
+        if (value == null) {
+            value = loader.apply(key);      // recompute after collection
+            entries.put(key, new SoftReference<>(value));
+        }
+        return value;
+    }
+
+    public int size() { return entries.size(); }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        SoftCache<Integer, String> cache = new SoftCache<>(k -> "value-" + k);
+        System.out.println("First lookup: " + cache.get(1));
+        System.out.println("Cached lookup: " + cache.get(1));
+        System.out.println("Entries: " + cache.size());
+    }
+}"#.to_string(),
                 language: "java".to_string(),
-                expected_output: "Cached".to_string(),
+                expected_output: "First lookup: value-1\nCached lookup: value-1\nEntries: 1".to_string(),
             },
             led_quiz: vec![],
             practice_problems: vec![],
             challenging_problem: ChallengingProblemSpec {
                 id: 1,
-                title: "Off-Heap Direct ByteBuffer Ring".to_string(),
+                title: "Direct ByteBuffer Ring".to_string(),
                 difficulty: "Hard".to_string(),
                 marks: 20.0,
-                description: "Zero-copy byte buffer management.".to_string(),
+                description: "Build a fixed-capacity ring buffer over off-heap memory allocated with ByteBuffer.allocateDirect, reusing one buffer instead of allocating per operation.".to_string(),
                 sample_input: "1024".to_string(),
-                sample_output: "Allocated".to_string(),
-                starter_code: "// DirectByteBuffer".to_string(),
+                sample_output: "Allocated 1024 bytes\nWrote 16 ints\nRead 16 ints".to_string(),
+                starter_code: "import java.nio.ByteBuffer;\n\nclass DirectRing {\n    private final ByteBuffer buffer;\n    private int count = 0;\n\n    public DirectRing(int capacityBytes) {\n        this.buffer = ByteBuffer.allocateDirect(capacityBytes);\n    }\n\n    // TODO: implement putInt(int) and getInt() with wraparound\n}".to_string(),
                 test_cases_count: 10,
             },
         };
@@ -1042,26 +1344,100 @@ public class Main {
             max_marks: 20.0,
             status: "evaluated".to_string(),
             clo: "CLO-1".to_string(),
-            description: "Generic binary search tree with self-balancing rotation mechanics.".to_string(),
-            lecture_notes: "BST and AVL tree lecture notes.".to_string(),
+            description: "Generic binary search trees, traversal orders and the rotations that keep AVL and red-black trees balanced."
+                .to_string(),
+            lecture_notes: r#"# Week 08: Abstract Data Types & Generic Binary Search Trees
+
+## 1. The Search Tree Invariant
+For every node, all keys in the left subtree are smaller and all keys in the right subtree are larger. The invariant is what makes search, insert and delete cost O(height) rather than O(n) — provided the tree stays balanced.
+
+## 2. Traversal Orders
+Depth-first traversals differ only in when the node is visited relative to its subtrees. An in-order traversal of a binary search tree emits keys in sorted order, which makes it the usual correctness check:
+
+```java
+void inOrder(Node<T> node, List<T> out) {
+    if (node == null) return;
+    inOrder(node.left, out);
+    out.add(node.key);
+    inOrder(node.right, out);
+}
+```
+
+## 3. Rotations
+A rotation is a constant-time restructuring that preserves the in-order sequence of keys while changing the height of the subtrees involved. Both AVL and red-black trees are defined in terms of rotations applied after an insertion or deletion breaks their balance condition.
+
+## 4. AVL vs Red-Black
+AVL trees keep subtree heights within one of each other, so they are more rigidly balanced and faster to read. Red-black trees enforce a colour-based condition that allows more imbalance but needs fewer rotations per update, so they are preferred when inserts and deletes dominate. Java's `TreeMap` is a red-black tree.
+
+## 5. Generics in Java
+Bounded type parameters make the ordering requirement explicit at compile time:
+
+```java
+class Bst<T extends Comparable<T>> { /* ... */ }
+```
+
+## 6. Assessment Notes
+The harness inserts a key sequence, then validates both the in-order traversal and the resulting tree height against the balance bound."#.to_string(),
             worked_demo: WorkedDemoSpec {
-                title: "BST Insertion Demo".to_string(),
-                description: "Recursive insertion.".to_string(),
-                code: "class BST {}".to_string(),
+                title: "Generic BST Insertion and In-Order Traversal".to_string(),
+                description: "Recursive insertion into a generic binary search tree, validated by printing the in-order traversal.".to_string(),
+                code: r#"import java.util.ArrayList;
+import java.util.List;
+
+class Node<T> {
+    T key;
+    Node<T> left, right;
+    Node(T key) { this.key = key; }
+}
+
+class Bst<T extends Comparable<T>> {
+    private Node<T> root;
+
+    public void insert(T key) { root = insert(root, key); }
+
+    private Node<T> insert(Node<T> node, T key) {
+        if (node == null) return new Node<>(key);
+        int cmp = key.compareTo(node.key);
+        if (cmp < 0)      node.left  = insert(node.left, key);
+        else if (cmp > 0) node.right = insert(node.right, key);
+        return node;   // equal keys are ignored
+    }
+
+    public List<T> inOrder() {
+        List<T> out = new ArrayList<>();
+        inOrder(root, out);
+        return out;
+    }
+
+    private void inOrder(Node<T> node, List<T> out) {
+        if (node == null) return;
+        inOrder(node.left, out);
+        out.add(node.key);
+        inOrder(node.right, out);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Bst<Integer> tree = new Bst<>();
+        for (int key : new int[] { 50, 30, 70, 20, 40, 60, 80 }) tree.insert(key);
+        System.out.println("In-order: " + tree.inOrder());
+    }
+}"#.to_string(),
                 language: "java".to_string(),
-                expected_output: "Inserted".to_string(),
+                expected_output: "In-order: [20, 30, 40, 50, 60, 70, 80]".to_string(),
             },
             led_quiz: vec![],
             practice_problems: vec![],
             challenging_problem: ChallengingProblemSpec {
                 id: 1,
-                title: "Red-Black Tree Insertion & Fixing".to_string(),
+                title: "Red-Black Tree Insertion with Fixup".to_string(),
                 difficulty: "Hard".to_string(),
                 marks: 20.0,
-                description: "Self-balancing Red-Black invariants.".to_string(),
+                description: "Insert into a red-black tree and restore the colour invariants with the standard recolour and rotation cases. Report the root colour and the black height of each path.".to_string(),
                 sample_input: "10 20 30".to_string(),
-                sample_output: "Balanced".to_string(),
-                starter_code: "// RBTree".to_string(),
+                sample_output: "Root: 20 (black)\nBlack height: 2".to_string(),
+                starter_code: "class RbNode {\n    int key;\n    boolean red = true;\n    RbNode left, right, parent;\n\n    RbNode(int key) { this.key = key; }\n}\n\n// TODO: implement insert(int) followed by the fixup cases\nclass RedBlackTree {\n    private RbNode root;\n\n    public void insert(int key) {\n        // 1. ordinary BST insert, new node coloured red\n        // 2. fix up: recolour, then rotate when the uncle is black\n    }\n}".to_string(),
                 test_cases_count: 10,
             },
         };
@@ -1071,14 +1447,14 @@ public class Main {
         labs.insert(lab_09.id.clone(), lab_09);
         labs.insert(lab_08.id.clone(), lab_08);
 
-        // Student Progress for Aditya
+        // Student Progress for Student 1
         student_progress.insert(
-            ("bacs101-lab-08".to_string(), aditya_id),
+            ("bacs101-lab-08".to_string(), student1_id),
             StudentLabProgress {
                 lab_id: "bacs101-lab-08".to_string(),
-                student_id: aditya_id,
-                student_email: aditya_email.clone(),
-                student_reg_no: aditya_reg.clone(),
+                student_id: student1_id,
+                student_email: student1_email.clone(),
+                student_reg_no: student1_reg.clone(),
                 status: "Evaluated".to_string(),
                 current_stage: "submit".to_string(),
                 active_minutes: 95,
@@ -1093,17 +1469,19 @@ public class Main {
                 max_marks: 20.0,
                 submitted_at: Some(now - chrono::Duration::days(18)),
                 evaluated_at: Some(now - chrono::Duration::days(18)),
-                feedback: Some("Excellent BST rotation logic and asymptotic complexity bounds.".to_string()),
+                feedback: Some(
+                    "Excellent BST rotation logic and asymptotic complexity bounds.".to_string(),
+                ),
             },
         );
 
         student_progress.insert(
-            ("bacs101-lab-09".to_string(), aditya_id),
+            ("bacs101-lab-09".to_string(), student1_id),
             StudentLabProgress {
                 lab_id: "bacs101-lab-09".to_string(),
-                student_id: aditya_id,
-                student_email: aditya_email.clone(),
-                student_reg_no: aditya_reg.clone(),
+                student_id: student1_id,
+                student_email: student1_email.clone(),
+                student_reg_no: student1_reg.clone(),
                 status: "Evaluated".to_string(),
                 current_stage: "submit".to_string(),
                 active_minutes: 110,
@@ -1118,17 +1496,19 @@ public class Main {
                 max_marks: 20.0,
                 submitted_at: Some(now - chrono::Duration::days(12)),
                 evaluated_at: Some(now - chrono::Duration::days(12)),
-                feedback: Some("Solid understanding of reference types and JVM escape analysis.".to_string()),
+                feedback: Some(
+                    "Solid understanding of reference types and JVM escape analysis.".to_string(),
+                ),
             },
         );
 
         student_progress.insert(
-            ("bacs101-lab-10".to_string(), aditya_id),
+            ("bacs101-lab-10".to_string(), student1_id),
             StudentLabProgress {
                 lab_id: "bacs101-lab-10".to_string(),
-                student_id: aditya_id,
-                student_email: aditya_email.clone(),
-                student_reg_no: aditya_reg.clone(),
+                student_id: student1_id,
+                student_email: student1_email.clone(),
+                student_reg_no: student1_reg.clone(),
                 status: "Evaluated".to_string(),
                 current_stage: "submit".to_string(),
                 active_minutes: 140,
@@ -1148,12 +1528,12 @@ public class Main {
         );
 
         student_progress.insert(
-            ("bacs101-lab-11".to_string(), aditya_id),
+            ("bacs101-lab-11".to_string(), student1_id),
             StudentLabProgress {
                 lab_id: "bacs101-lab-11".to_string(),
-                student_id: aditya_id,
-                student_email: aditya_email.clone(),
-                student_reg_no: aditya_reg.clone(),
+                student_id: student1_id,
+                student_email: student1_email.clone(),
+                student_reg_no: student1_reg.clone(),
                 status: "In Progress".to_string(),
                 current_stage: "practice".to_string(),
                 active_minutes: 48,
@@ -1187,8 +1567,12 @@ public class Main {
             activity_logs.push(StudentActivityLog {
                 id: Uuid::new_v4(),
                 org_slug: "vit-chennai".to_string(),
-                lab_id: if days_ago > 6 { "bacs101-lab-10".to_string() } else { "bacs101-lab-11".to_string() },
-                student_id: aditya_id,
+                lab_id: if days_ago > 6 {
+                    "bacs101-lab-10".to_string()
+                } else {
+                    "bacs101-lab-11".to_string()
+                },
+                student_id: student1_id,
                 event_type: evt.to_string(),
                 stage: stg.to_string(),
                 details: serde_json::json!({ "iteration": i, "status": "success" }),
@@ -1196,55 +1580,60 @@ public class Main {
             });
         }
 
-        // Pre-seeded Security Audit logs
+        // Pre-seeded evaluation audit log
         security_audit_logs.push(SecurityAuditItem {
             id: Uuid::new_v4(),
             timestamp: now - chrono::Duration::minutes(15),
-            event: "SYSCALL_BLOCKED: socket(AF_INET, SOCK_STREAM) rejected".to_string(),
-            container_id: "cgroup-judge-wkr-01".to_string(),
-            action: "SIGSYS trapped, submission denied socket connectivity".to_string(),
+            event: "NETWORK_ACCESS_BLOCKED: submission attempted an outbound connection"
+                .to_string(),
+            container_id: "eval-worker-node-01".to_string(),
+            action: "Run terminated. Submissions execute without network access by design."
+                .to_string(),
             severity: "HIGH".to_string(),
         });
         security_audit_logs.push(SecurityAuditItem {
             id: Uuid::new_v4(),
             timestamp: now - chrono::Duration::hours(2),
-            event: "CGROUP_MEMORY_LIMIT: memory.max enforced at 256MB".to_string(),
-            container_id: "cgroup-judge-wkr-02".to_string(),
-            action: "Memory limit enforced, zero host impact".to_string(),
+            event: "MEMORY_LIMIT_ENFORCED: run exceeded the per-submission memory allowance"
+                .to_string(),
+            container_id: "eval-worker-node-02".to_string(),
+            action: "Run terminated and reported to the student as a resource-limit failure."
+                .to_string(),
             severity: "MEDIUM".to_string(),
         });
         security_audit_logs.push(SecurityAuditItem {
             id: Uuid::new_v4(),
             timestamp: now - chrono::Duration::hours(5),
-            event: "UNSHARE_NET: Network namespace dropped".to_string(),
-            container_id: "cgroup-judge-wkr-03".to_string(),
-            action: "Container initialized with loopback-only interface".to_string(),
+            event: "RUNTIME_ISOLATED: evaluation environment initialised".to_string(),
+            container_id: "eval-worker-node-03".to_string(),
+            action: "Execution began in an isolated environment with no host access.".to_string(),
             severity: "INFO".to_string(),
         });
         security_audit_logs.push(SecurityAuditItem {
             id: Uuid::new_v4(),
             timestamp: now - chrono::Duration::hours(12),
-            event: "PROCESS_LIMIT: pids.max capped at 64 tasks".to_string(),
-            container_id: "cgroup-judge-wkr-04".to_string(),
-            action: "Fork-bomb protection verified".to_string(),
+            event: "PROCESS_LIMIT_ENFORCED: run exceeded the per-submission process allowance"
+                .to_string(),
+            container_id: "eval-worker-node-04".to_string(),
+            action: "Run terminated and reported as a resource-limit failure.".to_string(),
             severity: "INFO".to_string(),
         });
 
         // Pre-seeded Plagiarism reports
         plagiarism_reports.push(PlagiarismReportItem {
             lab_id: "bacs101-lab-10".to_string(),
-            student_a: "25BAI1234 (Aditya Sharma)".to_string(),
-            student_b: "25BCE1802 (Kavya R)".to_string(),
+            student_a: "DEMO-001 (Student 1)".to_string(),
+            student_b: "DEMO-002 (Student 2)".to_string(),
             ast_similarity_score: 12.4,
-            winnowing_fingerprints_matched: 6,
+            similarity_matches: 6,
             status: "PASSED (Clean)".to_string(),
         });
         plagiarism_reports.push(PlagiarismReportItem {
             lab_id: "bacs101-lab-09".to_string(),
-            student_a: "25BCE1120 (Rohan Gupta)".to_string(),
-            student_b: "25BAI1234 (Aditya Sharma)".to_string(),
+            student_a: "DEMO-003 (Student 3)".to_string(),
+            student_b: "DEMO-001 (Student 1)".to_string(),
             ast_similarity_score: 14.8,
-            winnowing_fingerprints_matched: 8,
+            similarity_matches: 8,
             status: "PASSED (Clean)".to_string(),
         });
 
@@ -1289,6 +1678,8 @@ pub struct AppState {
     pub hackathon_store: HackathonStore,
     /// Optional Redis client for queue dispatches and pub/sub streaming.
     pub redis_client: Option<redis::Client>,
+    /// Per-user quota limiter guarding the model-backed AI debugging pipeline.
+    pub ai_debug_limiter: AiDebugRateLimiter,
 }
 
 impl AppState {
@@ -1306,6 +1697,7 @@ impl AppState {
             jwt_secret: jwt_secret.unwrap_or_else(|| DEFAULT_JWT_SECRET.to_string()),
             mock_campus: MockCampusStore::default(),
             hackathon_store: HackathonStore::default(),
+            ai_debug_limiter: AiDebugRateLimiter::new(redis_client.clone()),
             redis_client,
         }
     }

@@ -26,9 +26,7 @@ async fn viva_ws_endpoint(
 ) -> Response {
     let user_id = Uuid::new_v4();
     let username = format!("{role}_user");
-    ws.on_upgrade(move |socket| {
-        handle_viva_socket(socket, room, user_id, username, role)
-    })
+    ws.on_upgrade(move |socket| handle_viva_socket(socket, room, user_id, username, role))
 }
 
 /// Helper function setting up an ephemeral Axum server hosting a Viva room.
@@ -40,9 +38,7 @@ async fn setup_viva_server(room: Arc<VivaRoom>) -> (String, tokio::task::JoinHan
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
         .await
         .expect("failed to bind ephemeral test port");
-    let addr = listener
-        .local_addr()
-        .expect("failed to get local address");
+    let addr = listener.local_addr().expect("failed to get local address");
 
     let server_handle = tokio::spawn(async move {
         let _ = axum::serve(listener, app).await;
@@ -75,10 +71,8 @@ async fn test_candidate_rubric_masking_invariant() -> Result<(), Box<dyn std::er
     });
     let confidential_notes = "Candidate struggled with edge cases; do not offer senior role.";
 
-    let update = RubricEvaluationUpdate::new(
-        rubric_payload.clone(),
-        Some(confidential_notes.to_string()),
-    );
+    let update =
+        RubricEvaluationUpdate::new(rubric_payload.clone(), Some(confidential_notes.to_string()));
 
     // Instructor sends the RubricEvaluation frame over WebSocket
     let client_msg = VivaWsClientMessage::RubricEvaluation {
@@ -101,7 +95,9 @@ async fn test_candidate_rubric_masking_invariant() -> Result<(), Box<dyn std::er
                 if text_str.contains("rubric_scores") || text_str.contains("RubricEvaluation") {
                     candidate_received_rubric = true;
                 }
-                if text_str.contains("struggled with edge cases") || text_str.contains(confidential_notes) {
+                if text_str.contains("struggled with edge cases")
+                    || text_str.contains(confidential_notes)
+                {
                     candidate_received_notes = true;
                 }
             }
@@ -177,10 +173,8 @@ async fn test_evaluator_frame_delivery() -> Result<(), Box<dyn std::error::Error
     });
     let confidential_notes = "Strong performance on architectural tradeoffs.";
 
-    let update = RubricEvaluationUpdate::new(
-        rubric_scores.clone(),
-        Some(confidential_notes.to_string()),
-    );
+    let update =
+        RubricEvaluationUpdate::new(rubric_scores.clone(), Some(confidential_notes.to_string()));
 
     // Host updates rubric
     let client_msg = VivaWsClientMessage::RubricEvaluation {
@@ -212,9 +206,13 @@ async fn test_evaluator_frame_delivery() -> Result<(), Box<dyn std::error::Error
         "Timed out waiting for evaluator rubric frame delivery"
     );
 
-    let delivered = received_by_evaluator.expect("evaluator did not receive rubric evaluation frame");
+    let delivered =
+        received_by_evaluator.expect("evaluator did not receive rubric evaluation frame");
     assert_eq!(delivered.rubric_scores, rubric_scores);
-    assert_eq!(delivered.interviewer_notes, Some(confidential_notes.to_string()));
+    assert_eq!(
+        delivered.interviewer_notes,
+        Some(confidential_notes.to_string())
+    );
 
     Ok(())
 }
@@ -353,9 +351,13 @@ async fn test_rubric_score_math_and_persistence() -> Result<(), VivaError> {
         crit3_id.to_string(): 10.0
     });
 
-    let eval_update = RubricEvaluationUpdate::new(scores, Some("Solid execution overall".to_string()));
+    let eval_update =
+        RubricEvaluationUpdate::new(scores, Some("Solid execution overall".to_string()));
     let calculated = eval_update.calculate_weighted_score(&criteria)?;
-    assert!((calculated - 88.5).abs() < 0.001, "Expected 88.5%, got {calculated}%");
+    assert!(
+        (calculated - 88.5).abs() < 0.001,
+        "Expected 88.5%, got {calculated}%"
+    );
 
     // Also support criterion lookup by name
     let scores_by_name = serde_json::json!({
@@ -365,7 +367,10 @@ async fn test_rubric_score_math_and_persistence() -> Result<(), VivaError> {
     });
     let perfect_update = RubricEvaluationUpdate::new(scores_by_name, None);
     let perfect_score = perfect_update.calculate_weighted_score(&criteria)?;
-    assert!((perfect_score - 100.0).abs() < 0.001, "Expected 100.0%, got {perfect_score}%");
+    assert!(
+        (perfect_score - 100.0).abs() < 0.001,
+        "Expected 100.0%, got {perfect_score}%"
+    );
 
     // 2. Validate rejection of out-of-bounds scores
     let out_of_bounds = serde_json::json!({
@@ -400,8 +405,9 @@ async fn test_rubric_score_math_and_persistence() -> Result<(), VivaError> {
     );
 
     // 4. Test live PostgreSQL persistence if database pool is accessible
-    let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
 
     if let Ok(pg_pool) = sqlx::postgres::PgPoolOptions::new()
         .max_connections(2)

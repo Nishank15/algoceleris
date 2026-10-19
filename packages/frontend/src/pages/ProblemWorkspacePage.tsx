@@ -19,6 +19,7 @@ import { DeveloperAnalyticsModal } from '../components/DeveloperAnalyticsModal';
 import { useContestProctoring } from '../hooks/useContestProctoring';
 import {
   Language,
+  Problem,
   SubmissionStatus,
   SubmissionReport,
   StreamEvent,
@@ -26,6 +27,8 @@ import {
   AIDebugResponse,
 } from '../types';
 import {
+  fetchProblem,
+  fetchProblems,
   submitCode,
   subscribeSubmissionStream,
   getSubmission,
@@ -40,7 +43,9 @@ const WATCHDOG_MESSAGE =
 export const ProblemWorkspacePage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [problems] = useState(PROBLEMS);
+  // Catalog is hydrated from the gateway; the bundled sample-only constants keep the
+  // workspace usable for first paint and when the API is unreachable.
+  const [problems, setProblems] = useState<Problem[]>(PROBLEMS);
   const activeProblemId = slug || 'two-sum';
   const setActiveProblemId = useCallback((id: string) => navigate(`/problems/${id}`), [navigate]);
   const [activeLanguage, setActiveLanguage] = useState<Language>('cpp');
@@ -109,6 +114,46 @@ export const ProblemWorkspacePage: React.FC = () => {
     };
   }, [clearWatchdog]);
 
+  // Hydrate the catalog from the gateway (metadata + sample cases only). The bundled
+  // sample-only constants stay in place if the API is unreachable.
+  useEffect(() => {
+    let cancelled = false;
+    fetchProblems()
+      .then((catalog) => {
+        if (!cancelled && catalog.length > 0) {
+          setProblems(catalog);
+        }
+      })
+      .catch(() => {
+        // Bundled sample-only fallback stays in place.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Refresh the active problem's authoritative metadata and sample cases.
+  useEffect(() => {
+    let cancelled = false;
+    fetchProblem(activeProblemId)
+      .then((serverProblem) => {
+        if (cancelled) return;
+        setProblems((prev) => {
+          const exists = prev.some((p) => p.id === serverProblem.id);
+          if (!exists) {
+            return [...prev, serverProblem];
+          }
+          return prev.map((p) => (p.id === serverProblem.id ? { ...p, ...serverProblem } : p));
+        });
+      })
+      .catch(() => {
+        // Bundled sample-only fallback stays in place.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeProblemId]);
+
   const [isZenMode, setIsZenMode] = useState<boolean>(false);
   const [activeConsoleTab, setActiveConsoleTab] = useState<
     'testcases' | 'custom' | 'output'
@@ -134,7 +179,11 @@ export const ProblemWorkspacePage: React.FC = () => {
 
 
   const activeProblem = useMemo(() => {
-    return problems.find((p) => p.id === activeProblemId) || problems[0];
+    return (
+      problems.find((p) => p.id === activeProblemId) ||
+      problems.find((p) => p.id === 'two-sum') ||
+      problems[0]
+    );
   }, [problems, activeProblemId]);
 
   // Code editor value for active problem + language
@@ -195,7 +244,6 @@ export const ProblemWorkspacePage: React.FC = () => {
 
       const isCustomRun = activeConsoleTab === 'custom' && !!customInput.trim();
       const problemId = activeProblem.id;
-
       // Arm the 10s watchdog: guarantees the UI can never stay locked
       watchdogTimerRef.current = setTimeout(() => {
         watchdogTimerRef.current = null;
@@ -230,37 +278,20 @@ export const ProblemWorkspacePage: React.FC = () => {
         }
       };
 
-      // Prepare test cases
-      let testCasesToRun = isSampleRun
-        ? activeProblem.sampleCases
-        : [...activeProblem.sampleCases, ...(activeProblem.hiddenCases || [])];
-
-      // If user is in custom input tab and provided custom input, run against that
-      if (activeConsoleTab === 'custom' && customInput.trim()) {
-        testCasesToRun = [
-          {
-            id: 999,
-            input_data: customInput,
-            expected_output: '',
-            is_sample: true,
-          },
-        ];
-      }
+      // Evaluation criteria are server-authoritative: the gateway resolves the case
+      // list (samples for "Run", samples + hidden for "Submit") from the catalog.
+      const isCustomInputRun = activeConsoleTab === 'custom' && !!customInput.trim();
 
       try {
         const response = await submitCode({
-          problem_slug: (activeProblem as any).slug || activeProblem.id,
+          problem_slug: activeProblem.id,
           language: activeLanguage,
           code: currentCode,
           source_code: currentCode,
           time_limit_ms: activeProblem.timeLimitMs,
           memory_limit_bytes: activeProblem.memoryLimitBytes,
-          test_cases: testCasesToRun.map((tc) => ({
-            id: tc.id,
-            input_data: tc.input_data,
-            expected_output: tc.expected_output,
-            is_sample: tc.is_sample,
-          })),
+          mode: isSampleRun ? 'run' : 'submit',
+          ...(isCustomInputRun ? { custom_input: customInput } : {}),
         });
 
         const subId = response.submission_id;
@@ -441,6 +472,7 @@ export const ProblemWorkspacePage: React.FC = () => {
         user_id: 'usr-pro-dev',
         language: activeLanguage,
         source_code: currentCode,
+        problem_slug: activeProblem.id,
         problem_title: activeProblem.title,
         problem_description: activeProblem.description,
         failing_test_cases: failingCases,
@@ -450,12 +482,11 @@ export const ProblemWorkspacePage: React.FC = () => {
       setAIDebugResponse(resp);
     } catch (err: any) {
       console.debug('AI Debug request fallback:', err);
+      // Report the failure as a failure. Synthesising `fixed_code` here would arm the modal's
+      // "Apply Fix to Editor" action with the unmodified submission.
       setAIDebugResponse({
-        root_cause: `Failed to connect to AI Debug Service.`,
-        complexity_analysis: `N/A`,
-        fix_explanation: `Error: ${err.message || 'Judge Service Unavailable'}`,
-        fixed_code: currentCode,
-        code_diff: ``,
+        root_cause: 'The AI Debug service could not be reached, so no diagnosis was produced.',
+        fix_explanation: `Request failed: ${err.message || 'Judge Service Unavailable'}`,
       });
     } finally {
       setIsAIDebugLoading(false);
@@ -483,13 +514,11 @@ export const ProblemWorkspacePage: React.FC = () => {
     if (latest?.event_type === 'compiling') return 'Compiling...';
     if (latest?.event_type === 'test_case_start') {
       const idx = latest.data?.index ?? 1;
-      const total =
-        latest.data?.total ??
-        activeProblem.sampleCases.length + (activeProblem.hiddenCases?.length || 0);
-      return `Evaluating ${idx}/${total}...`;
+      const total = latest.data?.total;
+      return total ? `Evaluating ${idx}/${total}...` : `Evaluating ${idx}...`;
     }
     return 'Evaluating...';
-  }, [isRunning, streamEvents, activeProblem]);
+  }, [isRunning, streamEvents]);
 
   return (
     <div className="workspace-container">

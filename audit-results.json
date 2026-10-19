@@ -1,7 +1,7 @@
 {
-  "pagesTested": 29,
-  "controlsInteracted": 33,
-  "apiEndpointsVerified": 139,
+  "pagesTested": 14,
+  "controlsInteracted": 18,
+  "apiEndpointsVerified": 54,
   "consoleErrors": [],
   "consoleWarnings": [],
   "pageErrors": [],
@@ -91,83 +91,6 @@
       "feature": "CampusSidebarLayout: Institution popover, theme toggle & live role switcher",
       "status": "PASS",
       "observed": "All shell controls interactive, instant route transitions, zero layout shift",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "Student Dashboard: Dynamic KPIs & attention notifications",
-      "status": "PASS",
-      "observed": "All 4 KPI cards dynamically populated from Rust Axum backend",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "Labs Catalog & Completed Labs: Tab filters & navigation",
-      "status": "PASS",
-      "observed": "All/Active/Evaluated filter tabs, deadline badges, and direct room triggers",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "Tests & Assessments (/student/tests & /completed)",
-      "status": "PASS",
-      "observed": "PAT exam catalog routes verified",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "6-Stage Progressive Lab Room: 6-stage pedagogy & section-locked code",
-      "status": "PASS",
-      "observed": "All 6 stages verified, MCQ state saving, Monaco editor integration",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "Lab Evaluation Review: Rubric criteria, grade & code viewer",
-      "status": "PASS",
-      "observed": "Letter grade, score breakdown, active time, and evaluated solution code verified",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Student Portal",
-      "feature": "Telemetry Analytics: 4-tab Recharts dashboard",
-      "status": "PASS",
-      "observed": "Recharts datasets render cleanly without NaN ticks or SVG overflow",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Faculty Portal",
-      "feature": "Faculty Dashboard: Cohort curriculum, authoring modal & roster",
-      "status": "PASS",
-      "observed": "Course overview cards, interactive lab creation modal, cohort student roster",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Faculty Portal",
-      "feature": "Live Proctoring Cockpit (/faculty/cockpit/:id): Telemetry grid",
-      "status": "PASS",
-      "observed": "Candidate anomaly indicators, tabular clock, live incident log",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Faculty Portal",
-      "feature": "Collaborative Viva Workspace (/faculty/viva/:id): Private rubric drawer",
-      "status": "PASS",
-      "observed": "Monaco editor, candidate telemetry summary, private instructor rubric slider",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Faculty Portal",
-      "feature": "AST Plagiarism Matrix (/faculty/plagiarism): Winnowing reports",
-      "status": "PASS",
-      "observed": "Pairwise similarity metrics, tokenized AST comparison table",
-      "actionItems": "None"
-    },
-    {
-      "moduleName": "Admin Portal",
-      "feature": "Admin Center (/admin/dashboard): Roster, provisioning & kernel audit",
-      "status": "PASS",
-      "observed": "Roster filtering, member modal, cgroups v2/seccomp-bpf isolation audit table",
       "actionItems": "None"
     }
   ]

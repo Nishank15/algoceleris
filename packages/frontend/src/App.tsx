@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { getCampusSession } from './services/campusSession';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { LinearHeaderNav } from './components/LinearHeaderNav';
@@ -21,10 +22,13 @@ import { CampusLabRoomPage } from './pages/campus/CampusLabRoomPage';
 import { CampusLabReviewPage } from './pages/campus/CampusLabReviewPage';
 import { CampusAnalyticsPage } from './pages/campus/CampusAnalyticsPage';
 import { CampusFacultyDashboard } from './pages/campus/CampusFacultyDashboard';
+import { CampusFacultyAnalyticsPage } from './pages/campus/CampusFacultyAnalyticsPage';
 import { CampusAdminDashboard } from './pages/campus/CampusAdminDashboard';
 import { FacultyProctorCockpitPage } from './pages/campus/FacultyProctorCockpitPage';
 import { VivaInterviewWorkspacePage } from './pages/campus/VivaInterviewWorkspacePage';
 import { StudentExamArenaPage } from './pages/campus/StudentExamArenaPage';
+import { CampusWorkspacePage } from './pages/campus/CampusWorkspacePage';
+import { CampusRouteGuard } from './components/CampusRouteGuard';
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -59,8 +63,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#08090a',
-            color: '#ffffff',
+            background: 'var(--bg-canvas)',
+            color: 'var(--text-primary)',
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             padding: '24px',
             textAlign: 'center',
@@ -72,8 +76,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
               width: '100%',
               padding: '32px',
               borderRadius: '12px',
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               boxShadow: 'rgba(0, 0, 0, 0.4) 0px 2px 4px 0px',
               display: 'flex',
               flexDirection: 'column',
@@ -96,7 +100,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                 fontSize: '24px',
                 fontWeight: 510,
                 margin: 0,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.022em',
               }}
             >
@@ -105,7 +109,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             <p
               style={{
                 fontSize: '14px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 margin: 0,
                 lineHeight: 1.5,
               }}
@@ -121,8 +125,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   window.location.href = '/problems';
                 }}
                 style={{
-                  backgroundColor: '#e4f222',
-                  color: '#08090a',
+                  backgroundColor: 'var(--accent-primary)',
+                  color: 'var(--accent-primary-fg)',
                   border: 'none',
                   padding: '10px 18px',
                   borderRadius: '6px',
@@ -141,9 +145,9 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   window.location.reload();
                 }}
                 style={{
-                  backgroundColor: '#161718',
-                  color: '#d0d6e0',
-                  border: '1px solid #23252a',
+                  backgroundColor: 'var(--bg-elevated)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
                   padding: '10px 18px',
                   borderRadius: '6px',
                   fontSize: '13px',
@@ -175,13 +179,92 @@ const ScrollToTop: React.FC = () => {
 
   return null;
 };
+
+/**
+ * Campus redirect helper for aliased or unmatched campus subpaths.
+ *
+ * Always navigates to an ABSOLUTE path. A relative `Navigate` target inside the campus
+ * splat route resolves against the full matched pathname, which previously produced an
+ * unbounded `/student/dashboard/student/dashboard/...` append loop (recursive
+ * "Maximum update depth exceeded" renders) on any unmatched campus URL such as
+ * `/campus/:orgSlug/org_admin/dashboard`.
+ *
+ * - With `suffix`, redirects to that absolute campus subpath (used by legacy role-slug aliases).
+ * - Without `suffix`, sends unauthenticated visitors to the tenant login page and
+ *   authenticated visitors to the dashboard for their own role.
+ */
+const CampusRedirect: React.FC<{ suffix?: string }> = ({ suffix }) => {
+  const { orgSlug } = useParams<{ orgSlug: string }>();
+  const slug = orgSlug || 'vit-chennai';
+
+  if (suffix) {
+    return <Navigate to={`/campus/${slug}/${suffix}`} replace />;
+  }
+
+  const session = getCampusSession(orgSlug);
+  if (!session || !session.token) {
+    return <Navigate to={`/campus/${slug}/login`} replace />;
+  }
+
+  // Sessions are rehydrated from unvalidated storage JSON, so tolerate the legacy
+  // `admin` slug alongside the canonical CampusRole union.
+  const rawRole: string = session.role;
+  const normalizedRole =
+    rawRole === 'faculty' ? 'instructor' : rawRole === 'admin' ? 'org_admin' : rawRole;
+
+  const home =
+    normalizedRole === 'org_admin'
+      ? 'admin/dashboard'
+      : normalizedRole === 'instructor'
+      ? 'faculty/dashboard'
+      : 'student/dashboard';
+
+  return <Navigate to={`/campus/${slug}/${home}`} replace />;
+};
+
+/**
+ * Routes that render as permanently dark-surface enterprise portals.
+ *
+ * The campus and hackathon portals were authored against the dark palette: they pair
+ * theme-aware tokens with hardcoded lime accents (#e4f222) and dark panel literals, so they
+ * are only legible on a dark canvas. Rather than rewrite every literal, the routes are
+ * declared dark-only and the scope below re-establishes the dark token set for everything
+ * inside them.
+ */
+const DARK_PORTAL_ROUTE = /^\/(?:campus|hackathons)(?:\/|$)/;
+
+/**
+ * Routed application shell.
+ *
+ * Renders the same `.app-container` element as before, but pins `data-theme="dark"` on it
+ * while a dark-only portal route is active, so every descendant — header/navigation chrome
+ * included — resolves the dark token set instead of the document's light one.
+ *
+ * The scope is applied to the existing container rather than a nested wrapper: that keeps
+ * the DOM shape, the shell layout and the `position: relative` containing block identical
+ * in both themes, so nothing outside the portals is affected.
+ */
+const RouteThemeScope: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { pathname } = useLocation();
+  const isDarkPortal = DARK_PORTAL_ROUTE.test(pathname);
+
+  return (
+    <div
+      className={isDarkPortal ? 'app-container enforced-dark-surface' : 'app-container'}
+      data-theme={isDarkPortal ? 'dark' : undefined}
+    >
+      {children}
+    </div>
+  );
+};
+
 export const App: React.FC = () => (
   <ErrorBoundary>
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
-          <div className="app-container">
+          <RouteThemeScope>
             <LinearHeaderNav />
             <div className="app-content">
               <Routes>
@@ -206,35 +289,45 @@ export const App: React.FC = () => (
 
                 {/* Role-Gated Campus Workspace Shell */}
                 <Route path="/campus/:orgSlug" element={<CampusSidebarLayout />}>
-                  <Route index element={<CampusStudentDashboard />} />
+                  <Route index element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusStudentDashboard /></CampusRouteGuard>} />
 
                   {/* Student Routes */}
-                  <Route path="student/dashboard" element={<CampusStudentDashboard />} />
-                  <Route path="student/labs" element={<CampusLabsListPage />} />
-                  <Route path="student/labs/completed" element={<CampusLabsListPage />} />
-                  <Route path="student/tests" element={<CampusLabsListPage />} />
-                  <Route path="student/tests/completed" element={<CampusLabsListPage />} />
-                  <Route path="student/tests/:assessmentId" element={<StudentExamArenaPage />} />
-                  <Route path="student/labs/:labId/room" element={<CampusLabRoomPage />} />
-                  <Route path="student/labs/:labId/review" element={<CampusLabReviewPage />} />
-                  <Route path="student/analytics" element={<CampusAnalyticsPage />} />
-                  <Route path="student/analytics/:tab" element={<CampusAnalyticsPage />} />
+                  <Route path="student/dashboard" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusStudentDashboard /></CampusRouteGuard>} />
+                  <Route path="student/labs" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabsListPage /></CampusRouteGuard>} />
+                  <Route path="student/labs/completed" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabsListPage /></CampusRouteGuard>} />
+                  <Route path="student/tests" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabsListPage /></CampusRouteGuard>} />
+                  <Route path="student/tests/completed" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabsListPage /></CampusRouteGuard>} />
+                  <Route path="student/tests/:assessmentId" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><StudentExamArenaPage /></CampusRouteGuard>} />
+                  <Route path="student/labs/:labId/room" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabRoomPage /></CampusRouteGuard>} />
+                  <Route path="student/labs/:labId/review" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusLabReviewPage /></CampusRouteGuard>} />
+                  <Route path="student/analytics" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusAnalyticsPage /></CampusRouteGuard>} />
+                  <Route path="student/analytics/:tab" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusAnalyticsPage /></CampusRouteGuard>} />
+                  <Route path="student/workspace" element={<CampusRouteGuard allowedRoles={['student', 'instructor', 'org_admin']}><CampusWorkspacePage /></CampusRouteGuard>} />
 
-                  {/* Faculty Routes */}
-                  <Route path="faculty/dashboard" element={<CampusFacultyDashboard />} />
-                  <Route path="faculty/labs" element={<CampusFacultyDashboard />} />
-                  <Route path="faculty/analytics" element={<CampusFacultyDashboard />} />
-                  <Route path="faculty/cockpit" element={<FacultyProctorCockpitPage />} />
-                  <Route path="faculty/cockpit/:assessmentId" element={<FacultyProctorCockpitPage />} />
-                  <Route path="faculty/viva/:vivaId" element={<VivaInterviewWorkspacePage />} />
-                  <Route path="faculty/plagiarism" element={<CampusFacultyDashboard />} />
+                  {/* Faculty Routes — `/faculty/dashboard`, `/faculty/labs` and
+                      `/faculty/plagiarism` share `CampusFacultyDashboard`, which selects its
+                      section from the route; `/faculty/analytics` has no aggregation behind it
+                      yet and renders its status instead of a second copy of the dashboard. */}
+                  <Route path="faculty/dashboard" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><CampusFacultyDashboard /></CampusRouteGuard>} />
+                  <Route path="faculty/labs" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><CampusFacultyDashboard /></CampusRouteGuard>} />
+                  <Route path="faculty/analytics" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><CampusFacultyAnalyticsPage /></CampusRouteGuard>} />
+                  <Route path="faculty/cockpit" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><FacultyProctorCockpitPage /></CampusRouteGuard>} />
+                  <Route path="faculty/cockpit/:assessmentId" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><FacultyProctorCockpitPage /></CampusRouteGuard>} />
+                  <Route path="faculty/viva/:vivaId" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><VivaInterviewWorkspacePage /></CampusRouteGuard>} />
+                  <Route path="faculty/plagiarism" element={<CampusRouteGuard allowedRoles={['instructor', 'org_admin']}><CampusFacultyDashboard /></CampusRouteGuard>} />
 
                   {/* Admin Routes */}
-                  <Route path="admin/dashboard" element={<CampusAdminDashboard />} />
-                  <Route path="admin/roster" element={<CampusAdminDashboard />} />
-                  <Route path="admin/audit" element={<CampusAdminDashboard />} />
+                  <Route path="admin/dashboard" element={<CampusRouteGuard allowedRoles={['org_admin']}><CampusAdminDashboard /></CampusRouteGuard>} />
+                  <Route path="admin/roster" element={<CampusRouteGuard allowedRoles={['org_admin']}><CampusAdminDashboard /></CampusRouteGuard>} />
+                  <Route path="admin/audit" element={<CampusRouteGuard allowedRoles={['org_admin']}><CampusAdminDashboard /></CampusRouteGuard>} />
 
-                  <Route path="*" element={<Navigate to="student/dashboard" replace />} />
+                  {/* Legacy role-slug aliases: /campus/:orgSlug/org_admin/* maps onto the
+                      canonical admin/* surfaces used by the campus sidebar navigation. */}
+                  <Route path="org_admin/dashboard" element={<CampusRedirect suffix="admin/dashboard" />} />
+                  <Route path="org_admin/roster" element={<CampusRedirect suffix="admin/roster" />} />
+                  <Route path="org_admin/audit" element={<CampusRedirect suffix="admin/audit" />} />
+
+                  <Route path="*" element={<CampusRedirect />} />
                 </Route>
 
                 {/* Legacy Portal Redirects */}
@@ -244,7 +337,7 @@ export const App: React.FC = () => (
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </div>
-          </div>
+          </RouteThemeScope>
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

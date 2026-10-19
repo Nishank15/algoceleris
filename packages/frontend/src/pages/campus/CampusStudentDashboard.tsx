@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import {
   FlaskConical,
   CheckCircle2,
@@ -10,6 +10,7 @@ import {
   Calendar,
   AlertCircle,
   Activity,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   getStudentCampusAnalytics,
@@ -22,7 +23,9 @@ import { getCampusSession } from '../../services/campusSession';
 export const CampusStudentDashboard: React.FC = () => {
   const { orgSlug: paramSlug } = useParams<{ orgSlug?: string }>();
   const orgSlug = (paramSlug || 'vit-chennai').toLowerCase();
+  const location = useLocation();
   const session = getCampusSession(orgSlug);
+  const accessDeniedMessage = (location.state as any)?.message;
 
   const [analytics, setAnalytics] = useState<StudentAnalyticsResponse | null>(null);
   const [labs, setLabs] = useState<LabSummaryResponse[]>([]);
@@ -67,8 +70,8 @@ export const CampusStudentDashboard: React.FC = () => {
       {/* Welcome Banner */}
       <div
         style={{
-          background: 'linear-gradient(180deg, #0f1011 0%, #08090a 100%)',
-          border: '1px solid #23252a',
+          background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-canvas) 100%)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px 32px',
           display: 'flex',
@@ -94,7 +97,7 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 fontSize: '11px',
                 fontWeight: 600,
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
                 fontFamily: 'JetBrains Mono, monospace',
@@ -108,7 +111,7 @@ export const CampusStudentDashboard: React.FC = () => {
               margin: 0,
               fontSize: '28px',
               fontWeight: 510,
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               letterSpacing: '-0.022em',
               fontFamily: 'Inter, sans-serif',
             }}
@@ -122,17 +125,17 @@ export const CampusStudentDashboard: React.FC = () => {
             style={{
               margin: 0,
               fontSize: '14px',
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
               lineHeight: '1.5',
               fontFamily: 'Inter, sans-serif',
             }}
           >
             Registration Number:{' '}
-            <strong style={{ color: '#ffffff', fontFamily: 'JetBrains Mono, monospace' }}>
-              {session?.regNumber || analytics?.reg_number || '25BAI1234'}
+            <strong style={{ color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
+              {session?.regNumber || analytics?.reg_number || 'DEMO-001'}
             </strong>{' '}
             · Cohort Course:{' '}
-            <strong style={{ color: '#ffffff' }}>
+            <strong style={{ color: 'var(--text-primary)' }}>
               {analytics?.course_code || 'BACS101'} ({analytics?.course_name || 'Problem Solving Using Java'})
             </strong>
           </p>
@@ -147,8 +150,8 @@ export const CampusStudentDashboard: React.FC = () => {
               gap: '8px',
               padding: '10px 20px',
               borderRadius: '6px',
-              background: '#e4f222',
-              color: '#08090a',
+              background: 'var(--accent-primary)',
+              color: 'var(--accent-primary-fg)',
               fontWeight: 510,
               fontSize: '13px',
               textDecoration: 'none',
@@ -168,20 +171,42 @@ export const CampusStudentDashboard: React.FC = () => {
               gap: '8px',
               padding: '10px 18px',
               borderRadius: '6px',
-              background: '#141517',
-              border: '1px solid #23252a',
-              color: '#ffffff',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-primary)',
               fontWeight: 510,
               fontSize: '13px',
               textDecoration: 'none',
               letterSpacing: '-0.011em',
             }}
           >
-            <Activity size={15} color="#8a8f98" />
+            <Activity size={15} color="var(--text-secondary)" />
             <span>View Attainment</span>
           </Link>
         </div>
       </div>
+
+      {accessDeniedMessage && (
+        <div
+          role="alert"
+          style={{
+            background: 'rgba(235, 87, 87, 0.12)',
+            border: '1px solid #eb5757',
+            borderRadius: '8px',
+            padding: '16px 20px',
+            color: '#eb5757',
+            fontSize: '13px',
+            fontWeight: 510,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            boxShadow: '0 4px 12px rgba(235, 87, 87, 0.1)',
+          }}
+        >
+          <ShieldAlert size={18} />
+          <span>{accessDeniedMessage}</span>
+        </div>
+      )}
 
       {error && (
         <div
@@ -213,8 +238,8 @@ export const CampusStudentDashboard: React.FC = () => {
         {/* KPI 1 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px 24px',
             display: 'flex',
@@ -223,7 +248,7 @@ export const CampusStudentDashboard: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '13px', color: '#8a8f98', fontWeight: 500 }}>Active Labs</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Active Labs</span>
             <div
               style={{
                 width: '32px',
@@ -245,7 +270,7 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 fontSize: '32px',
                 fontWeight: 590,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontFamily: 'JetBrains Mono, monospace',
                 letterSpacing: '-0.03em',
               }}
@@ -261,8 +286,8 @@ export const CampusStudentDashboard: React.FC = () => {
         {/* KPI 2 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px 24px',
             display: 'flex',
@@ -271,7 +296,7 @@ export const CampusStudentDashboard: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '13px', color: '#8a8f98', fontWeight: 500 }}>Completed Labs</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Completed Labs</span>
             <div
               style={{
                 width: '32px',
@@ -293,7 +318,7 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 fontSize: '32px',
                 fontWeight: 590,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontFamily: 'JetBrains Mono, monospace',
                 letterSpacing: '-0.03em',
               }}
@@ -309,8 +334,8 @@ export const CampusStudentDashboard: React.FC = () => {
         {/* KPI 3 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px 24px',
             display: 'flex',
@@ -319,7 +344,7 @@ export const CampusStudentDashboard: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '13px', color: '#8a8f98', fontWeight: 500 }}>Average Score</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Average Score</span>
             <div
               style={{
                 width: '32px',
@@ -340,15 +365,15 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 fontSize: '32px',
                 fontWeight: 590,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontFamily: 'JetBrains Mono, monospace',
                 letterSpacing: '-0.03em',
               }}
             >
-              {loading ? '—' : analytics ? `${analytics.average_marks} / 20` : '—'}
+              {loading ? '—' : analytics && analytics.completed_labs_count > 0 ? `${analytics.average_marks} / 20` : '—'}
             </span>
             <span style={{ fontSize: '12px', color: '#f59e0b', fontWeight: 500 }}>
-              Rubric Attainment
+              {analytics && analytics.completed_labs_count > 0 ? 'Rubric Attainment' : 'Pending Evaluation'}
             </span>
           </div>
         </div>
@@ -356,8 +381,8 @@ export const CampusStudentDashboard: React.FC = () => {
         {/* KPI 4 */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px 24px',
             display: 'flex',
@@ -366,7 +391,7 @@ export const CampusStudentDashboard: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '13px', color: '#8a8f98', fontWeight: 500 }}>CLO Attainment</span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>CLO Attainment</span>
             <div
               style={{
                 width: '32px',
@@ -387,15 +412,15 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 fontSize: '32px',
                 fontWeight: 590,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 fontFamily: 'JetBrains Mono, monospace',
                 letterSpacing: '-0.03em',
               }}
             >
-              {loading ? '—' : analytics ? `${analytics.clo_attainment_percent}%` : '—'}
+              {loading ? '—' : analytics && analytics.completed_labs_count > 0 ? `${analytics.clo_attainment_percent}%` : '—'}
             </span>
             <span style={{ fontSize: '12px', color: '#e4f222', fontWeight: 500 }}>
-              ABET Target Met
+              {analytics && analytics.completed_labs_count > 0 ? 'ABET Target Met' : 'Target Pending'}
             </span>
           </div>
         </div>
@@ -405,8 +430,8 @@ export const CampusStudentDashboard: React.FC = () => {
       {activeLab && (
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '28px',
             display: 'flex',
@@ -458,7 +483,7 @@ export const CampusStudentDashboard: React.FC = () => {
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: '#8a8f98', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={14} />
                 {activeLab.duration_minutes} mins window
@@ -476,7 +501,7 @@ export const CampusStudentDashboard: React.FC = () => {
                 margin: '0 0 8px 0',
                 fontSize: '20px',
                 fontWeight: 510,
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 letterSpacing: '-0.015em',
               }}
             >
@@ -486,7 +511,7 @@ export const CampusStudentDashboard: React.FC = () => {
               style={{
                 margin: 0,
                 fontSize: '14px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 lineHeight: '1.6',
               }}
             >
@@ -497,7 +522,7 @@ export const CampusStudentDashboard: React.FC = () => {
           <div
             style={{
               paddingTop: '8px',
-              borderTop: '1px solid #161718',
+              borderTop: '1px solid var(--border-subtle)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -505,7 +530,7 @@ export const CampusStudentDashboard: React.FC = () => {
               gap: '12px',
             }}
           >
-            <div style={{ display: 'flex', gap: '20px', color: '#62666d', fontSize: '12px' }}>
+            <div style={{ display: 'flex', gap: '20px', color: 'var(--text-muted)', fontSize: '12px' }}>
               <span>6-Stage Pedagogy: Notes · Demo · LED MCQs · Locked Practice · Project Task</span>
             </div>
 
@@ -517,8 +542,8 @@ export const CampusStudentDashboard: React.FC = () => {
                 gap: '8px',
                 padding: '10px 20px',
                 borderRadius: '6px',
-                background: '#e4f222',
-                color: '#08090a',
+                background: 'var(--accent-primary)',
+                color: 'var(--accent-primary-fg)',
                 fontWeight: 510,
                 fontSize: '13px',
                 textDecoration: 'none',
@@ -535,8 +560,8 @@ export const CampusStudentDashboard: React.FC = () => {
       {/* Evaluated Labs & Progression Table */}
       <div
         style={{
-          background: '#0f1011',
-          border: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '24px',
           display: 'flex',
@@ -546,11 +571,11 @@ export const CampusStudentDashboard: React.FC = () => {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 510, color: '#ffffff' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 510, color: 'var(--text-primary)' }}>
               Curriculum Submissions & Rubric Records
             </h3>
-            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#8a8f98' }}>
-              Real-time evaluated scores and outcomes verified by the kernel sandbox
+            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
+              Real-time evaluated scores and outcomes verified by the evaluation sandbox
             </p>
           </div>
           <Link
@@ -572,7 +597,7 @@ export const CampusStudentDashboard: React.FC = () => {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid #23252a', color: '#62666d' }}>
+              <tr style={{ borderBottom: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
                 <th style={{ padding: '12px 16px', fontWeight: 500 }}>LAB CODE</th>
                 <th style={{ padding: '12px 16px', fontWeight: 500 }}>ASSESSMENT TITLE</th>
                 <th style={{ padding: '12px 16px', fontWeight: 500 }}>CLO</th>
@@ -583,19 +608,19 @@ export const CampusStudentDashboard: React.FC = () => {
             </thead>
             <tbody>
               {labs.map((lab) => {
-                const isEvaluated = lab.student_status === 'Evaluated' || lab.status === 'evaluated';
+                const isEvaluated = lab.student_status === 'Evaluated';
                 return (
                   <tr
                     key={lab.id}
                     style={{
-                      borderBottom: '1px solid #161718',
+                      borderBottom: '1px solid var(--border-subtle)',
                       transition: 'background 120ms ease',
                     }}
                   >
-                    <td style={{ padding: '14px 16px', fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', fontWeight: 500 }}>
+                    <td style={{ padding: '14px 16px', fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-primary)', fontWeight: 500 }}>
                       {lab.code}
                     </td>
-                    <td style={{ padding: '14px 16px', color: '#ffffff' }}>
+                    <td style={{ padding: '14px 16px', color: 'var(--text-primary)' }}>
                       {lab.title}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
@@ -612,8 +637,8 @@ export const CampusStudentDashboard: React.FC = () => {
                         {lab.clo}
                       </span>
                     </td>
-                    <td style={{ padding: '14px 16px', fontFamily: 'JetBrains Mono, monospace', color: isEvaluated ? '#22c55e' : '#8a8f98' }}>
-                      {isEvaluated ? `${lab.student_marks ?? 19.5} / ${lab.max_marks}` : `— / ${lab.max_marks}`}
+                    <td style={{ padding: '14px 16px', fontFamily: 'JetBrains Mono, monospace', color: isEvaluated ? '#22c55e' : 'var(--text-secondary)' }}>
+                      {isEvaluated && lab.student_marks != null ? `${lab.student_marks} / ${lab.max_marks}` : `— / ${lab.max_marks}`}
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       <span
@@ -625,12 +650,35 @@ export const CampusStudentDashboard: React.FC = () => {
                           borderRadius: '9999px',
                           fontSize: '11px',
                           fontWeight: 500,
-                          background: isEvaluated ? 'rgba(34, 197, 94, 0.1)' : 'rgba(228, 242, 34, 0.1)',
-                          color: isEvaluated ? '#22c55e' : '#e4f222',
+                          background: isEvaluated
+                            ? 'rgba(34, 197, 94, 0.1)'
+                            : lab.student_status === 'In Progress'
+                            ? 'rgba(245, 158, 11, 0.1)'
+                            : 'rgba(228, 242, 34, 0.1)',
+                          color: isEvaluated
+                            ? '#22c55e'
+                            : lab.student_status === 'In Progress'
+                            ? '#f59e0b'
+                            : '#e4f222',
                         }}
                       >
-                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: isEvaluated ? '#22c55e' : '#e4f222' }} />
-                        {isEvaluated ? 'Evaluated' : 'Active'}
+                        <span
+                          style={{
+                            width: '5px',
+                            height: '5px',
+                            borderRadius: '50%',
+                            background: isEvaluated
+                              ? '#22c55e'
+                              : lab.student_status === 'In Progress'
+                              ? '#f59e0b'
+                              : '#e4f222',
+                          }}
+                        />
+                        {isEvaluated
+                          ? 'Evaluated'
+                          : lab.student_status === 'In Progress'
+                          ? 'In Progress'
+                          : 'Active'}
                       </span>
                     </td>
                     <td style={{ padding: '14px 16px', textAlign: 'right' }}>
@@ -638,7 +686,7 @@ export const CampusStudentDashboard: React.FC = () => {
                         <Link
                           to={`/campus/${orgSlug}/student/labs/${lab.id}/review`}
                           style={{
-                            color: '#8a8f98',
+                            color: 'var(--text-secondary)',
                             textDecoration: 'none',
                             fontSize: '12px',
                             display: 'inline-flex',

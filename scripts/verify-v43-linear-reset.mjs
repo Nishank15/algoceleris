@@ -225,7 +225,7 @@ try {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          student_email: 'aditya.sharma2025@vitstudent.ac.in',
+          student_email: 'student1@vitstudent.ac.in',
         }),
       });
     } catch {}

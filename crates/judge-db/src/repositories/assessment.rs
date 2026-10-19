@@ -157,7 +157,11 @@ pub async fn update_assessment_status(
         "ACTIVE" => AssessmentStatus::Active,
         "GRACE_PERIOD" => AssessmentStatus::GracePeriod,
         "CLOSED" => AssessmentStatus::Closed,
-        other => return Err(DbError::NotFound(format!("unknown assessment status: {other}"))),
+        other => {
+            return Err(DbError::NotFound(format!(
+                "unknown assessment status: {other}"
+            )))
+        }
     };
 
     let valid_target = judge_core::transition_assessment_state(current_status, target_status)?;

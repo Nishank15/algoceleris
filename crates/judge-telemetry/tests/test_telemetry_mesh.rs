@@ -173,10 +173,7 @@ async fn test_pubsub_channel_naming_and_serialization() -> Result<(), TelemetryE
 
     // 1. Channel naming validation
     let channel = format_telemetry_channel(assessment_id);
-    assert_eq!(
-        channel,
-        format!("campus:proctor:{assessment_id}:telemetry")
-    );
+    assert_eq!(channel, format!("campus:proctor:{assessment_id}:telemetry"));
 
     let relay = TelemetryRelay::new_in_memory();
     assert_eq!(relay.channel_name(assessment_id), channel);
@@ -201,7 +198,10 @@ async fn test_pubsub_channel_naming_and_serialization() -> Result<(), TelemetryE
     relay.publish(&event).await?;
 
     // Receive locally
-    let received = rx.recv().await.map_err(|e| TelemetryError::ChannelClosed(e.to_string()))?;
+    let received = rx
+        .recv()
+        .await
+        .map_err(|e| TelemetryError::ChannelClosed(e.to_string()))?;
     assert_eq!(received.assessment_id, assessment_id);
     assert_eq!(received.candidate_id, candidate_id);
     assert_eq!(received.event_type, TelemetryEventType::TabSwitch);

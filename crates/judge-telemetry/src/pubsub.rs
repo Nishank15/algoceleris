@@ -94,11 +94,13 @@ impl TelemetryRelay {
     pub async fn subscribe_redis(
         &self,
         assessment_id: Uuid,
-    ) -> Result<impl futures_util::Stream<Item = Result<TelemetryEvent, TelemetryError>>, TelemetryError> {
-        let client = self
-            .client
-            .as_ref()
-            .ok_or_else(|| TelemetryError::ConnectionError("redis client not configured".to_string()))?;
+    ) -> Result<
+        impl futures_util::Stream<Item = Result<TelemetryEvent, TelemetryError>>,
+        TelemetryError,
+    > {
+        let client = self.client.as_ref().ok_or_else(|| {
+            TelemetryError::ConnectionError("redis client not configured".to_string())
+        })?;
 
         let mut pubsub = client
             .get_async_pubsub()
@@ -106,7 +108,10 @@ impl TelemetryRelay {
             .map_err(TelemetryError::Redis)?;
 
         let channel = format_telemetry_channel(assessment_id);
-        pubsub.subscribe(&channel).await.map_err(TelemetryError::Redis)?;
+        pubsub
+            .subscribe(&channel)
+            .await
+            .map_err(TelemetryError::Redis)?;
 
         let stream = pubsub.into_on_message().map(|msg| {
             let payload: String = msg.get_payload().map_err(TelemetryError::Redis)?;

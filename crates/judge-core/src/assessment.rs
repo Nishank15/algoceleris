@@ -1,6 +1,6 @@
-use chrono::{DateTime, Utc};
 use crate::errors::DomainError;
 use crate::models::{AssessmentStatus, LatePenaltyResult, RubricCriterion};
+use chrono::{DateTime, Utc};
 
 /// Validates the chronological timeline ordering of an assessment:
 /// `publish_at <= starts_at <= due_at <= cutoff_at`
@@ -95,7 +95,9 @@ pub fn calculate_late_penalty(
     let hours_late = ((seconds_late / 3600.0).ceil() as u32).max(1);
 
     let calculated_pct = f64::from(hours_late) * late_penalty_percent_per_hour;
-    let penalty_percent = calculated_pct.min(max_late_penalty_percent).clamp(0.0, 100.0);
+    let penalty_percent = calculated_pct
+        .min(max_late_penalty_percent)
+        .clamp(0.0, 100.0);
 
     let deduction = (raw_score * (penalty_percent / 100.0) * 100.0).round() / 100.0;
     let final_score = (raw_score - deduction).max(0.0);

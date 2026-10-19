@@ -19,7 +19,9 @@ pub use contests::{
     get_global_leaderboard_handler, list_contests_handler, ContestProblemSummary, ContestSummary,
     LeaderboardEntry, ProblemScoreInfo,
 };
-pub use problems::{get_problem_handler, list_problems_handler, Problem, TestCaseItem};
+pub use problems::{
+    get_problem_handler, init_problem_catalog, list_problems_handler, Problem, TestCaseItem,
+};
 pub use subscriptions::{
     ai_debug_handler, create_razorpay_order_handler, create_stripe_checkout_handler,
     get_entitlements_handler, verify_razorpay_payment_handler, AIDebugRequest, AIDebugResponse,
@@ -34,16 +36,19 @@ pub use users::{
 };
 
 pub use cockpit::{
-    get_proctor_cockpit_handler, get_viva_rubric_handler, proctor_stream_handler,
+    get_proctor_cockpit_handler, get_proctor_events_handler, get_proctored_students_handler,
+    get_viva_rubric_handler, post_proctor_event_handler, proctor_stream_handler,
     provision_viva_escalation_handler, update_viva_rubric_handler, viva_room_ws_handler,
-    CandidateCockpitSummary, ProctorCockpitResponse, ProvisionVivaRequest, ProvisionVivaResponse,
+    CandidateCockpitSummary, ProctorCockpitResponse, ProctorEventIngestRequest, ProctorEventQuery,
+    ProctorEventView, ProctoredCandidateState, ProvisionVivaRequest, ProvisionVivaResponse,
     UpdateVivaRubricRequest, VivaRubricResponse,
 };
 
 pub use submission::{
-    get_submission_handler, mask_test_case_json, mask_test_case_results,
-    submission_stream_handler, submit_code_handler, GetSubmissionResponse, StreamParams,
-    SubmissionJob, SubmitCodeRequest, SubmitCodeResponse, TestCaseResult, SECRET_TEST_MASK,
+    get_submission_handler, mask_test_case_json, mask_test_case_results, resolve_server_test_cases,
+    submission_stream_handler, submit_code_handler, GetSubmissionResponse, ServerTestCase,
+    StreamParams, SubmissionJob, SubmitCodeRequest, SubmitCodeResponse, TestCaseResult,
+    SECRET_TEST_MASK,
 };
 
 pub use assessment::{
@@ -63,12 +68,13 @@ pub use campus::{
     record_campus_lab_activity_handler, submit_campus_lab_handler, ActivityCategoryItem,
     ActivityPoint, AddRosterMemberRequest, BatchIngestRequest, BatchIngestResponse,
     BatchMemberItem, BloomDistributionItem, CampusAdminAuditResponse, CampusLoginRequest,
-    CampusLoginResponse, CampusOrgSummary, CampusProvisionRequest, CampusProvisionResponse,
-    CampusUserProfile, CloAttainmentItem, CodeRunTrendItem, CohortResponse, CreateCohortRequest,
-    CreateLabRequest, CreateOrganizationRequest, ErrorDistributionItem, LabActivityRequest,
-    LabActivityResponse, LabDetailResponse, LabSummaryResponse, LabsQuery, MarksProgressionItem,
-    OrganizationResponse, RecentSubmissionItem, RosterMemberResponse, RosterQuery,
-    StudentAnalyticsResponse, SubmitLabRequest, SubmitLabResponse, TimeSpentLabItem,
+    CampusLoginResponse, CampusOrgPublicSummary, CampusOrgSummary, CampusProvisionRequest,
+    CampusProvisionResponse, CampusUserProfile, CloAttainmentItem, CodeRunTrendItem,
+    CohortResponse, CreateCohortRequest, CreateLabRequest, CreateOrganizationRequest,
+    ErrorDistributionItem, LabActivityRequest, LabActivityResponse, LabDetailResponse,
+    LabSummaryResponse, LabsQuery, MarksProgressionItem, OrganizationResponse,
+    RecentSubmissionItem, RosterMemberResponse, RosterQuery, StudentAnalyticsResponse,
+    SubmitLabRequest, SubmitLabResponse, TimeSpentLabItem,
 };
 pub mod hackathons;
 pub use hackathons::{

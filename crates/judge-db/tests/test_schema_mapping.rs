@@ -153,8 +153,5 @@ fn test_error_formatting_constraint_violations() {
     );
 
     let ser_err = DbError::SerializationError("invalid UTF-8".to_string());
-    assert_eq!(
-        ser_err.to_string(),
-        "serialization error: invalid UTF-8"
-    );
+    assert_eq!(ser_err.to_string(), "serialization error: invalid UTF-8");
 }

@@ -13,7 +13,7 @@ import {
 
 export const CampusWorkspacePage: React.FC = () => {
   const { orgSlug = 'vit-chennai' } = useParams<{ orgSlug: string }>();
-  const [session, setSession] = useState<CampusUserSession | null>(null);
+  const [session, setSession] = useState<CampusUserSession | null>(() => getCampusSession(orgSlug));
 
   useEffect(() => {
     const s = getCampusSession(orgSlug);
@@ -21,7 +21,7 @@ export const CampusWorkspacePage: React.FC = () => {
   }, [orgSlug]);
 
   const role = session?.role || 'student';
-  const regNumber = session?.regNumber || '25BAI1234';
+  const regNumber = session?.regNumber || 'DEMO-001';
   const orgName = session?.orgName || orgSlug.toUpperCase().replace('-', ' ');
 
   return (
@@ -29,8 +29,8 @@ export const CampusWorkspacePage: React.FC = () => {
       {/* Top Banner */}
       <div
         style={{
-          background: 'linear-gradient(180deg, #0f1011 0%, #141517 100%)',
-          border: '1px solid #23252a',
+          background: 'linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 100%)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px',
           marginBottom: '24px',
@@ -59,8 +59,8 @@ export const CampusWorkspacePage: React.FC = () => {
             >
               {role.toUpperCase()} WORKSPACE
             </span>
-            <span style={{ color: '#62666d' }}>•</span>
-            <span style={{ color: '#8a8f98', fontSize: '13px' }}>
+            <span style={{ color: 'var(--text-tertiary)' }}>•</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
               Active Cohort: {session?.cohortName || 'CSE Core 2026'}
             </span>
           </div>
@@ -71,15 +71,15 @@ export const CampusWorkspacePage: React.FC = () => {
               fontWeight: 590,
               margin: '0 0 6px 0',
               letterSpacing: '-0.02em',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             }}
           >
             Welcome, {session?.name || 'Academic Scholar'}
           </h1>
 
-          <p style={{ color: '#8a8f98', fontSize: '14px', margin: 0 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px', margin: 0 }}>
             {orgName} · Registration No:{' '}
-            <strong style={{ color: '#ffffff', fontFamily: 'JetBrains Mono, monospace' }}>
+            <strong style={{ color: 'var(--text-primary)', fontFamily: 'JetBrains Mono, monospace' }}>
               {regNumber}
             </strong>
           </p>
@@ -88,20 +88,20 @@ export const CampusWorkspacePage: React.FC = () => {
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div
             style={{
-              background: '#08090a',
-              border: '1px solid #23252a',
+              background: 'var(--bg-canvas)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '10px 16px',
               fontSize: '12px',
               textAlign: 'right',
             }}
           >
-            <div style={{ color: '#62666d', fontSize: '10px', textTransform: 'uppercase', marginBottom: '2px' }}>
-              Sandbox Isolation
+            <div style={{ color: 'var(--text-tertiary)', fontSize: '10px', textTransform: 'uppercase', marginBottom: '2px' }}>
+              Evaluation Engine
             </div>
-            <div style={{ color: '#22c55e', fontWeight: 510, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
-              256MB / 1 vCPU cgroups v2
+            <div style={{ color: 'var(--accent-success)', fontWeight: 510, display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-success)' }} />
+              Dedicated Compute Allocation
             </div>
           </div>
         </div>
@@ -118,67 +118,67 @@ export const CampusWorkspacePage: React.FC = () => {
       >
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Assigned Lab Modules
             </span>
             <FileCode2 size={16} style={{ color: '#e4f222' }} />
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#ffffff', marginBottom: '4px' }}>
+          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text-primary)', marginBottom: '4px' }}>
             {role === 'student' ? '4 Active' : '6 Published'}
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
             Next due: Oct 24, 2026 · Lab 04 (Graph Algorithms)
           </div>
         </div>
 
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               CLO Attainment Index
             </span>
-            <BarChart3 size={16} style={{ color: '#22c55e' }} />
+            <BarChart3 size={16} style={{ color: 'var(--accent-success)' }} />
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#22c55e', marginBottom: '4px' }}>
+          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent-success)', marginBottom: '4px' }}>
             91.4%
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
-            CLO-1: 96% · CLO-2: 88% · CLO-3: 90% (ABET Targets Met)
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+            CLO-1: 96% · CLO-2: 88% · CLO-3: 90% (Target Met)
           </div>
         </div>
 
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '20px',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <span style={{ fontSize: '12px', color: '#8a8f98', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Academic Integrity
             </span>
-            <ShieldCheck size={16} style={{ color: '#02b8cc' }} />
+            <ShieldCheck size={16} style={{ color: 'var(--accent-cyan)' }} />
           </div>
-          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: '#02b8cc', marginBottom: '4px' }}>
+          <div style={{ fontSize: '28px', fontWeight: 600, fontFamily: 'JetBrains Mono, monospace', color: 'var(--accent-cyan)', marginBottom: '4px' }}>
             0 Anomalies
           </div>
-          <div style={{ fontSize: '12px', color: '#62666d' }}>
-            AST Winnowing & Proctoring verified clean
+          <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
+            Originality & Proctoring verified clean
           </div>
         </div>
       </div>
@@ -186,18 +186,18 @@ export const CampusWorkspacePage: React.FC = () => {
       {/* Quick Launchpad & Next Steps */}
       <div
         style={{
-          background: '#0f1011',
-          border: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '28px',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <div>
-            <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 4px 0', color: '#ffffff' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 590, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
               Academic Quick Launchpad
             </h3>
-            <p style={{ color: '#8a8f98', fontSize: '13px', margin: 0 }}>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>
               Access sandboxed coding environments, progressive lab assessments, and practice catalogs.
             </p>
           </div>
@@ -207,12 +207,12 @@ export const CampusWorkspacePage: React.FC = () => {
           <Link
             to="/problems"
             style={{
-              background: '#161718',
-              border: '1px solid #23252a',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '18px',
               textDecoration: 'none',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -224,8 +224,8 @@ export const CampusWorkspacePage: React.FC = () => {
                 <Terminal size={16} />
                 <span style={{ fontSize: '14px', fontWeight: 590 }}>Competitive Practice Catalog</span>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
-                Evaluate algorithmic code across dual-pane Monaco editor with sub-millisecond local sandbox runs.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
+                Evaluate algorithmic code across dual-pane Monaco editor with instant evaluation feedback.
               </p>
             </div>
             <div style={{ marginTop: '14px', fontSize: '12px', color: '#e4f222', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -236,12 +236,12 @@ export const CampusWorkspacePage: React.FC = () => {
           <Link
             to={`/campus/${orgSlug}/login`}
             style={{
-              background: '#161718',
-              border: '1px solid #23252a',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '18px',
               textDecoration: 'none',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -249,28 +249,28 @@ export const CampusWorkspacePage: React.FC = () => {
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#02b8cc', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)', marginBottom: '8px' }}>
                 <Users size={16} />
-                <span style={{ fontSize: '14px', fontWeight: 590 }}>Role & Identity Switcher</span>
+                <span style={{ fontSize: '14px', fontWeight: 590 }}>Role & Identity Portal</span>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
-                Switch between Student, Faculty, and Admin personas with authentic JWT tokens and domain whitelisting.
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
+                Access verified Student, Faculty, and Administrator accounts with authentic institutional credentials.
               </p>
             </div>
-            <div style={{ marginTop: '14px', fontSize: '12px', color: '#02b8cc', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              Switch Persona <ArrowRight size={13} />
+            <div style={{ marginTop: '14px', fontSize: '12px', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Sign In / Switch Account <ArrowRight size={13} />
             </div>
           </Link>
 
           <Link
             to="/campus"
             style={{
-              background: '#161718',
-              border: '1px solid #23252a',
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '18px',
               textDecoration: 'none',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -278,15 +278,15 @@ export const CampusWorkspacePage: React.FC = () => {
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-success)', marginBottom: '8px' }}>
                 <Building2 size={16} />
                 <span style={{ fontSize: '14px', fontWeight: 590 }}>University Directory</span>
               </div>
-              <p style={{ color: '#8a8f98', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '12px', margin: 0, lineHeight: 1.5 }}>
                 Explore active campus portals across IIT Madras, VIT Chennai, BITS Pilani, or provision a new institution.
               </p>
             </div>
-            <div style={{ marginTop: '14px', fontSize: '12px', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div style={{ marginTop: '14px', fontSize: '12px', color: 'var(--accent-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               View All Universities <ArrowRight size={13} />
             </div>
           </Link>

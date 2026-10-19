@@ -19,7 +19,7 @@ pub fn build_batch_insert_query() -> &'static str {
         NOW()
     FROM UNNEST($3::uuid[], $4::uuid[], $5::text[], $6::text[]) AS t(m_id, u_id, u_role, u_status)
     ON CONFLICT (org_id, user_id, cohort_id) DO UPDATE
-    SET role = EXCLUDED.role, status = EXCLUDED.status
+    SET role = EXCLUDED.role, status = EXCLUDED.status, updated_at = NOW()
     "
 }
 

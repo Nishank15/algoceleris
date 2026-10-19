@@ -16,7 +16,9 @@ pub const DEFAULT_W: usize = 5;
 const RABIN_KARP_BASE: u64 = 131;
 
 /// A structural fingerprint extracted via the Winnowing algorithm.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub struct Fingerprint {
     /// 64-bit rolling hash of the k-gram.
     pub hash: u64,

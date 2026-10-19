@@ -7,6 +7,8 @@ pub mod auth;
 pub mod errors;
 pub mod extractors;
 pub mod routes;
+pub mod security;
+pub mod services;
 pub mod state;
 
 pub use auth::{
@@ -28,42 +30,45 @@ pub use routes::{
     get_campus_labs_handler, get_cohort_roster_handler, get_contest_handler,
     get_contest_leaderboard_handler, get_entitlements_handler, get_global_leaderboard_handler,
     get_hackathon_detail_handler, get_org_roster_by_slug_handler, get_organization_handler,
-    get_problem_handler, get_proctor_cockpit_handler, get_student_analytics_handler,
-    get_submission_handler, get_user_profile_handler, get_viva_rubric_handler,
-    grant_time_accommodation_handler, health_handler, list_cohort_assessments_handler,
-    list_contests_handler, list_hackathons_handler, list_organizations_handler,
-    list_problems_handler, login_handler, logout_handler, mask_test_case_json,
-    mask_test_case_results, me_handler, migrate_guest_submissions_handler, proctor_stream_handler,
+    get_problem_handler, get_proctor_cockpit_handler, get_proctor_events_handler,
+    get_proctored_students_handler, get_student_analytics_handler, get_submission_handler,
+    get_user_profile_handler, get_viva_rubric_handler, grant_time_accommodation_handler,
+    health_handler, list_cohort_assessments_handler, list_contests_handler,
+    list_hackathons_handler, list_organizations_handler, list_problems_handler, login_handler,
+    logout_handler, mask_test_case_json, mask_test_case_results, me_handler,
+    migrate_guest_submissions_handler, post_proctor_event_handler, proctor_stream_handler,
     provision_organization_handler, provision_viva_escalation_handler,
     record_campus_lab_activity_handler, refresh_handler, register_hackathon_handler,
     register_handler, submission_stream_handler, submit_assessment_solution_handler,
     submit_campus_lab_handler, submit_code_handler, submit_hackathon_project_handler,
     update_assessment_status_handler, update_viva_rubric_handler,
     upvote_hackathon_submission_handler, verify_razorpay_payment_handler, viva_room_ws_handler,
-    AddRosterMemberRequest, AIDebugRequest, AIDebugResponse, AssessmentResponse, AvailabilityQuery,
+    AIDebugRequest, AIDebugResponse, AddRosterMemberRequest, AssessmentResponse, AvailabilityQuery,
     AvailabilityResponse, BatchIngestRequest, BatchIngestResponse, BatchMemberItem,
-    CampusLoginRequest, CampusLoginResponse, CampusOrgSummary, CampusProvisionRequest,
-    CampusProvisionResponse, CampusUserProfile, CandidateCockpitSummary, CohortResponse,
-    ContestProblemSummary, ContestRatingPoint, ContestSummary, CreateAssessmentRequest,
-    CreateCohortRequest, CreateOrganizationRequest, DailyContributionPoint, DifficultyBreakdown,
-    DifficultyStats, EntitlementsResponse, ForceSubmitRequest, ForceSubmitResponse,
-    GetSubmissionResponse, GrantAccommodationRequest, GrantAccommodationResponse,
-    GuestSubmissionItem, HealthResponse, LeaderboardEntry, LoginRequest,
-    MigrateGuestSubmissionsRequest, MigrateGuestSubmissionsResponse, OrganizationResponse,
-    Problem, ProblemScoreInfo, ProctorCockpitResponse, ProfileStats, ProvisionVivaRequest,
-    ProvisionVivaResponse, RazorpayOrderRequest, RazorpayOrderResponse, RazorpayVerifyRequest,
-    RazorpayVerifyResponse, RegisterRequest, RosterMemberResponse, RosterQuery, StreamParams,
-    StripeCheckoutRequest, StripeCheckoutResponse, SubmissionJob, SubmitAssessmentRequest,
-    SubmitAssessmentResponse, SubmitCodeRequest, SubmitCodeResponse, TestCaseItem,
-    TestCaseResult, TokenResponse, UpdateAssessmentStatusRequest, UpdateVivaRubricRequest,
-    UserProfileResponse, UserResponse, VivaRubricResponse, SECRET_TEST_MASK,
+    CampusLoginRequest, CampusLoginResponse, CampusOrgPublicSummary, CampusOrgSummary,
+    CampusProvisionRequest, CampusProvisionResponse, CampusUserProfile, CandidateCockpitSummary,
+    CohortResponse, ContestProblemSummary, ContestRatingPoint, ContestSummary,
+    CreateAssessmentRequest, CreateCohortRequest, CreateOrganizationRequest,
+    DailyContributionPoint, DifficultyBreakdown, DifficultyStats, EntitlementsResponse,
+    ForceSubmitRequest, ForceSubmitResponse, GetSubmissionResponse, GrantAccommodationRequest,
+    GrantAccommodationResponse, GuestSubmissionItem, HealthResponse, LeaderboardEntry,
+    LoginRequest, MigrateGuestSubmissionsRequest, MigrateGuestSubmissionsResponse,
+    OrganizationResponse, Problem, ProblemScoreInfo, ProctorCockpitResponse,
+    ProctorEventIngestRequest, ProctorEventQuery, ProctorEventView, ProctoredCandidateState,
+    ProfileStats, ProvisionVivaRequest, ProvisionVivaResponse, RazorpayOrderRequest,
+    RazorpayOrderResponse, RazorpayVerifyRequest, RazorpayVerifyResponse, RegisterRequest,
+    RosterMemberResponse, RosterQuery, StreamParams, StripeCheckoutRequest, StripeCheckoutResponse,
+    SubmissionJob, SubmitAssessmentRequest, SubmitAssessmentResponse, SubmitCodeRequest,
+    SubmitCodeResponse, TestCaseItem, TestCaseResult, TokenResponse, UpdateAssessmentStatusRequest,
+    UpdateVivaRubricRequest, UserProfileResponse, UserResponse, VivaRubricResponse,
+    SECRET_TEST_MASK,
 };
 pub use state::AppState;
 
+use axum::middleware;
 use axum::routing::{get, patch, post};
 use axum::Router;
 use tower_http::compression::CompressionLayer;
-use tower_http::cors::CorsLayer;
 use tower_http::trace::TraceLayer;
 
 /// Builds and mounts all Axum gateway endpoints and Tower middleware.
@@ -75,14 +80,8 @@ pub fn create_router(state: AppState) -> Router {
         .route("/api/v1/health", get(health_handler))
         // Auth
         .route("/api/v1/auth/login", post(login_handler))
-        .route(
-            "/api/v1/auth/signup",
-            post(register_handler),
-        )
-        .route(
-            "/api/v1/auth/register",
-            post(register_handler),
-        )
+        .route("/api/v1/auth/signup", post(register_handler))
+        .route("/api/v1/auth/register", post(register_handler))
         .route("/api/v1/auth/refresh", post(refresh_handler))
         .route("/api/v1/auth/logout", post(logout_handler))
         .route("/api/v1/auth/me", get(me_handler))
@@ -134,6 +133,9 @@ pub fn create_router(state: AppState) -> Router {
         )
         // AI Debugging Assistant
         .route("/api/v1/ai/debug", post(ai_debug_handler))
+        // Subscription-scoped alias for clients that address the assistant through the
+        // subscriptions module.
+        .route("/api/v1/subscriptions/ai-debug", post(ai_debug_handler))
         // Campus Organizations, Provisioning & Institutional Auth
         .route(
             "/api/v1/campus/orgs",
@@ -173,7 +175,10 @@ pub fn create_router(state: AppState) -> Router {
             "/api/v1/campus/{org_slug}/admin/audit",
             get(get_campus_admin_audit_handler),
         )
-        .route("/api/v1/campus/orgs/{org_id}", get(get_organization_handler))
+        .route(
+            "/api/v1/campus/orgs/{org_id}",
+            get(get_organization_handler),
+        )
         .route(
             "/api/v1/campus/orgs/{org_id}/cohorts",
             post(create_cohort_handler),
@@ -187,7 +192,10 @@ pub fn create_router(state: AppState) -> Router {
             post(batch_ingest_members_handler),
         )
         // Assessment Lifecycle & Deadline Gatekeeper
-        .route("/api/v1/campus/assessments", post(create_assessment_handler))
+        .route(
+            "/api/v1/campus/assessments",
+            post(create_assessment_handler),
+        )
         .route(
             "/api/v1/campus/cohorts/{cohort_id}/assessments",
             post(create_cohort_assessment_handler).get(list_cohort_assessments_handler),
@@ -216,6 +224,14 @@ pub fn create_router(state: AppState) -> Router {
         .route(
             "/api/v1/campus/assessments/{assessment_id}/cockpit",
             get(get_proctor_cockpit_handler),
+        )
+        .route(
+            "/api/v1/campus/assessments/{assessment_id}/proctor/events",
+            get(get_proctor_events_handler).post(post_proctor_event_handler),
+        )
+        .route(
+            "/api/v1/campus/assessments/{assessment_id}/proctor/students",
+            get(get_proctored_students_handler),
         )
         .route(
             "/api/v1/campus/assessments/{assessment_id}/viva/provision",
@@ -256,8 +272,13 @@ pub fn create_router(state: AppState) -> Router {
             get(proctor_stream_handler),
         )
         .route("/ws/campus/viva/{room_code}", get(viva_room_ws_handler))
-        .layer(CorsLayer::permissive())
+        // Explicit origin allow-list plus credentialed CORS for the dev/edge origins,
+        // replacing the previous wildcard `CorsLayer::permissive()`.
+        .layer(security::cors_layer())
         .layer(TraceLayer::new_for_http())
         .layer(CompressionLayer::new())
+        // Outermost layer: baseline hardening headers land on every response, including
+        // the CORS preflight short-circuits and the 404 fallback.
+        .layer(middleware::from_fn(security::attach_security_headers))
         .with_state(state)
 }

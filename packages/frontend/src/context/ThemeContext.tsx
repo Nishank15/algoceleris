@@ -8,12 +8,13 @@ export interface ThemeContextType {
   setTheme: (theme: Theme) => void;
 }
 
-const THEME_STORAGE_KEY = 'cloud_judge_theme';
+const THEME_STORAGE_KEY = 'algoceleris_theme';
+const LEGACY_THEME_STORAGE_KEY = 'cloud_judge_theme';
 
 const getInitialTheme = (): Theme => {
   if (typeof window === 'undefined') return 'dark';
   try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    const saved = localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem(LEGACY_THEME_STORAGE_KEY);
     if (saved === 'dark' || saved === 'light') {
       return saved;
     }
@@ -39,6 +40,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.classList.toggle('dark', theme === 'dark');
     try {
       localStorage.setItem(THEME_STORAGE_KEY, theme);
+      localStorage.setItem(LEGACY_THEME_STORAGE_KEY, theme);
     } catch {
       // ignore storage error
     }

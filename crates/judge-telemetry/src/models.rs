@@ -129,11 +129,8 @@ impl CandidateProctorState {
         }
 
         let previous_severity = self.risk_score.severity;
-        self.risk_score = calculate_risk_score(
-            self.tab_switches,
-            self.fullscreen_exits,
-            self.paste_bursts,
-        );
+        self.risk_score =
+            calculate_risk_score(self.tab_switches, self.fullscreen_exits, self.paste_bursts);
 
         let escalated = self.risk_score.severity != previous_severity;
         let is_concerning = self.risk_score.severity != RiskSeverity::Low;
@@ -147,7 +144,10 @@ impl CandidateProctorState {
                 timestamp: event.timestamp,
                 message: format!(
                     "Candidate {} anomaly triggered: {:?} (Score: {}, Severity: {:?})",
-                    self.candidate_id, event.event_type, self.risk_score.score, self.risk_score.severity
+                    self.candidate_id,
+                    event.event_type,
+                    self.risk_score.score,
+                    self.risk_score.severity
                 ),
             })
         } else {

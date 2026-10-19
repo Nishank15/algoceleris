@@ -32,7 +32,10 @@ impl AstTokenizer {
     ///
     /// # Errors
     /// Returns [`WorkerError::ParseError`] if grammar loading or parsing fails.
-    pub fn tokenize(language: Language, source_code: &str) -> Result<Vec<StructuralToken>, WorkerError> {
+    pub fn tokenize(
+        language: Language,
+        source_code: &str,
+    ) -> Result<Vec<StructuralToken>, WorkerError> {
         let mut parser = Parser::new();
         let ts_lang = match language {
             Language::Cpp => tree_sitter_cpp::LANGUAGE.into(),
@@ -40,9 +43,9 @@ impl AstTokenizer {
             Language::Java => tree_sitter_java::LANGUAGE.into(),
         };
 
-        parser
-            .set_language(&ts_lang)
-            .map_err(|e| WorkerError::ParseError(format!("failed to load tree-sitter language: {e}")))?;
+        parser.set_language(&ts_lang).map_err(|e| {
+            WorkerError::ParseError(format!("failed to load tree-sitter language: {e}"))
+        })?;
 
         let tree: Tree = parser
             .parse(source_code, None)
@@ -64,12 +67,20 @@ fn walk_ast(node: Node, tokens: &mut Vec<StructuralToken>) {
 
     // 2. Normalize identifiers and literals
     if is_identifier(kind) {
-        tokens.push(StructuralToken::new("ID", node.start_byte(), node.end_byte()));
+        tokens.push(StructuralToken::new(
+            "ID",
+            node.start_byte(),
+            node.end_byte(),
+        ));
         return;
     }
 
     if is_literal(kind) {
-        tokens.push(StructuralToken::new("LIT", node.start_byte(), node.end_byte()));
+        tokens.push(StructuralToken::new(
+            "LIT",
+            node.start_byte(),
+            node.end_byte(),
+        ));
         return;
     }
 
@@ -78,20 +89,32 @@ fn walk_ast(node: Node, tokens: &mut Vec<StructuralToken>) {
         // Only emit non-empty, non-whitespace tokens
         let trimmed = kind.trim();
         if !trimmed.is_empty() {
-            tokens.push(StructuralToken::new(trimmed, node.start_byte(), node.end_byte()));
+            tokens.push(StructuralToken::new(
+                trimmed,
+                node.start_byte(),
+                node.end_byte(),
+            ));
         }
         return;
     }
 
     // 4. For internal nodes, emit opening tag, recurse children, emit closing tag
-    tokens.push(StructuralToken::new(format!("OPEN_{kind}"), node.start_byte(), node.end_byte()));
+    tokens.push(StructuralToken::new(
+        format!("OPEN_{kind}"),
+        node.start_byte(),
+        node.end_byte(),
+    ));
 
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         walk_ast(child, tokens);
     }
 
-    tokens.push(StructuralToken::new(format!("CLOSE_{kind}"), node.start_byte(), node.end_byte()));
+    tokens.push(StructuralToken::new(
+        format!("CLOSE_{kind}"),
+        node.start_byte(),
+        node.end_byte(),
+    ));
 }
 
 fn is_comment(kind: &str) -> bool {

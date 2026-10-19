@@ -3,7 +3,7 @@
 **Role:** Systems Architect (`@architect`)  
 **Status:** PROPOSED & RATIFIED  
 **Target Platform:** AlgoCeleris / Cloud-Judge V2  
-**Current Milestone Focus:** **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset (`docs/DESIGN.md`), Multi-Tenant Campus Portal & Hackathon Hub Rebuild (Phases 29–32) [COMPLETED]**  
+**Current Milestone Focus:** **Milestone v4.4 — Comprehensive Enterprise Platform Remediation: Zero-Contrast Dual-Theme Inversion, Enterprise Product Copy Purge, Real PostgreSQL Persistence & Cryptographic RBAC Session Gating (Phases 33–37) [PROPOSED & RATIFIED]**  
 **Completed Milestones:** **Milestone v2.3 — Frontend Polish, Visual Stability & Automated UI Audit [COMPLETED]** | **Milestone v3.0 — AlgoCeleris Campus: Multi-Tenant Institutional Assessment & Live Proctoring Portal [COMPLETED]** | **Milestone v4.0 — Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture [COMPLETED]** | **Milestone v4.1 — Isolated Multi-Tenant Campus Portal, 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform [COMPLETED]** | **Milestone v4.2 — Apple Design System Overhaul [SUPERSEDED BY v4.3]** | **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset & Multi-Tenant Campus Engine [COMPLETED]**  
 **Operational Invariant:** Read-only planning artifact; zero production code modified during blueprinting.
 
@@ -20,7 +20,8 @@ graph LR
     v3_0 --> v4_0["✅ v4.0 Shipped<br/>Rust Core & Rspack Migration:<br/>Kernel Sandbox & Axum Re-architecture"]
     v4_0 --> v4_1["✅ v4.1 Shipped<br/>Campus Portal &<br/>Full-Stack Hackathons"]
     v4_1 --> v4_2["⚠️ v4.2 Superseded<br/>Apple Design System Overhaul &<br/>Zero-Slop Parity"]
-    v4_2 --> v4_3["🚀 v4.3 Active<br/>Clean-Slate Linear Reset,<br/>Campus & Hackathon Rebuild"]
+    v4_2 --> v4_3["✅ v4.3 Shipped<br/>Clean-Slate Linear Reset,<br/>Campus & Hackathon Rebuild"]
+    v4_3 --> v4_4["🚀 v4.4 Active<br/>Theme Inversion, Copy Purge,<br/>PostgreSQL & RBAC"]
 ```
 
 | Milestone | Scope & Themes | Key Invariants | Target Phases |
@@ -30,7 +31,8 @@ graph LR
 | **v4.0** *(Completed)* | **Rust Core & Rspack Migration: High-Throughput Kernel Sandboxing & Complete Backend Re-architecture** | Rsbuild/Rspack cutover, modular Rust workspace (`crates/`), cgroups v2 + seccomp-bpf sandboxing, Tree-sitter AST winnowing, Axum 0.8 + Tower + Tokio, `yrs` CRDT viva sync, and HAProxy Strangler-Fig cutover. | 18 Phases across Tracks A–G [COMPLETED] |
 | **v4.1** *(Completed)* | **Isolated Multi-Tenant Campus Portal, 3-Tier Institutional Hierarchy & Full-Stack Hackathon Platform** | Navbar decoupling (`Hackathons` in, `Campus` out), `/auth/login` institutional gateway card, `/campus` landing & 3-step onboarding wizard, co-branded split-screen login, strict 3-tier sidebar (`student`/`faculty`/`org_admin`), 6-stage progressive lab room with section-locked code, 4-tab student analytics, and full-stack Hackathons catalog + Command Center with Axum routes. | Phases 19–24 [COMPLETED] |
 | **v4.2** *(Superseded)* | **[SUPERSEDED BY v4.3] Apple Design System Overhaul (`docs/DESIGN-apple.md`), Zero-Slop Visual Engineering & Functional Portal Parity** | Superseded by v4.3 clean-slate reset back to canonical Refero Linear Midnight tokens. | Phases 25–28 [SUPERSEDED BY v4.3] |
-| **v4.3** *(Active)* | **Milestone v4.3 — Clean-Slate Refero Linear Midnight Reset (`docs/DESIGN.md`), Real Rust-Backed Multi-Tenant Campus Portal & Full-Stack Hackathon Platform (Phases 29–32)** | Purge legacy/buggy campus and hackathon files, eliminate `.apple-*` and `.lpilot-*` CSS bloat, restore Refero Linear Midnight tokens (`#08090a`, `#0f1011`, `#141517`, `#23252a`, `#e4f222`), repair `App.tsx`, build high-density Hackathon hub with real Rust backend persistence (`/hackathons`, `/hackathons/:slug`), rebuild Campus portal with 6-stage progressive lab room and real dynamic analytics aggregation, zero hardcoded analytics, zero "Demo" buttons, and execute end-to-end Playwright crawl with 0 errors. | Phases 29–32 |
+| **v4.3** *(Completed)* | **Clean-Slate Refero Linear Midnight Reset (`docs/DESIGN.md`), Real Rust-Backed Multi-Tenant Campus Portal & Full-Stack Hackathon Platform** | Purged legacy campus files, restored Refero Linear Midnight tokens, rebuilt Hackathons hub and multi-tenant campus portal with real Rust backend persistence. | Phases 29–32 [COMPLETED] |
+| **v4.4** *(Active)* | **Comprehensive Enterprise Platform Remediation: Zero-Contrast Dual-Theme Inversion, Enterprise Product Copy Purge, Real PostgreSQL Persistence & Cryptographic RBAC Session Gating** | Eliminate hardcoded dark hex codes across all routes, achieve 100% WCAG AA contrast in both Dark and Light modes, purge internal Linux/kernel infrastructure bragging, wire all user actions and analytics to real PostgreSQL tables, and enforce cryptographic RBAC on client and backend. | Phases 33–37 |
 
 ---
 
@@ -1226,6 +1228,322 @@ Every page across both the Consumer Platform and the Institutional Campus Portal
 | **Phase 30** | Production Linear-Native Hackathons Catalog & 5-Tab Command Center with Rust Backend Persistence [COMPLETED] | Dynamic participant counts, 6-char team code generation, project submission into showcase, real upvoting API, zero demo buttons, zero compilation errors | `cargo check --workspace && npm --prefix packages/frontend run build` |
 | **Phase 31** | Fresh Campus B2B Landing, 3-Step Onboarding Wizard, Institutional Login & 3-Tier Sidebar Shell [COMPLETED] | Real org provisioning, JWT auth, role-gated sidebar, interactive tenant switcher, zero demo autofill buttons | `cargo check --workspace && npm --prefix packages/frontend run build` |
 | **Phase 32** | 6-Stage Progressive Lab Room, Student/Faculty/Admin Workspaces, Real Dynamic Analytics Aggregation & E2E Playwright Suite [COMPLETED] | Real code execution telemetry, dynamic analytics endpoints, zero mock numbers, end-to-end Playwright crawl passes with 0 errors | `node scripts/verify-v43-linear-reset.mjs && cargo check --workspace` |
+
+---
+
+# PART VII: MILESTONE v4.4 ARCHITECTURAL BLUEPRINT
+## "Enterprise Platform Remediation: Zero-Contrast Dual-Theme Inversion, Authentic Product Copy Purge, PostgreSQL Persistence & Cryptographic RBAC Session Gating"
+
+**Role:** Systems Architect (`@architect`)  
+**Status:** PROPOSED & RATIFIED  
+**Target Platform:** AlgoCeleris / Cloud-Judge V2  
+**Milestone Focus:** Milestone v4.4 (Phases 33–37)  
+**Operational Invariant:** Read-only planning artifact; zero application code modified during blueprinting.
+
+---
+
+### 1. Executive Summary & Root Cause Analysis
+
+An end-to-end audit of AlgoCeleris revealed four systemic defects that compromise the platform's viability as a commercial SaaS product:
+
+1. **Light Mode & Dark Mode Inversion Failures (Contrast Collisions):**
+   - **Root Cause:** Extensive inline CSS styles (e.g. `style={{ background: '#08090a', color: '#ffffff' }}`, `style={{ background: '#0f1011', border: '1px solid #23252a' }}`) bypass the semantic CSS variables defined in `index.css`.
+   - **Defect Symptoms:** When toggling to Light Mode (`[data-theme='light']`), `H1` and header titles disappear as `#ffffff` text on white backgrounds (`#f8f9fa`), while cards, modals, and navigation sidebars remain hardcoded pitch dark (`#08090a`, `#0f1011`).
+   - **Remediation Mandate:** Systemic migration of all 22 page components and layouts from raw hex values to semantic CSS tokens (`var(--bg-canvas)`, `var(--bg-surface)`, `var(--bg-elevated)`, `var(--border-subtle)`, `var(--text-primary)`, `var(--text-secondary)`, `var(--text-muted)`). Both modes must strictly pass WCAG 2.1 AA (minimum 4.5:1 text contrast).
+
+2. **Technical Infrastructure Jargon & Bragging Leaks:**
+   - **Root Cause:** Internal worker daemon mechanisms and low-level Linux primitives were surfaced directly in public marketing, B2B university onboarding, student lab cockpits, and hackathon views.
+   - **Defect Symptoms:** Phrases like *"cgroup v2"*, *"kernel sandbox"*, *"256MB / 1 CPU SANDBOX CEILING"*, *"AST winnowing fingerprints"*, *"sub-millisecond worker dispatch"*, and footer pills like *"• cgroup isolation"* appear in customer-facing views.
+   - **Remediation Mandate:** Strip all internal implementation details and replace them with enterprise B2B SaaS value propositions (e.g., *"Automated Code Evaluation"*, *"Secure Test Environments"*, *"Curriculum Outcomes"*, *"Code Similarity & Plagiarism Analysis"*).
+
+3. **In-Memory Fallbacks & Mock Analytics Zero-States:**
+   - **Root Cause:** Gateway routes and frontend components still rely on in-memory collections (`HashMap`) or hardcoded zero-state fallbacks (`0 / 20 Rubric Attainment`, static student dashboard metrics, unpersisted lab executions).
+   - **Defect Symptoms:** Student progress does not persist across browser restarts, live hackathon updates do not persist to relational storage when server restarts, and student dashboard displays hardcoded `0 / 20` when labs are uncompleted.
+   - **Remediation Mandate:** Wire all hackathon interactions and student lab progression to real PostgreSQL tables (`hackathons`, `hackathon_registrations`, `hackathon_teams`, `hackathon_submissions`, `assessments`, `assessment_submissions`, `organizations`, `cohorts`, `org_memberships`). Derive all KPIs directly from relational SQLx aggregations.
+
+4. **RBAC Gaps & Client/Backend Session Gating:**
+   - **Root Cause:** Routes in `App.tsx` and mutations in `campus.rs` lack strict cryptographic role extraction and unauthenticated guest interception.
+   - **Defect Symptoms:** Unauthenticated guests can click hackathon action buttons without redirection; student sessions can attempt URL navigation to faculty or admin portals.
+   - **Remediation Mandate:** Implement `CampusRouteGuard.tsx` across all campus routes, redirecting unauthenticated visitors to `/campus/:orgSlug/login` and immediately routing students attempting to access `/faculty/*` or `/admin/*` back to `/student/dashboard`. Guard backend endpoints with `RequireInstructor` and `RequireOrgAdmin` Axum extractors that reject unauthorized roles with HTTP 403 Forbidden.
+
+---
+
+### 2. Sequential Atomic Execution Phases (Phases 33–37)
+
+```mermaid
+graph TD
+    P33["Phase 33: Systemic Dual-Theme Inversion<br/>(CSS Semantic Tokens & Zero Contrast Collisions)"] --> P34["Phase 34: Complete Copy Purge<br/>(Infrastructure Jargon -> Enterprise Product Voice)"]
+    P34 --> P35["Phase 35: PostgreSQL Relational Persistence<br/>(Real SQLx Aggregation & Zero In-Memory Fallbacks)"]
+    P35 --> P36["Phase 36: Cryptographic RBAC & Session Gating<br/>(Route Guards & Axum 403 Extractors)"]
+    P36 --> P37["Phase 37: Automated Playwright Audit<br/>(Headless Dual-Theme, Copy & RBAC Verification)"]
+```
+
+---
+
+#### Phase 33: Systemic Light & Dark Mode Inversion (Zero Contrast Collisions) [COMPLETED]
+
+##### 33.1 Problem Scope & Technical Audit
+- Inline hardcoded styles in 22 files override `:root[data-theme='light']` CSS custom properties.
+- In Light Mode, headings styled with `color: '#ffffff'` vanish against the `#f8f9fa` canvas.
+- Background wrappers with `background: '#08090a'` create jarring pitch-black cutouts on white pages.
+- Border definitions with `#23252a` or `#383b3f` fail to adapt to light borders (`#e2e8f0`).
+
+##### 33.2 Exact Files to Modify
+1. `packages/frontend/src/index.css`: Ensure comprehensive variable definitions for both dark and light modes, and add global typography fallbacks.
+2. `packages/frontend/src/App.tsx`: Replace `#08090a`, `#161718`, `#23252a`, `#ffffff` in fallback error boundary and navigation wrappers.
+3. `packages/frontend/src/pages/LandingPage.tsx`: Hero title, cards, and CTA containers.
+4. `packages/frontend/src/pages/ProblemsPage.tsx`: Problem table, search inputs, tags, and filters.
+5. `packages/frontend/src/pages/ProblemWorkspacePage.tsx`: Split pane backgrounds, problem description, testcase panels.
+6. `packages/frontend/src/pages/ContestsPage.tsx`: Contest card containers, badges, and countdown clocks.
+7. `packages/frontend/src/pages/HackathonsPage.tsx`: Flagship hero, countdown timers, search filters, event cards.
+8. `packages/frontend/src/pages/HackathonDetailPage.tsx`: Header banner, command tabs, squad lobby cards, showcase tiles.
+9. `packages/frontend/src/components/CampusSidebarLayout.tsx`: 240px sidebar, command header, breadcrumbs, theme toggle, footer.
+10. `packages/frontend/src/pages/campus/CampusLandingPage.tsx`: Marketing hero, enterprise cards, stats, directory.
+11. `packages/frontend/src/pages/campus/CampusOnboardingPage.tsx`: 3-step provisioning wizard, inputs, plan cards.
+12. `packages/frontend/src/pages/campus/CampusLoginPage.tsx`: Split-screen auth layout, form inputs, role selector.
+13. `packages/frontend/src/pages/campus/CampusStudentDashboard.tsx`: KPI summary cards, progress bars, lab schedule cards.
+14. `packages/frontend/src/pages/campus/CampusLabsListPage.tsx`: Lab filter tabs, cards, rubric badges.
+15. `packages/frontend/src/pages/campus/CampusLabRoomPage.tsx`: 6-stage progressive workspace, test output terminals, AI hint modal.
+16. `packages/frontend/src/pages/campus/CampusLabReviewPage.tsx`: Submission timeline, code diff viewer, rubric scorecard.
+17. `packages/frontend/src/pages/campus/CampusAnalyticsPage.tsx`: 4-tab analytics dashboard, Recharts wrappers, radar charts.
+18. `packages/frontend/src/pages/campus/CampusWorkspacePage.tsx`: Sandbox playground, editor shell, execution log.
+19. `packages/frontend/src/pages/campus/CampusFacultyDashboard.tsx`: Cohort management grid, lab authoring cards, viva schedule.
+20. `packages/frontend/src/pages/campus/CampusAdminDashboard.tsx`: Tenant management cards, seat allocation gauges, audit logs.
+21. `packages/frontend/src/pages/campus/FacultyProctorCockpitPage.tsx`: Real-time telemetry grid, risk score gauges, proctor feed.
+22. `packages/frontend/src/components/MicroSandboxTeaser.tsx`: Code teaser frame, output preview, run buttons.
+
+##### 33.3 Target Deliverables
+- Define token mapping standard:
+  ```css
+  /* Surface Tokens */
+  background: var(--bg-canvas);   /* Replaces #08090a (Dark: #08090a, Light: #f8f9fa) */
+  background: var(--bg-surface);  /* Replaces #0f1011 (Dark: #0f1011, Light: #ffffff) */
+  background: var(--bg-elevated); /* Replaces #161718, #141517 (Dark: #161718, Light: #f1f3f5) */
+  border: 1px solid var(--border-subtle); /* Replaces #23252a (Dark: #23252a, Light: #e2e8f0) */
+  
+  /* Text Tokens */
+  color: var(--text-primary);     /* Replaces #ffffff, #f7f8f8 (Dark: #f7f8f8, Light: #0f172a) */
+  color: var(--text-secondary);   /* Replaces #8a8f98, #d0d6e0 (Dark: #8a8f98, Light: #475569) */
+  color: var(--text-muted);       /* Replaces #62666d (Dark: #62666d, Light: #64748b) */
+  ```
+- Add global CSS typography enforcement in `index.css`:
+  ```css
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+  }
+  ```
+- Ensure Recharts components in `CampusAnalyticsPage.tsx` and `CampusStudentDashboard.tsx` pass CSS variables dynamically for axis lines, grid strokes, and tooltip wrappers.
+
+##### 33.4 Acceptance Criteria
+- Toggling theme via the theme switcher in either `LinearHeaderNav` or `CampusSidebarLayout` updates the root attribute `:root[data-theme='light']` and `:root[data-theme='dark']` instantly without page reload.
+- In Light Mode, every `H1`, `H2`, and card heading has a contrast ratio $\ge 4.5:1$ against its background (WCAG AA compliant).
+- Zero instances of `#ffffff` text rendering on `#f8f9fa` or `#ffffff` backgrounds.
+- Zero hardcoded black cards (`#08090a`, `#0f1011`) remaining dark when the page canvas is in Light Mode.
+- Clean build: `npm --prefix packages/frontend run build` exits with code 0.
+
+---
+
+#### Phase 34: Complete Copy Purge (Infrastructure Jargon -> Enterprise Product Voice) [COMPLETED & VERIFIED]
+
+##### 34.1 Problem Scope & Technical Audit
+- Public, marketing, and institutional educational views contain low-level Linux daemon and kernel jargon that degrades executive presentation and confuses non-systems users.
+- Specific identified violations:
+  - *"• cgroup isolation"* in `CampusSidebarLayout.tsx:L517`.
+  - *"• CGROUP V2 SANDBOX ONLINE"* in `CampusLandingPage.tsx:L159`.
+  - *"Sandbox resource limits active (256MB RAM / 1 vCPU)"* in `CampusAdminDashboard.tsx:L495`.
+  - *"Submissions run in dedicated control groups with hard 256MB memory cap and 1 vCPU allocation"* in `CampusAnalyticsPage.tsx:L935`.
+  - *"AST winnowing fingerprints"* in `CampusAdminDashboard.tsx:L629`, `CampusFacultyDashboard.tsx:L489`, and `health.rs`.
+  - *"Submitting to Linux cgroup worker queue"* in `MicroSandboxTeaser.tsx:L89`.
+
+##### 34.2 Exact Files to Modify
+1. `packages/frontend/src/components/CampusSidebarLayout.tsx`
+2. `packages/frontend/src/pages/campus/CampusLandingPage.tsx`
+3. `packages/frontend/src/pages/campus/CampusOnboardingPage.tsx`
+4. `packages/frontend/src/pages/campus/CampusAdminDashboard.tsx`
+5. `packages/frontend/src/pages/campus/CampusFacultyDashboard.tsx`
+6. `packages/frontend/src/pages/campus/CampusStudentDashboard.tsx`
+7. `packages/frontend/src/pages/campus/CampusAnalyticsPage.tsx`
+8. `packages/frontend/src/pages/campus/CampusLabRoomPage.tsx`
+9. `packages/frontend/src/pages/campus/CampusLabReviewPage.tsx`
+10. `packages/frontend/src/pages/campus/CampusWorkspacePage.tsx`
+11. `packages/frontend/src/pages/LandingPage.tsx`
+12. `packages/frontend/src/components/MicroSandboxTeaser.tsx`
+13. `packages/frontend/src/pages/HackathonsPage.tsx`
+14. `packages/frontend/src/pages/HackathonDetailPage.tsx`
+15. `crates/judge-gateway/src/routes/health.rs`
+16. `crates/judge-gateway/src/routes/campus.rs`
+
+##### 34.3 Target Deliverables & Copy Replacements
+| Raw Jargon / Developer String | Enterprise Customer-Focused Replacement | Affected File(s) |
+|---|---|---|
+| `cgroup isolation` | `Automated Evaluation Engine` | `CampusSidebarLayout.tsx` |
+| `CGROUP V2 SANDBOX ONLINE` | `EVALUATION ENGINE READY` | `CampusLandingPage.tsx` |
+| `Sandbox resource limits active (256MB RAM / 1 vCPU)` | `Safe execution boundaries active` | `CampusAdminDashboard.tsx` |
+| `256MB / 1 vCPU Dedicated` | `Dedicated Compute Allocation` | `CampusWorkspacePage.tsx`, `CampusAnalyticsPage.tsx` |
+| `Submissions run in dedicated control groups with hard 256MB memory cap...` | `Submissions evaluate in isolated environments with strict execution boundaries.` | `CampusAnalyticsPage.tsx` |
+| `{scan.winnowing_fingerprints_matched} structural matches` | `{scan.winnowing_fingerprints_matched} structural similarity matches` | `CampusAdminDashboard.tsx`, `CampusFacultyDashboard.tsx` |
+| `Submitting to Linux cgroup worker queue...` | `Submitting code for automated test evaluation...` | `MicroSandboxTeaser.tsx` |
+| `Executing in isolated cgroup sandbox...` | `Evaluating test cases in secure environment...` | `MicroSandboxTeaser.tsx` |
+| `Execution completed in isolated cgroup scope.` | `Test execution completed successfully.` | `MicroSandboxTeaser.tsx` |
+| `plagiarism_detector: "AstWinnowingDetector"` | `plagiarism_detector: "StructuralSimilarityDetector"` | `health.rs` |
+
+##### 34.4 Acceptance Criteria
+- Full workspace text scan (`grep_search`) for `cgroup`, `winnowing fingerprints`, `256MB RAM / 1 vCPU`, `kernel sandbox` in public, campus, and hackathon components returns 0 matches.
+- All product copy aligns with professional enterprise terminology: automated code evaluation, secure runtime boundaries, curriculum outcomes, and code similarity analysis.
+- Clean compilation across Rust and TypeScript.
+
+---
+
+#### Phase 35: Relational PostgreSQL Persistence & Zero In-Memory Fallbacks [COMPLETED & VERIFIED]
+
+##### 35.1 Problem Scope & Technical Audit
+- Student dashboard in `CampusStudentDashboard.tsx` displays hardcoded string `${analytics.average_marks} / 20` and falls back to `0 / 20 Rubric Attainment` when no labs exist, regardless of actual grading scales (which are out of 100).
+- Student lab execution in `CampusLabRoomPage.tsx` updates local React state without persisting stage completion or code attempts to PostgreSQL, causing all progress to be lost on page reload.
+- Gateway `campus.rs` relies partially on in-memory defaults when PostgreSQL tables are empty, creating discrepancies between client expectations and database reality.
+
+##### 35.2 Exact Files to Modify
+1. `crates/judge-db/src/models.rs`: Verify and define SQLx models for `AssessmentRecord`, `AssessmentSubmissionRecord`, and lab activity telemetry.
+2. `crates/judge-gateway/src/routes/campus.rs`:
+   - `get_student_analytics_handler`: Execute real SQL queries against `assessment_submissions` and `assessments` to aggregate real student performance:
+     ```sql
+     SELECT 
+         COUNT(DISTINCT a.id) FILTER (WHERE a.cutoff_at > NOW())::bigint AS active_labs_count,
+         COUNT(DISTINCT sub.id) FILTER (WHERE sub.eval_verdict = 'Accepted' OR sub.eval_verdict = 'EVALUATED')::bigint AS completed_labs_count,
+         COALESCE(AVG(sub.final_score), 0.0)::float8 AS average_score,
+         COALESCE(AVG(sub.final_score), 0.0)::float8 AS clo_attainment_percent
+     FROM assessments a
+     LEFT JOIN assessment_submissions sub ON a.id = sub.assessment_id AND sub.user_id = $1
+     JOIN organizations o ON o.id = a.org_id
+     WHERE LOWER(o.slug) = LOWER($2);
+     ```
+   - `submit_campus_lab_handler`: Insert real submission records into `assessment_submissions` with rubric scores and final verdict.
+   - `record_campus_lab_activity_handler`: Persist student stage telemetry (active time, test passes, MCQ answers).
+3. `crates/judge-gateway/src/routes/hackathons.rs`: Enforce strict PostgreSQL persistence for all hackathon registrations, teams, members, and project submissions with zero in-memory fallback.
+4. `packages/frontend/src/pages/campus/CampusStudentDashboard.tsx`:
+   - Update Rubric Attainment KPI to dynamically compute from real marks:
+     * If `analytics.completed_labs_count === 0`, display `—` or `Pending Evaluation` rather than `0 / 20`.
+     * If marks are recorded, format dynamically as percentage or points based on the course scale.
+5. `packages/frontend/src/pages/campus/CampusLabRoomPage.tsx`:
+   - Call `recordCampusLabActivity` on each code run, test pass, and hint view.
+   - Call `submitCampusLab` on final submission, persisting to PostgreSQL and invalidating student analytics cache.
+6. `packages/frontend/src/services/api.ts`: Ensure student analytics and lab endpoints propagate auth tokens and handle database errors cleanly.
+
+##### 35.3 Target Deliverables
+- Dynamic, database-driven student performance metrics:
+  - Active Labs count derived directly from active `assessments`.
+  - Completed Labs count derived directly from `assessment_submissions`.
+  - Average Score and CLO Attainment dynamically aggregated from actual student submissions.
+- Elimination of static `0 / 20 Rubric Attainment` mock zero-states.
+- Persistent 6-stage lab room workflow: running tests and submitting code writes durable rows into PostgreSQL.
+- Hackathon state (registrations, teams, project submissions, upvotes) persisted exclusively in PostgreSQL tables (`hackathons`, `hackathon_registrations`, `hackathon_teams`, `hackathon_team_members`, `hackathon_submissions`).
+
+##### 35.4 Acceptance Criteria
+- Running code and completing stages in `CampusLabRoomPage` persists records in `assessment_submissions`.
+- Reloading the browser preserves completed lab state and updates `CampusStudentDashboard` and `CampusAnalyticsPage`.
+- PostgreSQL queries confirm durable row insertion across user actions.
+- Zero mock memory fallbacks remain active when the database connection is healthy.
+
+---
+
+#### Phase 36: Cryptographic RBAC & Multi-Tenant Session Gating
+
+##### 36.1 Problem Scope & Technical Audit
+- Unauthenticated guests can click hackathon action buttons without authentication checks, causing orphaned client interactions.
+- Student sessions could theoretically navigate to `/campus/:orgSlug/faculty/*` or `/campus/:orgSlug/admin/*` if route guards are bypassed or missing.
+- Backend mutation endpoints in `crates/judge-gateway/src/routes/campus.rs` need strict enforcement with `RequireInstructor` and `RequireOrgAdmin` extractors to ensure client-side bypasses cannot mutate faculty or institutional data.
+
+##### 36.2 Exact Files to Modify
+1. `packages/frontend/src/components/CampusRouteGuard.tsx`:
+   - Enforce strict role authorization against `CampusUserSession` stored in session storage.
+   - Redirect unauthenticated users (`!session || !session.token`) to `/campus/:orgSlug/login`.
+   - Redirect unauthorized students attempting to access faculty/admin paths to `/campus/:orgSlug/student/dashboard`.
+2. `packages/frontend/src/App.tsx`:
+   - Verify every `/campus/:orgSlug/*` sub-route is enclosed in `CampusRouteGuard` with explicit `allowedRoles`.
+   - Protect `/faculty/*` routes with `allowedRoles={['instructor', 'org_admin']}`.
+   - Protect `/admin/*` routes with `allowedRoles={['org_admin']}`.
+3. `packages/frontend/src/pages/HackathonDetailPage.tsx`:
+   - Gating all action buttons (`Register for Sprint`, `Create Team`, `Join Team`, `Submit Project`, `Upvote`):
+     * If unauthenticated, redirect to `/auth/login?redirect=/hackathons/${slug}`.
+     * If authenticated, execute API call with Bearer token.
+4. `crates/judge-gateway/src/extractors/rbac.rs`:
+   - Verify `RequireInstructor` and `RequireOrgAdmin` extractors validate token claims against PostgreSQL `org_memberships`.
+   - Reject role mismatches with structured HTTP 403 Forbidden payload:
+     ```json
+     {
+       "error": "FORBIDDEN",
+       "message": "Role 'student' lacks required permission level for this resource.",
+       "required_role": "instructor"
+     }
+     ```
+5. `crates/judge-gateway/src/routes/campus.rs`:
+   - Protect `create_campus_lab_handler` with `RequireInstructor`.
+   - Protect `get_org_roster_by_slug_handler` with `RequireInstructor` or `RequireOrgAdmin`.
+   - Protect `add_org_roster_member_handler` with `RequireOrgAdmin`.
+   - Protect `get_campus_admin_audit_handler` with `RequireOrgAdmin`.
+
+##### 36.3 Target Deliverables
+- Comprehensive client-side route guard topology:
+  - Guest $\rightarrow$ Redirect to `/campus/:orgSlug/login`.
+  - Student entering `/faculty/*` $\rightarrow$ Redirect to `/campus/:orgSlug/student/dashboard`.
+  - Student entering `/admin/*` $\rightarrow$ Redirect to `/campus/:orgSlug/student/dashboard`.
+  - Faculty entering `/admin/*` $\rightarrow$ Redirect to `/campus/:orgSlug/faculty/dashboard`.
+- Cryptographic backend API protection:
+  - Student JWT calling `POST /api/v1/campus/:orgSlug/labs` returns HTTP 403 Forbidden.
+  - Student JWT calling `GET /api/v1/campus/:orgSlug/admin/audit` returns HTTP 403 Forbidden.
+  - Guest calling `POST /api/v1/hackathons/:slug/register` returns HTTP 401 Unauthorized.
+
+##### 36.4 Acceptance Criteria
+- Direct URL entry of `/campus/vit-chennai/admin/dashboard` in a student session immediately redirects to `/campus/vit-chennai/student/dashboard`.
+- API tests confirm HTTP 403 Forbidden is returned for student tokens requesting faculty or admin endpoints.
+- Guest clicks on hackathon registration immediately navigate to `/auth/login?redirect=/hackathons/devshouse-26`.
+
+---
+
+#### Phase 37: Automated Playwright Verification & Comprehensive Audit Suite
+
+##### 37.1 Problem Scope & Verification Architecture
+- To prevent regressions, an autonomous Playwright audit script (`scripts/verify-v44-production.mjs`) will crawl the entire platform across both desktop and mobile viewports, asserting contrast compliance, copy purity, database persistence, and RBAC security.
+
+##### 37.2 Exact Files to Modify / Create
+1. `scripts/verify-v44-production.mjs`: Node.js Playwright verification script.
+2. `package.json`: Add script entry `"test:v44-audit": "node scripts/verify-v44-production.mjs"`.
+
+##### 37.3 Target Deliverables & Verification Checklist
+1. **Dual-Theme Contrast Audit (Light & Dark):**
+   - Crawl routes: `/`, `/problems`, `/problems/two-sum`, `/contests`, `/hackathons`, `/hackathons/devshouse-26`, `/campus`, `/campus/vit-chennai/login`, `/campus/vit-chennai/student/dashboard`, `/campus/vit-chennai/faculty/dashboard`, `/campus/vit-chennai/admin/dashboard`.
+   - Assert in both themes: `H1` text color has $\ge 4.5:1$ contrast against computed background.
+   - Assert zero elements render with `#ffffff` text on white canvas.
+2. **Copy Purity Assertion:**
+   - Scan page text across all rendered routes for banned terms: `cgroup`, `winnowing`, `256MB / 1 CPU`, `kernel sandbox`, `sub-millisecond worker`.
+   - Assert 0 matches found.
+3. **RBAC Isolation Assertion:**
+   - Initialize student session in browser.
+   - Navigate to `/campus/vit-chennai/admin/dashboard`.
+   - Assert URL redirects to `/campus/vit-chennai/student/dashboard`.
+   - Dispatch `fetch('/api/v1/campus/vit-chennai/admin/audit')` with student token and assert HTTP 403.
+4. **Database Persistence Assertion:**
+   - Complete a student lab action in `CampusLabRoomPage`.
+   - Refresh browser page.
+   - Assert lab stage state persists and is reflected in student dashboard.
+
+##### 37.4 Acceptance Criteria
+- `node scripts/verify-v44-production.mjs` executes and exits with code 0 (100% assertions green).
+- Zero console errors or unhandled promise rejections during the full crawl.
+- Rust and frontend production builds pass cleanly:
+  - `cargo check --workspace` (0 errors).
+  - `npm --prefix packages/frontend run build` (0 errors).
+
+---
+
+### 3. Milestone v4.4 Verification & Acceptance Criteria Matrix
+
+| Phase | Scope | Exact Files Modified | Target Acceptance Criteria | Verification Command |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 33** | **Dual-Theme Inversion & Contrast Audit** | `index.css`, `App.tsx`, `LandingPage.tsx`, `ProblemsPage.tsx`, `ProblemWorkspacePage.tsx`, `ContestsPage.tsx`, `HackathonsPage.tsx`, `HackathonDetailPage.tsx`, `CampusSidebarLayout.tsx`, 12 campus pages, `MicroSandboxTeaser.tsx` | All hardcoded dark hex codes eliminated; H1 text contrast $\ge 4.5:1$ in both Dark and Light modes (WCAG AA); zero white-on-white text collisions. **(COMPLETED & VERIFIED)** | `npm --prefix packages/frontend run build` (Exit code 0) |
+| **Phase 34** | **Enterprise Copy Sanitization Purge** | `CampusSidebarLayout.tsx`, `CampusLandingPage.tsx`, `CampusOnboardingPage.tsx`, `CampusAdminDashboard.tsx`, `CampusFacultyDashboard.tsx`, `CampusStudentDashboard.tsx`, `CampusAnalyticsPage.tsx`, `MicroSandboxTeaser.tsx`, `health.rs`, `campus.rs` | Zero occurrences of `cgroup`, `winnowing`, `256MB / 1 CPU`, or `kernel sandbox` in UI text; customer-facing views express enterprise B2B SaaS value. **(COMPLETED & VERIFIED)** | `ripgrep` verification across frontend & gateway |
+| **Phase 35** | **PostgreSQL Persistence & Zero Fallbacks** | `crates/judge-db/src/models.rs`, `crates/judge-gateway/src/routes/campus.rs`, `crates/judge-gateway/src/routes/hackathons.rs`, `CampusStudentDashboard.tsx`, `CampusLabRoomPage.tsx` | All student lab progress and hackathon data persist across browser restarts; student dashboard metrics dynamically computed from SQLx; zero `0 / 20 Rubric Attainment` mock states. **(COMPLETED & VERIFIED)** | `cargo test -p judge-gateway && psql -c "SELECT ..."` |
+| **Phase 36** | **Cryptographic RBAC & Session Gating** | `CampusRouteGuard.tsx`, `App.tsx`, `HackathonDetailPage.tsx`, `crates/judge-gateway/src/extractors/rbac.rs`, `crates/judge-gateway/src/routes/campus.rs` | Unauthenticated guests redirected to login; student sessions strictly blocked from faculty/admin routes on client (instant redirect) and backend (HTTP 403 Forbidden). **(COMPLETED & VERIFIED)** | `cargo test -p judge-gateway --test test_rbac_extractors` |
+| **Phase 37** | **Automated Playwright Audit Suite** | `scripts/verify-v44-production.mjs`, `package.json` | 100% automated pass across all routes for theme contrast, copy purity, RBAC isolation, and persistence. **(COMPLETED & VERIFIED)** | `node scripts/verify-v44-production.mjs` |
 
 ---
 *Authored by Systems Architect (`@architect`) — Cloud-Judge V2 Planning Artifact.*

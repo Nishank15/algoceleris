@@ -7,7 +7,7 @@ const SNIPPETS: Record<Language, { code: string; input: string; name: string }> 
   python: {
     name: 'Python 3.12',
     input: '10',
-    code: `# Fast Prime Sieve inside isolated cgroup sandbox
+    code: `# Fast Prime Sieve inside automated evaluation engine
 import sys
 
 def sieve(n: int) -> list[int]:
@@ -86,7 +86,7 @@ export const MicroSandboxTeaser: React.FC = () => {
   const handleRun = useCallback(async () => {
     setIsRunning(true);
     setStatus('compiling');
-    setOutput('Submitting to Linux cgroup worker queue...\n');
+    setOutput('Submitting code for automated test evaluation...\n');
     setExecutionTimeMs(null);
     setMemoryUsedMb(null);
 
@@ -98,14 +98,8 @@ export const MicroSandboxTeaser: React.FC = () => {
         source_code: code,
         time_limit_ms: 2000,
         memory_limit_bytes: 256 * 1024 * 1024,
-        test_cases: [
-          {
-            id: 1,
-            input_data: SNIPPETS[lang].input,
-            expected_output: '',
-            is_sample: true,
-          },
-        ],
+        custom_input: SNIPPETS[lang].input,
+        mode: 'run',
       });
 
       const subId = resp.submission_id;
@@ -119,7 +113,7 @@ export const MicroSandboxTeaser: React.FC = () => {
             setOutput((prev) => prev + 'Compiling source binary...\n');
           } else if (ev.event_type === 'test_case_start') {
             setStatus('running');
-            setOutput((prev) => prev + 'Executing in isolated cgroup sandbox...\n');
+            setOutput((prev) => prev + 'Executing automated test suite...\n');
           } else if (ev.event_type === 'test_case_finish') {
             const tc = ev.data;
             if (tc?.stdout) {
@@ -172,7 +166,7 @@ export const MicroSandboxTeaser: React.FC = () => {
               }
             } catch {
               setStatus('completed');
-              setOutput('Execution completed in isolated cgroup scope.\nBenchmark: 0 non-zero exit codes.');
+              setOutput('Execution completed successfully within safety boundaries.\nBenchmark: 0 non-zero exit codes.');
               setExecutionTimeMs(14);
               setMemoryUsedMb(4.2);
             } finally {
@@ -184,7 +178,7 @@ export const MicroSandboxTeaser: React.FC = () => {
 
       return () => unsubscribe();
     } catch (_err) {
-      // Offline fallback: demonstrate sub-millisecond simulation
+      // Offline fallback: demonstrate instant simulation
       setTimeout(() => {
         setStatus('completed');
         setIsRunning(false);
@@ -193,11 +187,11 @@ export const MicroSandboxTeaser: React.FC = () => {
         setMemoryUsedMb(4.2);
 
         if (lang === 'python') {
-          setOutput('Computed 4 primes up to 10: [2, 3, 5, 7]\n\n[Kernel Sandbox Status: Verified 256MB RAM / 1 CPU Isolation]');
+          setOutput('Computed 4 primes up to 10: [2, 3, 5, 7]\n\n[Evaluation Engine Status: Verified]');
         } else if (lang === 'cpp') {
-          setOutput('Fibonacci sequence up to F(5): 0 1 1 2 3 5\n\n[Kernel Sandbox Status: Verified 256MB RAM / 1 CPU Isolation]');
+          setOutput('Fibonacci sequence up to F(5): 0 1 1 2 3 5\n\n[Evaluation Engine Status: Verified]');
         } else {
-          setOutput('Input: hello -> Reversed: olleh\n\n[Kernel Sandbox Status: Verified 256MB RAM / 1 CPU Isolation]');
+          setOutput('Input: hello -> Reversed: olleh\n\n[Evaluation Engine Status: Verified]');
         }
       }, 350);
     }
@@ -226,7 +220,7 @@ export const MicroSandboxTeaser: React.FC = () => {
             id="micro-sandbox-run"
             disabled={isRunning}
           >
-            <Play size={13} fill="#08090a" />
+            <Play size={13} fill="var(--accent-primary-fg)" />
             <span>{isRunning ? 'Running...' : 'Run in Sandbox'}</span>
           </button>
         </div>
@@ -236,7 +230,7 @@ export const MicroSandboxTeaser: React.FC = () => {
         <div className="micro-editor-pane">
           <div className="micro-pane-banner">
             <span className="micro-pane-title">SOURCE CODE</span>
-            <span className="micro-pane-tag">cgroup: /sys/fs/cgroup/judge</span>
+            <span className="micro-pane-tag">Runtime: Dedicated</span>
           </div>
           <textarea
             className="micro-code-textarea"
@@ -259,22 +253,22 @@ export const MicroSandboxTeaser: React.FC = () => {
           <pre className="micro-output-pre">{output}</pre>
 
           <div className="micro-metrics-bar">
-            <div className="micro-metric-item" title="Kernel sandbox execution duration">
+            <div className="micro-metric-item" title="Evaluation run duration">
               <Clock size={12} className="metric-icon" />
               <span>Time:</span>
               <strong className="metric-val">{executionTimeMs !== null ? `${executionTimeMs} ms` : '—'}</strong>
             </div>
 
-            <div className="micro-metric-item" title="Peak resident set size within cgroup">
+            <div className="micro-metric-item" title="Peak memory used">
               <HardDrive size={12} className="metric-icon" />
               <span>Memory:</span>
               <strong className="metric-val">{memoryUsedMb !== null ? `${memoryUsedMb} MB` : '—'}</strong>
             </div>
 
-            <div className="micro-metric-item" title="Sandbox isolation quota">
+            <div className="micro-metric-item" title="Evaluation resource quota">
               <Cpu size={12} className="metric-icon" />
               <span>CPU:</span>
-              <strong className="metric-val">1 Core (CFS)</strong>
+              <strong className="metric-val">1 Core Dedicated</strong>
             </div>
 
             {status === 'completed' && (

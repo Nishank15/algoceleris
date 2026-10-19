@@ -40,7 +40,9 @@ pub async fn handle_telemetry_socket(
                         "error": "rate_limit_exceeded",
                         "message": e.to_string(),
                     });
-                    let _ = socket.send(Message::Text(err_payload.to_string().into())).await;
+                    let _ = socket
+                        .send(Message::Text(err_payload.to_string().into()))
+                        .await;
                     continue;
                 }
 
@@ -53,7 +55,9 @@ pub async fn handle_telemetry_socket(
                             "error": "invalid_payload",
                             "message": e.to_string(),
                         });
-                        let _ = socket.send(Message::Text(err_payload.to_string().into())).await;
+                        let _ = socket
+                            .send(Message::Text(err_payload.to_string().into()))
+                            .await;
                         continue;
                     }
                 };
@@ -68,7 +72,9 @@ pub async fn handle_telemetry_socket(
                         "error": "identity_mismatch",
                         "message": "event assessment_id or candidate_id does not match connection",
                     });
-                    let _ = socket.send(Message::Text(err_payload.to_string().into())).await;
+                    let _ = socket
+                        .send(Message::Text(err_payload.to_string().into()))
+                        .await;
                     break;
                 }
 
@@ -87,7 +93,11 @@ pub async fn handle_telemetry_socket(
                     "severity": state.risk_score.severity,
                     "alert": alert_opt,
                 });
-                if socket.send(Message::Text(ack_payload.to_string().into())).await.is_err() {
+                if socket
+                    .send(Message::Text(ack_payload.to_string().into()))
+                    .await
+                    .is_err()
+                {
                     break;
                 }
             }

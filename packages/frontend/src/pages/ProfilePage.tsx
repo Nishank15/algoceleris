@@ -98,7 +98,7 @@ export const ProfilePage: React.FC = () => {
     return (
       <main className="profile-page-root">
         <div className="profile-loading-state">
-          <p style={{ color: '#8a8f98', margin: 0 }}>Loading developer profile...</p>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Loading developer profile...</p>
         </div>
       </main>
     );
@@ -177,7 +177,7 @@ export const ProfilePage: React.FC = () => {
           <div className="profile-name-row">
             <h1 className="profile-username">{profile.username}</h1>
             {isSelf && (
-              <span style={{ fontSize: '0.72rem', color: '#8a8f98', padding: '1px 6px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }}>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', padding: '1px 6px', borderRadius: '4px', background: 'var(--bg-elevated)' }}>
                 You
               </span>
             )}
@@ -185,7 +185,7 @@ export const ProfilePage: React.FC = () => {
               {profile.account_type.toUpperCase()}
             </span>
             {profile.college_name && (
-              <span style={{ fontSize: '0.8rem', color: '#8a8f98' }}>· {profile.college_name}</span>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>· {profile.college_name}</span>
             )}
           </div>
           <p className="profile-bio">

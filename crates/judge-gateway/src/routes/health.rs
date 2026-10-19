@@ -45,7 +45,7 @@ pub async fn health_handler(State(state): State<AppState>) -> impl IntoResponse 
         contest_store: "InMemoryContestStore".to_string(),
         leaderboard_engine: "InMemoryLeaderboardEngine".to_string(),
         proctoring_store: "RedisProctoringMesh".to_string(),
-        plagiarism_detector: "AstWinnowingDetector".to_string(),
+        plagiarism_detector: "StructuralSimilarityDetector".to_string(),
         bloom_filter: "in_memory".to_string(),
     };
 

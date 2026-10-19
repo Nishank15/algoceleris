@@ -59,7 +59,10 @@ fn test_cgroup_controller_with_mock_filesystem() {
 
     // Test automatic drop cleanup
     drop(controller);
-    assert!(!cg_path.exists(), "cgroup directory should be cleaned up on drop");
+    assert!(
+        !cg_path.exists(),
+        "cgroup directory should be cleaned up on drop"
+    );
     let _ = fs::remove_dir_all(&base_dir);
 }
 

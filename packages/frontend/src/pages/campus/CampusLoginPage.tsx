@@ -104,7 +104,7 @@ export const CampusLoginPage: React.FC = () => {
         userId: resp.user.user_id,
         name: resp.user.username,
         loginId: resp.user.email,
-        regNumber: resp.user.reg_number || '25BAI1234',
+        regNumber: resp.user.reg_number || 'DEMO-001',
         department: resp.user.cohort_name || 'Computer Science & Engineering',
         initials: (resp.user.username || 'US').slice(0, 2).toUpperCase(),
         token: resp.access_token,
@@ -135,8 +135,8 @@ export const CampusLoginPage: React.FC = () => {
     <div
       style={{
         minHeight: '100vh',
-        background: '#08090a',
-        color: '#ffffff',
+        background: 'var(--bg-canvas)',
+        color: 'var(--text-primary)',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
         display: 'flex',
         flexDirection: 'column',
@@ -155,10 +155,10 @@ export const CampusLoginPage: React.FC = () => {
               gap: '6px',
               padding: '4px 10px',
               borderRadius: '9999px',
-              background: '#0f1011',
-              border: '1px solid #23252a',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-subtle)',
               fontSize: '11px',
-              color: '#8a8f98',
+              color: 'var(--text-secondary)',
               fontFamily: 'JetBrains Mono, monospace',
               marginBottom: '16px',
             }}
@@ -173,13 +173,13 @@ export const CampusLoginPage: React.FC = () => {
               fontWeight: 590,
               margin: '0 0 8px 0',
               letterSpacing: '-0.02em',
-              color: '#ffffff',
+              color: 'var(--text-primary)',
             }}
           >
             {loadingOrg ? 'Loading Campus...' : org?.name || 'Institutional Portal'}
           </h1>
 
-          <p style={{ color: '#8a8f98', fontSize: '13px', margin: 0, lineHeight: 1.4 }}>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0, lineHeight: 1.4 }}>
             Multi-Tenant Sandboxed Lab & Proctoring Authentication Gateway
           </p>
         </div>
@@ -187,8 +187,8 @@ export const CampusLoginPage: React.FC = () => {
         {/* Login Card */}
         <div
           style={{
-            background: '#0f1011',
-            border: '1px solid #23252a',
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-subtle)',
             borderRadius: '12px',
             padding: '28px',
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
@@ -199,10 +199,10 @@ export const CampusLoginPage: React.FC = () => {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(3, 1fr)',
-              background: '#161718',
+              background: 'var(--bg-elevated)',
               padding: '3px',
               borderRadius: '8px',
-              border: '1px solid #23252a',
+              border: '1px solid var(--border-subtle)',
               marginBottom: '24px',
             }}
           >
@@ -231,8 +231,8 @@ export const CampusLoginPage: React.FC = () => {
                     padding: '8px 0',
                     border: 'none',
                     borderRadius: '6px',
-                    background: active ? '#23252a' : 'transparent',
-                    color: active ? '#ffffff' : '#8a8f98',
+                    background: active ? 'var(--bg-elevated)' : 'transparent',
+                    color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
                     fontSize: '12px',
                     fontWeight: active ? 590 : 400,
                     cursor: 'pointer',
@@ -275,7 +275,7 @@ export const CampusLoginPage: React.FC = () => {
                   display: 'block',
                   fontSize: '12px',
                   fontWeight: 510,
-                  color: '#d0d6e0',
+                  color: 'var(--text-secondary)',
                   marginBottom: '6px',
                 }}
               >
@@ -293,27 +293,27 @@ export const CampusLoginPage: React.FC = () => {
                     left: '12px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    color: '#62666d',
+                    color: 'var(--text-muted)',
                   }}
                 />
                 <input
                   type="text"
                   placeholder={
                     role === 'student'
-                      ? 'e.g. 25BAI1234 or student@vitstudent.ac.in'
+                      ? 'e.g. DEMO-001 or student1@vitstudent.ac.in'
                       : role === 'faculty'
-                      ? 'e.g. FAC-9842 or faculty@vit.ac.in'
+                      ? 'e.g. FAC-VIT-01 or demofaculty@vit.ac.in'
                       : 'admin@vit.ac.in'
                   }
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '10px 12px 10px 34px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     fontFamily: 'Inter, sans-serif',
                     outline: 'none',
@@ -324,14 +324,14 @@ export const CampusLoginPage: React.FC = () => {
 
               {org?.domain_whitelist && org.domain_whitelist.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '6px' }}>
-                  <span style={{ fontSize: '11px', color: '#62666d' }}>Whitelisted:</span>
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Whitelisted:</span>
                   {org.domain_whitelist.map((d) => (
                     <span
                       key={d}
                       style={{
                         fontSize: '10px',
                         fontFamily: 'JetBrains Mono, monospace',
-                        color: '#8a8f98',
+                        color: 'var(--text-secondary)',
                         background: 'rgba(35, 37, 42, 0.4)',
                         padding: '1px 5px',
                         borderRadius: '3px',
@@ -350,7 +350,7 @@ export const CampusLoginPage: React.FC = () => {
                   display: 'block',
                   fontSize: '12px',
                   fontWeight: 510,
-                  color: '#d0d6e0',
+                  color: 'var(--text-secondary)',
                   marginBottom: '6px',
                 }}
               >
@@ -364,7 +364,7 @@ export const CampusLoginPage: React.FC = () => {
                     left: '12px',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    color: '#62666d',
+                    color: 'var(--text-muted)',
                   }}
                 />
                 <input
@@ -374,11 +374,11 @@ export const CampusLoginPage: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
                     width: '100%',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     borderRadius: '6px',
                     padding: '10px 36px 10px 34px',
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     fontSize: '13px',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -394,7 +394,7 @@ export const CampusLoginPage: React.FC = () => {
                     transform: 'translateY(-50%)',
                     background: 'transparent',
                     border: 'none',
-                    color: '#62666d',
+                    color: 'var(--text-muted)',
                     cursor: 'pointer',
                     padding: 0,
                     display: 'flex',
@@ -411,8 +411,8 @@ export const CampusLoginPage: React.FC = () => {
               style={{
                 marginTop: '10px',
                 width: '100%',
-                background: '#e4f222',
-                color: '#08090a',
+                background: 'var(--accent-primary)',
+                color: 'var(--accent-primary-fg)',
                 border: 'none',
                 padding: '11px',
                 borderRadius: '6px',
@@ -443,7 +443,7 @@ export const CampusLoginPage: React.FC = () => {
             textAlign: 'center',
             marginTop: '24px',
             fontSize: '13px',
-            color: '#8a8f98',
+            color: 'var(--text-secondary)',
           }}
         >
           Not from this university?{' '}

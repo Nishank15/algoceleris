@@ -17,9 +17,11 @@ use judge_gateway::create_router;
 use judge_gateway::errors::ProblemDetails;
 use judge_gateway::routes::{
     AssessmentResponse, CohortResponse, OrganizationResponse, ProctorCockpitResponse,
-    ProvisionVivaRequest, ProvisionVivaResponse, UpdateVivaRubricRequest, VivaRubricResponse,
+    ProctorEventView, ProctoredCandidateState, ProvisionVivaRequest, ProvisionVivaResponse,
+    UpdateVivaRubricRequest, VivaRubricResponse,
 };
 use judge_gateway::state::AppState;
+use serde::de::DeserializeOwned;
 use tower::ServiceExt;
 use uuid::Uuid;
 
@@ -35,10 +37,7 @@ fn generate_test_token(user_id: &str, role: &str) -> String {
     .expect("failed to generate token")
 }
 
-async fn setup_test_assessment(
-    app: &axum::Router,
-    instructor_token: &str,
-) -> (Uuid, Uuid, Uuid) {
+async fn setup_test_assessment(app: &axum::Router, instructor_token: &str) -> (Uuid, Uuid, Uuid) {
     let org_payload = serde_json::json!({
         "name": "Department of Computer Science",
         "slug": format!("cs-dept-{}", &Uuid::new_v4().to_string()[..8]),
@@ -116,8 +115,7 @@ async fn test_proctor_cockpit_returns_aggregated_anomaly_counts_and_risk_tiering
     let instructor_id = Uuid::new_v4().to_string();
     let instructor_token = generate_test_token(&instructor_id, "instructor");
 
-    let (org_id, cohort_id, assessment_id) =
-        setup_test_assessment(&app, &instructor_token).await;
+    let (org_id, cohort_id, assessment_id) = setup_test_assessment(&app, &instructor_token).await;
 
     let cand_low = Uuid::new_v4();
     let cand_elevated = Uuid::new_v4();
@@ -203,7 +201,9 @@ async fn test_proctor_cockpit_returns_aggregated_anomaly_counts_and_risk_tiering
 
     let req = Request::builder()
         .method("GET")
-        .uri(format!("/api/v1/campus/assessments/{assessment_id}/cockpit"))
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/cockpit"
+        ))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .body(Body::empty())
         .unwrap();
@@ -261,7 +261,9 @@ async fn test_student_accessing_cockpit_endpoint_returns_403_forbidden() {
 
     let req = Request::builder()
         .method("GET")
-        .uri(format!("/api/v1/campus/assessments/{assessment_id}/cockpit"))
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/cockpit"
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .body(Body::empty())
         .unwrap();
@@ -284,8 +286,7 @@ async fn test_viva_escalation_successfully_provisions_new_room_record() {
     let instructor_id = Uuid::new_v4();
     let instructor_token = generate_test_token(&instructor_id.to_string(), "instructor");
 
-    let (_org_id, _cohort_id, assessment_id) =
-        setup_test_assessment(&app, &instructor_token).await;
+    let (_org_id, _cohort_id, assessment_id) = setup_test_assessment(&app, &instructor_token).await;
 
     let candidate_id = Uuid::new_v4();
     let payload = ProvisionVivaRequest {
@@ -437,7 +438,9 @@ async fn test_private_rubric_endpoint_permits_instructor_and_rejects_candidates(
         .uri(format!("/api/v1/campus/viva/{room_code}/rubric"))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .header(CONTENT_TYPE, "application/json")
-        .body(Body::from(serde_json::to_vec(&valid_patch_payload).unwrap()))
+        .body(Body::from(
+            serde_json::to_vec(&valid_patch_payload).unwrap(),
+        ))
         .unwrap();
     let valid_patch_resp = app.oneshot(valid_patch_req).await.unwrap();
     assert_eq!(valid_patch_resp.status(), StatusCode::OK);
@@ -449,10 +452,7 @@ async fn test_private_rubric_endpoint_permits_instructor_and_rejects_candidates(
         updated_rubric.interviewer_notes,
         "Excellent complexity analysis by candidate."
     );
-    assert_eq!(
-        updated_rubric.rubric_scores[crit1.id.to_string()],
-        85.0
-    );
+    assert_eq!(updated_rubric.rubric_scores[crit1.id.to_string()], 85.0);
 
     // 5. Instructor attempts update with UNBALANCED criteria (weights sum to 80.0%) -> 400 Bad Request
     let unbalanced_criteria = vec![
@@ -497,10 +497,335 @@ async fn test_private_rubric_endpoint_permits_instructor_and_rejects_candidates(
     assert_eq!(problem.title, "Unbalanced Rubric Weights");
 }
 
+/// Enrolls a candidate into the assessment cohort and registers their identity,
+/// mirroring how a real roster entry reaches the telemetry surfaces.
+async fn enroll_candidate(
+    state: &AppState,
+    org_id: Uuid,
+    cohort_id: Uuid,
+    user_id: Uuid,
+    username: &str,
+) {
+    let mem = OrgMembershipRecord {
+        id: Uuid::new_v4(),
+        org_id,
+        user_id,
+        cohort_id: Some(cohort_id),
+        role: "student".to_string(),
+        status: "active".to_string(),
+        created_at: Utc::now(),
+    };
+    state
+        .mock_campus
+        .memberships
+        .write()
+        .await
+        .insert((org_id, user_id), mem);
+    state.mock_campus.users.write().await.insert(
+        user_id,
+        (username.to_string(), format!("{username}@campus.edu")),
+    );
+}
+
+fn proctor_ingest_request(
+    assessment_id: Uuid,
+    token: &str,
+    body: &serde_json::Value,
+) -> Request<Body> {
+    Request::builder()
+        .method("POST")
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/proctor/events"
+        ))
+        .header(AUTHORIZATION, format!("Bearer {token}"))
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(serde_json::to_vec(body).unwrap()))
+        .unwrap()
+}
+
+fn proctor_read_request(assessment_id: Uuid, token: &str, surface: &str) -> Request<Body> {
+    Request::builder()
+        .method("GET")
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/proctor/{surface}"
+        ))
+        .header(AUTHORIZATION, format!("Bearer {token}"))
+        .body(Body::empty())
+        .unwrap()
+}
+
+async fn json_body(response: axum::response::Response) -> serde_json::Value {
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    serde_json::from_slice(&bytes).unwrap()
+}
+
+async fn decode_body<T: DeserializeOwned>(response: axum::response::Response) -> T {
+    let bytes = axum::body::to_bytes(response.into_body(), usize::MAX)
+        .await
+        .unwrap();
+    serde_json::from_slice(&bytes).unwrap()
+}
+
+#[tokio::test]
+async fn test_proctor_telemetry_ingest_records_infractions_and_scores_enrolled_candidates() {
+    let state = AppState::new_test();
+    let app = create_router(state.clone());
+    let instructor_id = Uuid::new_v4().to_string();
+    let instructor_token = generate_test_token(&instructor_id, "instructor");
+    let (org_id, cohort_id, assessment_id) = setup_test_assessment(&app, &instructor_token).await;
+
+    let candidate_id = Uuid::new_v4();
+    let candidate_token = generate_test_token(&candidate_id.to_string(), "student");
+    enroll_candidate(&state, org_id, cohort_id, candidate_id, "anomalous_alice").await;
+
+    // An organization member outside the cohort must never reach this roster.
+    let unenrolled_id = Uuid::new_v4();
+    state.mock_campus.memberships.write().await.insert(
+        (org_id, unenrolled_id),
+        OrgMembershipRecord {
+            id: Uuid::new_v4(),
+            org_id,
+            user_id: unenrolled_id,
+            cohort_id: None,
+            role: "student".to_string(),
+            status: "active".to_string(),
+            created_at: Utc::now(),
+        },
+    );
+
+    // 1. Severity is derived from the event type: the extra `severity` field in a
+    //    candidate payload cannot downgrade an infraction.
+    let tab_req = proctor_ingest_request(
+        assessment_id,
+        &candidate_token,
+        &serde_json::json!({
+            "event_type": "tab_switch",
+            "severity": "info",
+            "metadata": { "hidden_ms": 4200 }
+        }),
+    );
+    let tab_resp = app.clone().oneshot(tab_req).await.unwrap();
+    assert_eq!(tab_resp.status(), StatusCode::CREATED);
+    let tab_event = json_body(tab_resp).await;
+    assert_eq!(tab_event["event_type"], "tab_switch");
+    assert_eq!(tab_event["severity"], "warning");
+    assert_eq!(tab_event["user_id"], candidate_id.to_string());
+    assert_eq!(tab_event["username"], "anomalous_alice");
+    assert_eq!(tab_event["event_metadata"]["hidden_ms"], 4200);
+    assert_eq!(tab_event["persisted"], false);
+
+    let paste_req = proctor_ingest_request(
+        assessment_id,
+        &candidate_token,
+        &serde_json::json!({ "event_type": "paste_burst", "metadata": { "chars": 120 } }),
+    );
+    let paste_resp = app.clone().oneshot(paste_req).await.unwrap();
+    assert_eq!(paste_resp.status(), StatusCode::CREATED);
+    assert_eq!(json_body(paste_resp).await["severity"], "critical");
+
+    // 2. Heartbeats prove liveness but are not incidents.
+    let heartbeat_req = proctor_ingest_request(
+        assessment_id,
+        &candidate_token,
+        &serde_json::json!({ "event_type": "heartbeat" }),
+    );
+    let heartbeat_resp = app.clone().oneshot(heartbeat_req).await.unwrap();
+    assert_eq!(heartbeat_resp.status(), StatusCode::CREATED);
+    let heartbeat = json_body(heartbeat_resp).await;
+    assert_eq!(heartbeat["severity"], "info");
+    assert_eq!(heartbeat["persisted"], false);
+
+    // 3. The roster reports real enrolled state, scored server-side:
+    //    risk = 1 * 5 (tab switch) + 1 * 15 (paste burst) = 20 -> elevated.
+    let roster_resp = app
+        .clone()
+        .oneshot(proctor_read_request(
+            assessment_id,
+            &instructor_token,
+            "students",
+        ))
+        .await
+        .unwrap();
+    assert_eq!(roster_resp.status(), StatusCode::OK);
+    let roster: Vec<ProctoredCandidateState> = decode_body(roster_resp).await;
+    assert_eq!(roster.len(), 1, "roster holds enrolled candidates only");
+    let candidate = &roster[0];
+    assert_eq!(candidate.user_id, candidate_id);
+    assert_eq!(candidate.username.as_deref(), Some("anomalous_alice"));
+    assert_eq!(candidate.tab_switches, 1);
+    assert_eq!(candidate.fullscreen_exits, 0);
+    assert_eq!(candidate.paste_bursts, 1);
+    assert_eq!(candidate.total_events, 2, "heartbeats are not infractions");
+    assert_eq!(candidate.risk_score, 20);
+    assert_eq!(candidate.risk_severity, "elevated");
+    // Without a Redis liveness store no connection state may be claimed.
+    assert_eq!(candidate.status, "idle");
+
+    // 4. The incident log is newest-first and excludes heartbeats.
+    let events_resp = app
+        .clone()
+        .oneshot(proctor_read_request(
+            assessment_id,
+            &instructor_token,
+            "events",
+        ))
+        .await
+        .unwrap();
+    assert_eq!(events_resp.status(), StatusCode::OK);
+    let events: Vec<ProctorEventView> = decode_body(events_resp).await;
+    assert_eq!(events.len(), 2);
+    assert_eq!(events[0].event_type, "paste_burst");
+    assert_eq!(events[1].event_type, "tab_switch");
+    assert_eq!(events[0].username.as_deref(), Some("anomalous_alice"));
+
+    // 5. Faculty may terminate a candidate session; the incident is attributed to
+    //    the candidate while the weighted anomaly score stays evidence-based.
+    let forced_req = proctor_ingest_request(
+        assessment_id,
+        &instructor_token,
+        &serde_json::json!({
+            "event_type": "forced_session_terminated",
+            "user_id": candidate_id,
+            "metadata": { "reason": "repeated_tab_switching" }
+        }),
+    );
+    let forced_resp = app.clone().oneshot(forced_req).await.unwrap();
+    assert_eq!(forced_resp.status(), StatusCode::CREATED);
+    let forced_event = json_body(forced_resp).await;
+    assert_eq!(forced_event["user_id"], candidate_id.to_string());
+    assert_eq!(forced_event["severity"], "critical");
+
+    let roster_resp = app
+        .clone()
+        .oneshot(proctor_read_request(
+            assessment_id,
+            &instructor_token,
+            "students",
+        ))
+        .await
+        .unwrap();
+    let roster: Vec<ProctoredCandidateState> = decode_body(roster_resp).await;
+    assert_eq!(roster[0].total_events, 3);
+    assert_eq!(roster[0].risk_score, 20);
+}
+
+#[tokio::test]
+async fn test_proctor_telemetry_rejects_unsupported_forged_and_outsider_events() {
+    let state = AppState::new_test();
+    let app = create_router(state.clone());
+    let instructor_token = generate_test_token(&Uuid::new_v4().to_string(), "instructor");
+    let (org_id, cohort_id, assessment_id) = setup_test_assessment(&app, &instructor_token).await;
+
+    let candidate_id = Uuid::new_v4();
+    let candidate_token = generate_test_token(&candidate_id.to_string(), "student");
+    enroll_candidate(&state, org_id, cohort_id, candidate_id, "honest_bob").await;
+
+    let other_candidate_id = Uuid::new_v4();
+    enroll_candidate(
+        &state,
+        org_id,
+        cohort_id,
+        other_candidate_id,
+        "framed_carol",
+    )
+    .await;
+
+    // 1. Event types outside the allow-list are rejected outright.
+    let unsupported = proctor_ingest_request(
+        assessment_id,
+        &candidate_token,
+        &serde_json::json!({ "event_type": "evaluate_solution" }),
+    );
+    assert_eq!(
+        app.clone().oneshot(unsupported).await.unwrap().status(),
+        StatusCode::BAD_REQUEST
+    );
+
+    // 2. A candidate cannot record telemetry against another candidate.
+    let forged = proctor_ingest_request(
+        assessment_id,
+        &candidate_token,
+        &serde_json::json!({ "event_type": "tab_switch", "user_id": other_candidate_id }),
+    );
+    assert_eq!(
+        app.clone().oneshot(forged).await.unwrap().status(),
+        StatusCode::FORBIDDEN
+    );
+
+    // 3. A valid token for a tenant outsider cannot ingest telemetry.
+    let outsider_token = generate_test_token(&Uuid::new_v4().to_string(), "student");
+    let outsider = proctor_ingest_request(
+        assessment_id,
+        &outsider_token,
+        &serde_json::json!({ "event_type": "tab_switch" }),
+    );
+    assert_eq!(
+        app.clone().oneshot(outsider).await.unwrap().status(),
+        StatusCode::FORBIDDEN
+    );
+
+    // 4. An unknown assessment is reported as missing, never as silent success.
+    let ghost = proctor_ingest_request(
+        Uuid::new_v4(),
+        &candidate_token,
+        &serde_json::json!({ "event_type": "tab_switch" }),
+    );
+    assert_eq!(
+        app.clone().oneshot(ghost).await.unwrap().status(),
+        StatusCode::NOT_FOUND
+    );
+
+    // 5. An instructor token outside the tenant cannot read the roster.
+    let outsider_instructor_token = generate_test_token(&Uuid::new_v4().to_string(), "instructor");
+    let outsider_roster =
+        proctor_read_request(assessment_id, &outsider_instructor_token, "students");
+    assert_eq!(
+        app.clone().oneshot(outsider_roster).await.unwrap().status(),
+        StatusCode::FORBIDDEN
+    );
+
+    // 6. Candidates cannot read the faculty incident log.
+    let candidate_log = proctor_read_request(assessment_id, &candidate_token, "events");
+    assert_eq!(
+        app.clone().oneshot(candidate_log).await.unwrap().status(),
+        StatusCode::FORBIDDEN
+    );
+
+    // 7. Unauthenticated ingestion is refused.
+    let anonymous = Request::builder()
+        .method("POST")
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/proctor/events"
+        ))
+        .header(CONTENT_TYPE, "application/json")
+        .body(Body::from(
+            serde_json::to_vec(&serde_json::json!({ "event_type": "tab_switch" })).unwrap(),
+        ))
+        .unwrap();
+    assert_eq!(
+        app.clone().oneshot(anonymous).await.unwrap().status(),
+        StatusCode::UNAUTHORIZED
+    );
+
+    // Nothing rejected above may have reached the incident store.
+    let stored: usize = state
+        .mock_campus
+        .proctor_events
+        .read()
+        .await
+        .values()
+        .map(Vec::len)
+        .sum();
+    assert_eq!(stored, 0, "rejected telemetry must never be recorded");
+}
+
 #[tokio::test]
 async fn test_live_postgres_cockpit_and_viva_if_available() {
-    let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
 
     let pool = match judge_db::create_connection_pool(&db_url, 5).await {
         Ok(p) => p,
@@ -530,17 +855,21 @@ async fn test_live_postgres_cockpit_and_viva_if_available() {
     )
     .bind(instructor_id)
     .bind(format!("inst_{}", &instructor_id.to_string()[..8]))
-    .bind(format!("inst_{}@campus.edu", &instructor_id.to_string()[..8]))
+    .bind(format!(
+        "inst_{}@campus.edu",
+        &instructor_id.to_string()[..8]
+    ))
     .execute(pool.inner())
     .await;
 
-    let (_org_id, _cohort_id, assessment_id) =
-        setup_test_assessment(&app, &instructor_token).await;
+    let (_org_id, _cohort_id, assessment_id) = setup_test_assessment(&app, &instructor_token).await;
 
     // Test GET cockpit against live database
     let req = Request::builder()
         .method("GET")
-        .uri(format!("/api/v1/campus/assessments/{assessment_id}/cockpit"))
+        .uri(format!(
+            "/api/v1/campus/assessments/{assessment_id}/cockpit"
+        ))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .body(Body::empty())
         .unwrap();
@@ -559,7 +888,10 @@ async fn test_live_postgres_cockpit_and_viva_if_available() {
     )
     .bind(candidate_id)
     .bind(format!("cand_{}", &candidate_id.to_string()[..8]))
-    .bind(format!("cand_{}@campus.edu", &candidate_id.to_string()[..8]))
+    .bind(format!(
+        "cand_{}@campus.edu",
+        &candidate_id.to_string()[..8]
+    ))
     .execute(pool.inner())
     .await;
 

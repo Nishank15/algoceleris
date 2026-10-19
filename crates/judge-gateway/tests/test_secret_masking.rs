@@ -55,6 +55,7 @@ async fn test_submission_intake_creates_pending_record_and_pushes_queue() {
         source_code: None,
         custom_input: None,
         test_cases: None,
+        mode: None,
         time_limit_ms: None,
         memory_limit_bytes: None,
         assessment_id: None,
@@ -107,6 +108,7 @@ async fn test_submission_intake_validations() {
         source_code: None,
         custom_input: None,
         test_cases: None,
+        mode: None,
         time_limit_ms: None,
         memory_limit_bytes: None,
         assessment_id: None,
@@ -129,6 +131,7 @@ async fn test_submission_intake_validations() {
         source_code: None,
         custom_input: Some("sample".to_string()),
         test_cases: None,
+        mode: None,
         time_limit_ms: None,
         memory_limit_bytes: None,
         assessment_id: None,
@@ -151,6 +154,7 @@ async fn test_submission_intake_validations() {
         source_code: None,
         custom_input: None,
         test_cases: None,
+        mode: None,
         time_limit_ms: None,
         memory_limit_bytes: None,
         assessment_id: None,
@@ -431,7 +435,10 @@ async fn test_admin_query_receives_unmasked_details() {
     let body: GetSubmissionResponse = serde_json::from_slice(&bytes).unwrap();
 
     assert_eq!(body.id, submission_id);
-    assert_eq!(body.test_cases[0].input, Some("admin secret in".to_string()));
+    assert_eq!(
+        body.test_cases[0].input,
+        Some("admin secret in".to_string())
+    );
     assert_eq!(
         body.test_cases[0].expected_output,
         Some("admin secret out".to_string())
@@ -471,7 +478,10 @@ fn test_mask_test_case_results_and_json_helpers() {
     let masked = mask_test_case_results(&cases, false, false);
     assert_eq!(masked[0].input, Some("sample in".to_string()));
     assert_eq!(masked[1].input, Some(SECRET_TEST_MASK.to_string()));
-    assert_eq!(masked[1].expected_output, Some(SECRET_TEST_MASK.to_string()));
+    assert_eq!(
+        masked[1].expected_output,
+        Some(SECRET_TEST_MASK.to_string())
+    );
     assert_eq!(masked[1].actual_output, Some(SECRET_TEST_MASK.to_string()));
     assert_eq!(masked[1].diff, None);
 
@@ -537,8 +547,7 @@ async fn test_websocket_stream_payload_serialization_masks_for_students() {
     let student_token = generate_test_token(&Uuid::new_v4().to_string(), "student");
     let instructor_token = generate_test_token(&Uuid::new_v4().to_string(), "instructor");
 
-    let student_url =
-        format!("ws://{addr}/ws/submissions/{submission_id}?token={student_token}");
+    let student_url = format!("ws://{addr}/ws/submissions/{submission_id}?token={student_token}");
     let instructor_url =
         format!("ws://{addr}/ws/submissions/{submission_id}?token={instructor_token}");
 
@@ -620,10 +629,7 @@ async fn test_websocket_stream_payload_serialization_masks_for_students() {
         serde_json::from_str(instructor_text).expect("invalid json from instructor ws");
 
     // Assert instructor received raw unmasked test vectors
-    assert_eq!(
-        instructor_json["input"],
-        "super_secret_test_input_12345"
-    );
+    assert_eq!(instructor_json["input"], "super_secret_test_input_12345");
     assert_eq!(
         instructor_json["expected_output"],
         "super_secret_expected_output_67890"
@@ -672,6 +678,7 @@ async fn test_live_redis_intake_queue_and_pubsub_masking() {
         source_code: None,
         custom_input: None,
         test_cases: None,
+        mode: None,
         time_limit_ms: None,
         memory_limit_bytes: None,
         assessment_id: None,
@@ -695,7 +702,10 @@ async fn test_live_redis_intake_queue_and_pubsub_masking() {
 
     // Verify item was pushed to Redis queue `submissions:queue`
     let mut found = false;
-    while let Ok(Some(raw_job)) = con.rpop::<_, Option<String>>("submissions:queue", None).await {
+    while let Ok(Some(raw_job)) = con
+        .rpop::<_, Option<String>>("submissions:queue", None)
+        .await
+    {
         if let Ok(job) = serde_json::from_str::<serde_json::Value>(&raw_job) {
             if job["submission_id"].as_str() == Some(&submit_resp.submission_id.to_string()) {
                 assert_eq!(job["problem_slug"], "two-sum");
@@ -707,4 +717,3 @@ async fn test_live_redis_intake_queue_and_pubsub_masking() {
     }
     assert!(found, "Submitted job should be in Redis submissions:queue");
 }
-

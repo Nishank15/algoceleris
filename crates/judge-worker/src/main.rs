@@ -13,8 +13,7 @@ async fn main() -> Result<()> {
         .init();
     tracing::info!("judge-worker daemon initializing...");
 
-    let redis_url =
-        env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
+    let redis_url = env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1:6379".to_string());
     let db_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
         "postgresql://postgres:postgres@127.0.0.1:5432/cloud_judge".to_string()
     });
@@ -36,4 +35,3 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
-

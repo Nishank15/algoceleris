@@ -33,10 +33,7 @@ fn generate_test_token(user_id: &str, role: &str) -> String {
 }
 
 /// Helper bootstrapping test organization, cohort, and returning IDs with auth token.
-async fn setup_test_hierarchy(
-    app: &axum::Router,
-    instructor_token: &str,
-) -> (Uuid, Uuid) {
+async fn setup_test_hierarchy(app: &axum::Router, instructor_token: &str) -> (Uuid, Uuid) {
     let org_payload = serde_json::json!({
         "name": "Department of Computer Science",
         "slug": format!("cs-dept-{}", &Uuid::new_v4().to_string()[..8]),
@@ -207,7 +204,10 @@ async fn test_on_time_submission_accepts_with_zero_deduction() {
     });
     let submit_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload).unwrap()))
@@ -277,7 +277,10 @@ async fn test_grace_period_submission_calculates_ceiling_hour_late_penalty() {
     });
     let submit_req1 = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload_1).unwrap()))
@@ -303,7 +306,10 @@ async fn test_grace_period_submission_calculates_ceiling_hour_late_penalty() {
     });
     let submit_req2 = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload_2).unwrap()))
@@ -370,7 +376,10 @@ async fn test_post_cutoff_submission_strictly_rejected_with_403() {
 
     let submit_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload).unwrap()))
@@ -440,7 +449,10 @@ async fn test_premature_submission_before_starts_at_rejected_with_403() {
 
     let submit_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload).unwrap()))
@@ -507,7 +519,10 @@ async fn test_time_accommodation_extends_submission_window() {
     });
     let acc_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/accommodations", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/accommodations",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&acc_payload).unwrap()))
@@ -520,7 +535,10 @@ async fn test_time_accommodation_extends_submission_window() {
         .unwrap();
     let acc_res: GrantAccommodationResponse = serde_json::from_slice(&acc_bytes).unwrap();
     assert_eq!(acc_res.total_extension_minutes, 30);
-    assert_eq!(acc_res.effective_cutoff_at, cutoff_at + Duration::minutes(30));
+    assert_eq!(
+        acc_res.effective_cutoff_at,
+        cutoff_at + Duration::minutes(30)
+    );
 
     // Time: cutoff_at + 15m (45m after due_at)
     let submit_time = cutoff_at + Duration::minutes(15);
@@ -532,7 +550,10 @@ async fn test_time_accommodation_extends_submission_window() {
     });
     let submit_req_b = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_b_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload_b).unwrap()))
@@ -548,7 +569,10 @@ async fn test_time_accommodation_extends_submission_window() {
     });
     let submit_req_a = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_a_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload_a).unwrap()))
@@ -609,7 +633,10 @@ async fn test_faculty_force_submit_and_status_transition() {
     });
     let force_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/force-submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/force-submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&force_payload).unwrap()))
@@ -629,7 +656,10 @@ async fn test_faculty_force_submit_and_status_transition() {
     });
     let status_req = Request::builder()
         .method("PATCH")
-        .uri(format!("/api/v1/campus/assessments/{}/status", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/status",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {instructor_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&status_payload).unwrap()))
@@ -645,7 +675,10 @@ async fn test_faculty_force_submit_and_status_transition() {
     });
     let submit_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload).unwrap()))
@@ -657,8 +690,9 @@ async fn test_faculty_force_submit_and_status_transition() {
 
 #[tokio::test]
 async fn test_live_postgres_assessment_lifecycle_if_available() {
-    let db_url = std::env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string());
+    let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
+        "postgresql://postgres:postgres@localhost:5432/cloud_judge".to_string()
+    });
 
     let pool = match judge_db::create_connection_pool(&db_url, 5).await {
         Ok(p) => p,
@@ -686,7 +720,10 @@ async fn test_live_postgres_assessment_lifecycle_if_available() {
     )
     .bind(instructor_id)
     .bind(format!("inst_{}", &instructor_id.to_string()[..8]))
-    .bind(format!("inst_{}@campus.edu", &instructor_id.to_string()[..8]))
+    .bind(format!(
+        "inst_{}@campus.edu",
+        &instructor_id.to_string()[..8]
+    ))
     .execute(pool.inner())
     .await;
 
@@ -758,7 +795,10 @@ async fn test_live_postgres_assessment_lifecycle_if_available() {
     });
     let submit_req = Request::builder()
         .method("POST")
-        .uri(format!("/api/v1/campus/assessments/{}/submit", assessment.id))
+        .uri(format!(
+            "/api/v1/campus/assessments/{}/submit",
+            assessment.id
+        ))
         .header(AUTHORIZATION, format!("Bearer {student_token}"))
         .header(CONTENT_TYPE, "application/json")
         .body(Body::from(serde_json::to_vec(&submit_payload).unwrap()))

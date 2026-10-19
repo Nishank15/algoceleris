@@ -27,7 +27,7 @@ import {
   AssessmentSubmissionResponse,
   getAssessment,
   submitAssessment,
-  connectProctoringWebSocket,
+  postProctorEvent,
   maskStudentTestResults,
   MOCK_ASSESSMENTS,
 } from '../../services/campusApi';
@@ -74,8 +74,9 @@ public class Solution {
 };
 
 export const StudentExamArenaPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { assessmentId } = useParams<{ assessmentId?: string }>();
   const { theme } = useTheme();
+  const examId = assessmentId || MOCK_ASSESSMENTS[0].id;
 
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -103,8 +104,7 @@ export const StudentExamArenaPage: React.FC = () => {
   const [sampleRunLoading, setSampleRunLoading] = useState<boolean>(false);
   const [sampleRunResults, setSampleRunResults] = useState<any[] | null>(null);
 
-  // WebSocket Ref
-  const wsRef = useRef<WebSocket | null>(null);
+  // Proctoring telemetry heartbeat timer
   const heartbeatTimerRef = useRef<number | null>(null);
 
   // Fetch Assessment Details
@@ -112,7 +112,6 @@ export const StudentExamArenaPage: React.FC = () => {
     let cancelled = false;
     const fetchExam = async () => {
       try {
-        const examId = id || MOCK_ASSESSMENTS[0].id;
         const data = await getAssessment(examId);
         if (!cancelled) {
           setAssessment(data);
@@ -136,7 +135,7 @@ export const StudentExamArenaPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [id]);
+  }, [examId]);
 
   // Current problem object
   const currentProblemSlug = useMemo(() => {
@@ -165,18 +164,13 @@ export const StudentExamArenaPage: React.FC = () => {
     }));
   };
 
-  // Helper to send telemetry
-  const sendTelemetry = useCallback((eventType: 'heartbeat' | 'tab_switch' | 'fullscreen_exit' | 'paste_burst', metadata = {}) => {
-    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      wsRef.current.send(
-        JSON.stringify({
-          event_type: eventType,
-          metadata,
-          timestamp: new Date().toISOString(),
-        })
-      );
-    }
-  }, []);
+  // Publishes candidate telemetry to the live proctoring pipeline
+  const sendTelemetry = useCallback(
+    (eventType: 'heartbeat' | 'tab_switch' | 'fullscreen_exit' | 'paste_burst', metadata = {}) => {
+      void postProctorEvent(examId, { event_type: eventType, metadata });
+    },
+    [examId]
+  );
 
   // Fullscreen Management
   const requestFullscreen = async () => {
@@ -200,19 +194,6 @@ export const StudentExamArenaPage: React.FC = () => {
     setIsReadinessModalOpen(false);
     setIsExamActive(true);
     await requestFullscreen();
-
-    // Connect Telemetry WebSocket
-    if (assessment) {
-      try {
-        wsRef.current = connectProctoringWebSocket(
-          assessment.id,
-          (msg) => console.log('Proctor WS message:', msg),
-          (err) => console.debug('Proctor WS status:', err)
-        );
-      } catch (err) {
-        console.debug('Telemetry WS init fallback:', err);
-      }
-    }
   };
 
   // Fullscreen change and visibility listeners
@@ -261,17 +242,6 @@ export const StudentExamArenaPage: React.FC = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('paste', handleWindowPaste);
       if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
-      if (wsRef.current) {
-        const s = wsRef.current;
-        if (s.readyState === WebSocket.OPEN) {
-          s.close(1000, 'Exam unmounted');
-        } else if (s.readyState === WebSocket.CONNECTING) {
-          s.onopen = () => {
-            s.close(1000, 'Exam unmounted');
-          };
-        }
-        wsRef.current = null;
-      }
     };
   }, [isExamActive, hasAutoSubmitted, sendTelemetry]);
 
@@ -317,7 +287,8 @@ export const StudentExamArenaPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Build sample tests evaluation
+      // Build sample tests evaluation. Hidden cases stay server-side and are never
+      // part of the browser payload.
       const sampleTests = (currentProblem.sampleCases || []).map((sc, idx) => ({
         id: sc.id || idx + 1,
         is_sample: true,
@@ -326,17 +297,8 @@ export const StudentExamArenaPage: React.FC = () => {
         expected_output: sc.expected_output,
         actual_output: sc.expected_output,
       }));
-      // Build hidden tests evaluation (evaluated inside worker sandbox)
-      const hiddenTests = (currentProblem.hiddenCases || []).map((hc, idx) => ({
-        id: hc.id || idx + 10,
-        is_sample: false,
-        passed: true,
-        input_data: hc.input_data,
-        expected_output: hc.expected_output,
-        actual_output: hc.expected_output,
-      }));
 
-      const allEvaluations = [...sampleTests, ...hiddenTests];
+      const allEvaluations = sampleTests;
       const rawScore = 100.0;
 
       const res = await submitAssessment(assessment.id, {
@@ -400,16 +362,9 @@ export const StudentExamArenaPage: React.FC = () => {
         expected_output: sc.expected_output,
         actual_output: sc.expected_output,
       }));
-      const hiddenTests = (currentProblem.hiddenCases || []).map((hc, idx) => ({
-        id: hc.id || idx + 10,
-        is_sample: false,
-        passed: true,
-        input_data: hc.input_data,
-        expected_output: hc.expected_output,
-        actual_output: hc.expected_output,
-      }));
 
-      const allEvaluations = [...sampleTests, ...hiddenTests];
+      // Hidden cases stay server-side; only the public sample set is sent along.
+      const allEvaluations = sampleTests;
       const rawScore = 100.0;
 
       const res = await submitAssessment(assessment.id, {

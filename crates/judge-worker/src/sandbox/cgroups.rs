@@ -52,9 +52,15 @@ impl CgroupController {
         let path = base_path.into().join(name);
         fs::create_dir_all(&path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::PermissionDenied {
-                WorkerError::PermissionDenied(format!("cannot create cgroup directory {}: {e}", path.display()))
+                WorkerError::PermissionDenied(format!(
+                    "cannot create cgroup directory {}: {e}",
+                    path.display()
+                ))
             } else {
-                WorkerError::CgroupError(format!("failed to create cgroup directory {}: {e}", path.display()))
+                WorkerError::CgroupError(format!(
+                    "failed to create cgroup directory {}: {e}",
+                    path.display()
+                ))
             }
         })?;
 
@@ -82,15 +88,24 @@ impl CgroupController {
         let swap_max_path = self.path.join("memory.swap.max");
 
         fs::write(&mem_max_path, self.memory_max.to_string()).map_err(|e| {
-            WorkerError::CgroupError(format!("failed to write memory.max to {}: {e}", mem_max_path.display()))
+            WorkerError::CgroupError(format!(
+                "failed to write memory.max to {}: {e}",
+                mem_max_path.display()
+            ))
         })?;
 
         fs::write(&mem_high_path, self.memory_high.to_string()).map_err(|e| {
-            WorkerError::CgroupError(format!("failed to write memory.high to {}: {e}", mem_high_path.display()))
+            WorkerError::CgroupError(format!(
+                "failed to write memory.high to {}: {e}",
+                mem_high_path.display()
+            ))
         })?;
 
         fs::write(&cpu_max_path, &self.cpu_max).map_err(|e| {
-            WorkerError::CgroupError(format!("failed to write cpu.max to {}: {e}", cpu_max_path.display()))
+            WorkerError::CgroupError(format!(
+                "failed to write cpu.max to {}: {e}",
+                cpu_max_path.display()
+            ))
         })?;
 
         // Optional swap constraint write; ignored if swap accounting is disabled in kernel
@@ -107,9 +122,15 @@ impl CgroupController {
         let procs_path = self.path.join("cgroup.procs");
         fs::write(&procs_path, pid.to_string()).map_err(|e| {
             if e.kind() == std::io::ErrorKind::PermissionDenied {
-                WorkerError::PermissionDenied(format!("permission denied attaching PID {pid} to {}", procs_path.display()))
+                WorkerError::PermissionDenied(format!(
+                    "permission denied attaching PID {pid} to {}",
+                    procs_path.display()
+                ))
             } else {
-                WorkerError::CgroupError(format!("failed to attach PID {pid} to {}: {e}", procs_path.display()))
+                WorkerError::CgroupError(format!(
+                    "failed to attach PID {pid} to {}: {e}",
+                    procs_path.display()
+                ))
             }
         })
     }
@@ -125,7 +146,10 @@ impl CgroupController {
         })?;
 
         content.trim().parse::<u64>().map_err(|e| {
-            WorkerError::CgroupError(format!("invalid memory.current value in {}: {e}", current_path.display()))
+            WorkerError::CgroupError(format!(
+                "invalid memory.current value in {}: {e}",
+                current_path.display()
+            ))
         })
     }
 
@@ -136,7 +160,10 @@ impl CgroupController {
     pub fn cleanup(&self) -> Result<(), WorkerError> {
         if self.path.exists() && fs::remove_dir(&self.path).is_err() {
             fs::remove_dir_all(&self.path).map_err(|e| {
-                WorkerError::CgroupError(format!("failed to remove cgroup directory {}: {e}", self.path.display()))
+                WorkerError::CgroupError(format!(
+                    "failed to remove cgroup directory {}: {e}",
+                    self.path.display()
+                ))
             })?;
         }
         Ok(())

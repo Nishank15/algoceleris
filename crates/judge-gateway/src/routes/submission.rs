@@ -149,6 +149,22 @@ pub fn mask_test_case_json(
     }
 }
 
+/// Server-authoritative test case injected into worker payloads and job records.
+///
+/// These are resolved from the problem catalog (PostgreSQL, or the in-memory catalog in
+/// standalone mode) and can never be supplied by the browser.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ServerTestCase {
+    /// 1-based position within the problem's case list.
+    pub id: u32,
+    /// Standard input fed to the candidate program.
+    pub input_data: String,
+    /// Expected standard output.
+    pub expected_output: String,
+    /// Whether the case is publicly visible as a sample.
+    pub is_sample: bool,
+}
+
 /// Asynchronous evaluation job pushed to `submissions:queue`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubmissionJob {
@@ -162,6 +178,9 @@ pub struct SubmissionJob {
     pub language: String,
     /// Source code.
     pub code: String,
+    /// Server-authoritative test cases for this evaluation.
+    #[serde(default)]
+    pub test_cases: Vec<ServerTestCase>,
     /// Associated assessment UUID if institutional attempt.
     pub assessment_id: Option<Uuid>,
     /// Ingestion timestamp.
@@ -185,9 +204,16 @@ pub struct SubmitCodeRequest {
     /// Optional custom test input for ad-hoc executions.
     #[serde(default)]
     pub custom_input: Option<String>,
-    /// Optional test cases passed by runner.
+    /// Legacy client-supplied test cases.
+    ///
+    /// Deliberately ignored: grading criteria are resolved server-side from the problem
+    /// catalog. The field is still accepted so older clients keep parsing.
     #[serde(default)]
     pub test_cases: Option<serde_json::Value>,
+    /// Evaluation scope: `run` grades only the problem's public sample cases, `submit`
+    /// (the default) grades every server-stored case.
+    #[serde(default)]
+    pub mode: Option<String>,
     /// Optional time limit in ms.
     #[serde(default)]
     pub time_limit_ms: Option<u64>,
@@ -260,13 +286,69 @@ pub struct StreamParams {
     pub token: Option<String>,
 }
 
+/// Resolves the authoritative test cases for a submission.
+///
+/// The browser cannot influence verification criteria: cases always come from the
+/// problem catalog, either from PostgreSQL or — when no database is attached — from the
+/// in-memory canonical catalog. `sample_only` restricts grading to public sample cases
+/// (used by "Run"), while full submissions receive every stored case, hidden ones
+/// included. Unknown slugs fall back to the caller's ad-hoc input, if any.
+///
+/// # Errors
+/// Returns [`GatewayError::Database`] if the problem lookup fails.
+pub async fn resolve_server_test_cases(
+    state: &AppState,
+    problem_slug: &str,
+    sample_only: bool,
+) -> Result<Vec<ServerTestCase>, GatewayError> {
+    let mut cases = Vec::new();
+
+    if let Some(ref pool) = state.db {
+        if let Some(problem) =
+            judge_db::repositories::problem::get_problem_by_id(pool.inner(), problem_slug).await?
+        {
+            let records = judge_db::repositories::problem::list_problem_test_cases(
+                pool.inner(),
+                &problem.id,
+                sample_only,
+            )
+            .await?;
+            cases = records
+                .into_iter()
+                .map(|case| ServerTestCase {
+                    id: u32::try_from(case.ordinal).unwrap_or_default(),
+                    input_data: case.input_data,
+                    expected_output: case.expected_output,
+                    is_sample: case.is_sample,
+                })
+                .collect();
+        }
+    } else if let Some(problem) = judge_db::problem_catalog::find(problem_slug) {
+        cases = problem
+            .cases
+            .iter()
+            .filter(|case| !sample_only || case.is_sample)
+            .map(|case| ServerTestCase {
+                id: u32::try_from(case.ordinal).unwrap_or_default(),
+                input_data: case.input_data.to_string(),
+                expected_output: case.expected_output.to_string(),
+                is_sample: case.is_sample,
+            })
+            .collect();
+    }
+
+    Ok(cases)
+}
+
 /// Handler for `POST /api/v1/submissions`.
 ///
-/// Intake endpoint validating code and dispatching evaluation jobs to Redis queue `submissions:queue`.
+/// Intake endpoint validating code and dispatching evaluation jobs to Redis queue
+/// `submissions:queue`. Test cases are resolved server-side from the problem catalog;
+/// client-supplied `test_cases` are ignored.
 ///
 /// # Errors
 /// Returns [`GatewayError::BadRequest`] on unsupported language or code exceeding 64KB.
-#[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_precision_loss, clippy::too_many_lines)]
 pub async fn submit_code_handler(
     State(state): State<AppState>,
     OptionalUser(auth): OptionalUser,
@@ -277,7 +359,11 @@ pub async fn submit_code_handler(
         "cpp" | "c++" => "cpp",
         "python" | "py" => "python",
         "java" => "java",
-        other => return Err(GatewayError::BadRequest(format!("Unsupported language: {other}"))),
+        other => {
+            return Err(GatewayError::BadRequest(format!(
+                "Unsupported language: {other}"
+            )))
+        }
     };
 
     let code = req.get_code().to_string();
@@ -293,13 +379,37 @@ pub async fn submit_code_handler(
     let problem_slug = req
         .problem_slug
         .filter(|s| !s.trim().is_empty())
-        .unwrap_or_else(|| "custom-run".to_string());
+        .map_or_else(|| "custom-run".to_string(), |s| s.trim().to_lowercase());
+
+    // 4. Server-authoritative evaluation criteria. Client-supplied `test_cases` are
+    //    ignored on purpose: the browser must not be able to pick the grading oracle.
+    //    An explicit ad-hoc input replaces the catalog cases for that run.
+    let sample_only = req
+        .mode
+        .as_deref()
+        .is_some_and(|mode| mode.trim().eq_ignore_ascii_case("run"));
+    let custom_input = req.custom_input.as_deref().filter(|s| !s.is_empty());
+    let mut test_cases = if custom_input.is_some() {
+        Vec::new()
+    } else {
+        resolve_server_test_cases(&state, &problem_slug, sample_only).await?
+    };
+    if test_cases.is_empty() {
+        if let Some(custom_input) = custom_input {
+            test_cases.push(ServerTestCase {
+                id: 999,
+                input_data: custom_input.to_string(),
+                expected_output: String::new(),
+                is_sample: true,
+            });
+        }
+    }
 
     let submission_id = Uuid::new_v4();
     let user_id = auth.map(|a| a.user_id);
     let now = Utc::now();
 
-    // 4. Persistence
+    // 5. Persistence
     if let Some(ref pool) = state.db {
         let _ = judge_db::repositories::submission::create_submission(
             pool.inner(),
@@ -333,18 +443,19 @@ pub async fn submit_code_handler(
         );
     }
 
-    // 5. Job dispatch to Redis queues
+    // 6. Job dispatch to Redis queues
     let job = SubmissionJob {
         submission_id,
         user_id,
         problem_slug: problem_slug.clone(),
         language: lang.to_string(),
         code: code.clone(),
+        test_cases: test_cases.clone(),
         assessment_id: req.assessment_id,
         submitted_at: now,
     };
-    let job_json = serde_json::to_string(&job)
-        .map_err(|e| GatewayError::InternalError(e.to_string()))?;
+    let job_json =
+        serde_json::to_string(&job).map_err(|e| GatewayError::InternalError(e.to_string()))?;
 
     // Create worker payload compatible with both Python worker and Rust engine
     let worker_job = serde_json::json!({
@@ -355,7 +466,7 @@ pub async fn submit_code_handler(
         "code": code,
         "time_limit_ms": req.time_limit_ms.unwrap_or(2000),
         "memory_limit_bytes": req.memory_limit_bytes.unwrap_or(268_435_456),
-        "test_cases": req.test_cases.clone().unwrap_or_else(|| serde_json::json!([])),
+        "test_cases": test_cases,
         "submitted_at": now.timestamp_millis() as f64 / 1000.0,
     });
     let worker_payload_str = worker_job.to_string();
@@ -366,9 +477,7 @@ pub async fn submit_code_handler(
                 .lpush("submissions:queue", &job_json)
                 .await
                 .map_err(GatewayError::Redis)?;
-            let _: Result<(), _> = conn
-                .lpush("judge:submissions", &worker_payload_str)
-                .await;
+            let _: Result<(), _> = conn.lpush("judge:submissions", &worker_payload_str).await;
         }
     } else {
         let mut queue = state.mock_campus.submission_queue.write().await;
@@ -397,7 +506,9 @@ pub async fn get_submission_handler(
     Path(submission_id_str): Path<String>,
     OptionalUser(auth): OptionalUser,
 ) -> Result<impl IntoResponse, GatewayError> {
-    let is_instructor = auth.as_ref().is_some_and(|a| role_level(&a.claims.role) >= 30);
+    let is_instructor = auth
+        .as_ref()
+        .is_some_and(|a| role_level(&a.claims.role) >= 30);
     let submission_id = Uuid::parse_str(&submission_id_str).unwrap_or_else(|_| Uuid::nil());
 
     let rec = if let Some(ref pool) = state.db {
@@ -476,11 +587,33 @@ pub async fn get_submission_handler(
         }
 
         if let Some(rep) = redis_report {
-            let verdict = rep.get("verdict").and_then(serde_json::Value::as_str).unwrap_or("ACCEPTED").to_string();
-            let passed = i32::try_from(rep.get("test_cases_passed").and_then(serde_json::Value::as_i64).unwrap_or(0)).unwrap_or(0);
-            let total = i32::try_from(rep.get("total_test_cases").and_then(serde_json::Value::as_i64).unwrap_or(0)).unwrap_or(0);
-            let time_ms = i32::try_from(rep.get("max_time_ms").and_then(serde_json::Value::as_i64).unwrap_or(0)).unwrap_or(0);
-            let mem_bytes = rep.get("max_memory_bytes").and_then(serde_json::Value::as_i64).unwrap_or(0);
+            let verdict = rep
+                .get("verdict")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("INTERNAL_ERROR")
+                .to_string();
+            let passed = i32::try_from(
+                rep.get("test_cases_passed")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0),
+            )
+            .unwrap_or(0);
+            let total = i32::try_from(
+                rep.get("total_test_cases")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0),
+            )
+            .unwrap_or(0);
+            let time_ms = i32::try_from(
+                rep.get("max_time_ms")
+                    .and_then(serde_json::Value::as_i64)
+                    .unwrap_or(0),
+            )
+            .unwrap_or(0);
+            let mem_bytes = rep
+                .get("max_memory_bytes")
+                .and_then(serde_json::Value::as_i64)
+                .unwrap_or(0);
             let mem_kb = i32::try_from(mem_bytes / 1024).unwrap_or(0);
             let dummy = SubmissionRecord {
                 id: submission_id,
@@ -499,7 +632,9 @@ pub async fn get_submission_handler(
             };
             (dummy, Vec::new(), Some(rep))
         } else {
-            return Err(GatewayError::NotFound(format!("Submission '{submission_id_str}' not found")));
+            return Err(GatewayError::NotFound(format!(
+                "Submission '{submission_id_str}' not found"
+            )));
         }
     };
 
@@ -556,7 +691,9 @@ pub async fn submission_stream_handler(
     State(state): State<AppState>,
 ) -> impl IntoResponse {
     let is_instructor = determine_stream_role(&params, &headers, &state.jwt_secret);
-    ws.on_upgrade(move |socket| handle_submission_socket(socket, submission_id_str, is_instructor, state))
+    ws.on_upgrade(move |socket| {
+        handle_submission_socket(socket, submission_id_str, is_instructor, state)
+    })
 }
 
 /// Manages active WebSocket connection streaming live test case outcomes.
@@ -575,15 +712,22 @@ async fn handle_submission_socket(
             let key = format!("judge:status:{submission_id_str}");
             if let Ok(Some(status)) = con.hget::<_, _, Option<String>>(&key, "status").await {
                 if status == "COMPLETED" || status == "FAILED" {
-                    let ev_type = if status == "FAILED" { "compilation_failed" } else { "completed" };
+                    let ev_type = if status == "FAILED" {
+                        "compilation_failed"
+                    } else {
+                        "completed"
+                    };
                     let report: Option<String> = con.hget(&key, "report").await.ok().flatten();
-                    let report_val = report.and_then(|r| serde_json::from_str::<serde_json::Value>(&r).ok());
+                    let report_val =
+                        report.and_then(|r| serde_json::from_str::<serde_json::Value>(&r).ok());
                     let event = serde_json::json!({
                         "event_type": ev_type,
                         "submission_id": submission_id_str,
                         "data": report_val.unwrap_or_else(|| serde_json::json!({ "status": status })),
                     });
-                    let _ = ws_sender.send(Message::Text(event.to_string().into())).await;
+                    let _ = ws_sender
+                        .send(Message::Text(event.to_string().into()))
+                        .await;
                     return;
                 }
             }
@@ -666,17 +810,19 @@ async fn handle_submission_socket(
                 }
             }
             () = &mut fallback_deadline, if event_count == 0 => {
-                // If offline or no worker processed job within 2.5s, emit completion to unblock client
-                let comp_event = serde_json::json!({
+                // No worker produced any event before the deadline. Fail closed instead of
+                // fabricating a passing verdict: report an internal error with zero cases passed.
+                let timeout_event = serde_json::json!({
                     "event_type": "completed",
                     "submission_id": submission_id_str,
                     "data": {
-                        "verdict": "ACCEPTED",
-                        "test_cases_passed": 2,
-                        "total_test_cases": 2,
+                        "verdict": "INTERNAL_ERROR",
+                        "test_cases_passed": 0,
+                        "total_test_cases": 0,
+                        "message": "Evaluation timed out or worker unavailable",
                     }
                 });
-                let _ = ws_sender.send(Message::Text(comp_event.to_string().into())).await;
+                let _ = ws_sender.send(Message::Text(timeout_event.to_string().into())).await;
                 break;
             }
         }

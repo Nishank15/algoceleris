@@ -41,40 +41,15 @@ export const CampusSidebarLayout: React.FC = () => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
-  const [session, setSession] = useState<CampusUserSession | null>(null);
+  const [session, setSession] = useState<CampusUserSession | null>(() => getCampusSession(orgSlug));
   const [orgs, setOrgs] = useState<CampusOrgSummary[]>([]);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [switcherSearch, setSwitcherSearch] = useState('');
 
-  // Detect role from URL path (e.g. /campus/vit-chennai/faculty/...) or fallback to session
-  const pathParts = location.pathname.split('/');
-  const urlRole: CampusRole = pathParts.includes('faculty')
-    ? 'faculty'
-    : pathParts.includes('admin')
-    ? 'org_admin'
-    : 'student';
-
   useEffect(() => {
     // 1. Fetch current institutional session
     const currentSession = getCampusSession(orgSlug);
-    if (currentSession) {
-      setSession(currentSession);
-    } else {
-      // If not logged in, synthesize a temporary institutional guest session
-      const tempSession: CampusUserSession = {
-        role: urlRole,
-        orgSlug,
-        orgName: orgSlug.toUpperCase().replace('-', ' '),
-        userId: 'temp-session',
-        name: urlRole === 'student' ? 'Student Member' : urlRole === 'faculty' ? 'Faculty Member' : 'Admin Lead',
-        loginId: `${urlRole}@${orgSlug}.ac.in`,
-        regNumber: urlRole === 'student' ? '25BAI1234' : urlRole === 'faculty' ? 'FAC-9842' : 'ADM-001',
-        department: 'Computer Science & Engineering',
-        initials: urlRole === 'student' ? 'ST' : urlRole === 'faculty' ? 'FC' : 'AD',
-      };
-      setSession(tempSession);
-      saveCampusSession(tempSession);
-    }
+    setSession(currentSession);
 
     // 2. Load all available organizations for the switcher dropdown
     let isMounted = true;
@@ -90,9 +65,10 @@ export const CampusSidebarLayout: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [orgSlug, urlRole]);
+  }, [orgSlug]);
 
-  const activeRole: CampusRole = session?.role || urlRole;
+  // Role strictly derived from active verified session claims
+  const activeRole: CampusRole = session?.role || 'student';
   const currentOrg = orgs.find((o) => o.slug.toLowerCase() === orgSlug.toLowerCase());
   const orgName = currentOrg?.name || session?.orgName || orgSlug.toUpperCase().replace('-', ' ');
 
@@ -110,20 +86,6 @@ export const CampusSidebarLayout: React.FC = () => {
     }
     const rolePath = activeRole === 'org_admin' ? 'admin' : activeRole;
     navigate(`/campus/${targetSlug}/${rolePath}/dashboard`);
-  };
-
-  const handleSwitchRole = (newRole: CampusRole) => {
-    if (session) {
-      const updated = {
-        ...session,
-        role: newRole,
-        regNumber: newRole === 'student' ? '25BAI1234' : newRole === 'faculty' ? 'FAC-9842' : 'ADM-001',
-      };
-      saveCampusSession(updated);
-      setSession(updated);
-    }
-    const rolePath = newRole === 'org_admin' ? 'admin' : newRole;
-    navigate(`/campus/${orgSlug}/${rolePath}/dashboard`);
   };
 
   // Nav items based on active role
@@ -187,7 +149,7 @@ export const CampusSidebarLayout: React.FC = () => {
           icon: Users,
         },
         {
-          label: 'Kernel Sandbox Audit',
+          label: 'Evaluation Safety Audit',
           path: `/campus/${orgSlug}/admin/audit`,
           icon: ShieldCheck,
         },
@@ -210,8 +172,8 @@ export const CampusSidebarLayout: React.FC = () => {
       style={{
         display: 'flex',
         minHeight: '100vh',
-        background: '#08090a',
-        color: '#ffffff',
+        background: 'var(--bg-canvas)',
+        color: 'var(--text-primary)',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
@@ -220,8 +182,8 @@ export const CampusSidebarLayout: React.FC = () => {
         style={{
           width: '240px',
           minWidth: '240px',
-          background: '#0f1011',
-          borderRight: '1px solid #23252a',
+          background: 'var(--bg-surface)',
+          borderRight: '1px solid var(--border-subtle)',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
@@ -230,7 +192,7 @@ export const CampusSidebarLayout: React.FC = () => {
       >
         <div>
           {/* Top Institution Switcher Bar */}
-          <div style={{ position: 'relative', borderBottom: '1px solid #23252a', padding: '14px 16px' }}>
+          <div style={{ position: 'relative', borderBottom: '1px solid var(--border-subtle)', padding: '14px 16px' }}>
             <button
               type="button"
               onClick={() => setSwitcherOpen(!switcherOpen)}
@@ -241,7 +203,7 @@ export const CampusSidebarLayout: React.FC = () => {
                 justifyContent: 'space-between',
                 background: 'transparent',
                 border: 'none',
-                color: '#ffffff',
+                color: 'var(--text-primary)',
                 cursor: 'pointer',
                 padding: 0,
                 textAlign: 'left',
@@ -253,8 +215,8 @@ export const CampusSidebarLayout: React.FC = () => {
                     width: '28px',
                     height: '28px',
                     borderRadius: '6px',
-                    background: '#161718',
-                    border: '1px solid #23252a',
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -269,7 +231,7 @@ export const CampusSidebarLayout: React.FC = () => {
                     style={{
                       fontSize: '13px',
                       fontWeight: 590,
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
@@ -281,7 +243,7 @@ export const CampusSidebarLayout: React.FC = () => {
                     style={{
                       fontSize: '11px',
                       fontFamily: 'JetBrains Mono, monospace',
-                      color: '#8a8f98',
+                      color: 'var(--text-secondary)',
                     }}
                   >
                     /{orgSlug}
@@ -292,7 +254,7 @@ export const CampusSidebarLayout: React.FC = () => {
               <ChevronDown
                 size={14}
                 style={{
-                  color: '#8a8f98',
+                  color: 'var(--text-secondary)',
                   transform: switcherOpen ? 'rotate(180deg)' : 'none',
                   transition: 'transform 0.15s ease',
                   flexShrink: 0,
@@ -308,10 +270,10 @@ export const CampusSidebarLayout: React.FC = () => {
                   top: '100%',
                   left: '12px',
                   right: '12px',
-                  background: '#141517',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
-                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.6)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
                   padding: '8px',
                   zIndex: 50,
                   marginTop: '6px',
@@ -325,7 +287,7 @@ export const CampusSidebarLayout: React.FC = () => {
                       left: '8px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      color: '#62666d',
+                      color: 'var(--text-muted)',
                     }}
                   />
                   <input
@@ -335,11 +297,11 @@ export const CampusSidebarLayout: React.FC = () => {
                     onChange={(e) => setSwitcherSearch(e.target.value)}
                     style={{
                       width: '100%',
-                      background: '#0f1011',
-                      border: '1px solid #23252a',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-subtle)',
                       borderRadius: '4px',
                       padding: '6px 8px 6px 26px',
-                      color: '#ffffff',
+                      color: 'var(--text-primary)',
                       fontSize: '12px',
                       outline: 'none',
                       boxSizing: 'border-box',
@@ -357,7 +319,7 @@ export const CampusSidebarLayout: React.FC = () => {
                     )
                     .map((o) => (
                       <button
-                        key={o.id}
+                        key={o.id ?? o.slug}
                         type="button"
                         onClick={() => handleSwitchOrg(o.slug)}
                         style={{
@@ -367,9 +329,9 @@ export const CampusSidebarLayout: React.FC = () => {
                           justifyContent: 'space-between',
                           padding: '8px',
                           borderRadius: '4px',
-                          background: o.slug === orgSlug ? '#23252a' : 'transparent',
+                          background: o.slug === orgSlug ? 'var(--border-subtle)' : 'transparent',
                           border: 'none',
-                          color: o.slug === orgSlug ? '#e4f222' : '#d0d6e0',
+                          color: o.slug === orgSlug ? '#e4f222' : 'var(--text-secondary)',
                           fontSize: '12px',
                           cursor: 'pointer',
                           textAlign: 'left',
@@ -383,7 +345,7 @@ export const CampusSidebarLayout: React.FC = () => {
                     ))}
                 </div>
 
-                <div style={{ borderTop: '1px solid #23252a', marginTop: '6px', paddingTop: '6px' }}>
+                <div style={{ borderTop: '1px solid var(--border-subtle)', marginTop: '6px', paddingTop: '6px' }}>
                   <Link
                     to="/campus/register"
                     onClick={() => setSwitcherOpen(false)}
@@ -404,58 +366,39 @@ export const CampusSidebarLayout: React.FC = () => {
             )}
           </div>
 
-          {/* Active Role Selector Strip */}
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #23252a' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#62666d', fontWeight: 510 }}>
-                Active Persona
+          {/* Read-Only Verified Identity Badge */}
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-subtle)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', fontWeight: 510 }}>
+                Verified Identity
               </span>
               <span
+                className="campus-verified-role-badge"
                 style={{
                   fontSize: '10px',
-                  padding: '2px 6px',
-                  borderRadius: '3px',
-                  background: 'rgba(228, 242, 34, 0.1)',
-                  color: '#e4f222',
-                  border: '1px solid rgba(228, 242, 34, 0.2)',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  background: 'rgba(34, 197, 94, 0.12)',
+                  color: '#22c55e',
+                  border: '1px solid rgba(34, 197, 94, 0.25)',
                   fontFamily: 'JetBrains Mono, monospace',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  fontWeight: 600,
                 }}
               >
-                {activeRole.toUpperCase()}
-              </span>
-            </div>
-
-            {/* Quick 3-way Role Switcher for paired testing */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                background: '#161718',
-                borderRadius: '6px',
-                padding: '2px',
-                border: '1px solid #23252a',
-              }}
-            >
-              {(['student', 'faculty', 'org_admin'] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => handleSwitchRole(r)}
+                <span
                   style={{
-                    padding: '4px 0',
-                    border: 'none',
-                    borderRadius: '4px',
-                    background: activeRole === r ? '#23252a' : 'transparent',
-                    color: activeRole === r ? '#ffffff' : '#8a8f98',
-                    fontSize: '10px',
-                    fontWeight: activeRole === r ? 590 : 400,
-                    cursor: 'pointer',
-                    textTransform: 'capitalize',
+                    width: '5px',
+                    height: '5px',
+                    borderRadius: '50%',
+                    background: '#22c55e',
+                    display: 'inline-block',
                   }}
-                >
-                  {r === 'org_admin' ? 'Admin' : r}
-                </button>
-              ))}
+                />
+                {activeRole === 'org_admin' ? 'ORG ADMIN' : activeRole.toUpperCase()}
+              </span>
             </div>
           </div>
 
@@ -478,12 +421,12 @@ export const CampusSidebarLayout: React.FC = () => {
                     fontSize: '13px',
                     fontWeight: isActive ? 590 : 400,
                     background: isActive ? 'rgba(228, 242, 34, 0.08)' : 'transparent',
-                    color: isActive ? '#e4f222' : '#8a8f98',
+                    color: isActive ? '#e4f222' : 'var(--text-secondary)',
                     borderLeft: isActive ? '2px solid #e4f222' : '2px solid transparent',
                     transition: 'all 0.15s ease',
                   }}
                 >
-                  <Icon size={15} style={{ color: isActive ? '#e4f222' : '#62666d' }} />
+                  <Icon size={15} style={{ color: isActive ? '#e4f222' : 'var(--text-muted)' }} />
                   <span>{item.label}</span>
                 </NavLink>
               );
@@ -492,7 +435,7 @@ export const CampusSidebarLayout: React.FC = () => {
         </div>
 
         {/* Bottom User Profile Section */}
-        <div style={{ borderTop: '1px solid #23252a', padding: '16px' }}>
+        <div style={{ borderTop: '1px solid var(--border-subtle)', padding: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
               <div
@@ -500,14 +443,14 @@ export const CampusSidebarLayout: React.FC = () => {
                   width: '32px',
                   height: '32px',
                   borderRadius: '6px',
-                  background: '#161718',
-                  border: '1px solid #23252a',
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-subtle)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: '12px',
                   fontWeight: 600,
-                  color: '#ffffff',
+                  color: 'var(--text-primary)',
                   fontFamily: 'JetBrains Mono, monospace',
                   flexShrink: 0,
                 }}
@@ -520,7 +463,7 @@ export const CampusSidebarLayout: React.FC = () => {
                   style={{
                     fontSize: '13px',
                     fontWeight: 510,
-                    color: '#ffffff',
+                    color: 'var(--text-primary)',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
@@ -532,10 +475,10 @@ export const CampusSidebarLayout: React.FC = () => {
                   style={{
                     fontSize: '11px',
                     fontFamily: 'JetBrains Mono, monospace',
-                    color: '#8a8f98',
+                    color: 'var(--text-secondary)',
                   }}
                 >
-                  {session?.regNumber || '25BAI1234'}
+                  {session?.regNumber || 'DEMO-001'}
                 </div>
               </div>
             </div>
@@ -547,13 +490,13 @@ export const CampusSidebarLayout: React.FC = () => {
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#62666d',
+                color: 'var(--text-muted)',
                 cursor: 'pointer',
                 padding: '4px',
                 display: 'flex',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#eb5757')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#62666d')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
             >
               <LogOut size={15} />
             </button>
@@ -565,7 +508,7 @@ export const CampusSidebarLayout: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'space-between',
               fontSize: '11px',
-              color: '#62666d',
+              color: 'var(--text-muted)',
             }}
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -578,9 +521,9 @@ export const CampusSidebarLayout: React.FC = () => {
                   display: 'inline-block',
                 }}
               />
-              cgroup isolation
+              Evaluation Engine Online
             </span>
-            <Link to="/campus" style={{ color: '#8a8f98', textDecoration: 'none' }}>
+            <Link to="/campus" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
               Directory
             </Link>
           </div>
@@ -593,8 +536,8 @@ export const CampusSidebarLayout: React.FC = () => {
         <header
           style={{
             height: '48px',
-            borderBottom: '1px solid #23252a',
-            background: 'rgba(15, 16, 17, 0.75)',
+            borderBottom: '1px solid var(--border-subtle)',
+            background: 'var(--bg-glass)',
             backdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
@@ -606,47 +549,54 @@ export const CampusSidebarLayout: React.FC = () => {
         >
           {/* Breadcrumb Path */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Link to="/campus" style={{ color: '#8a8f98', textDecoration: 'none' }}>
+            <Link to="/campus" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
               Campus
             </Link>
-            <span style={{ color: '#383b3f' }}>/</span>
-            <span style={{ color: '#d0d6e0', fontWeight: 510 }}>{orgName}</span>
-            <span style={{ color: '#383b3f' }}>/</span>
+            <span style={{ color: 'var(--border-divider)' }}>/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 510 }}>{orgName}</span>
+            <span style={{ color: 'var(--border-divider)' }}>/</span>
             <span
               style={{
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 textTransform: 'capitalize',
               }}
             >
               {activeRole.replace('_', ' ')}
             </span>
-            <span style={{ color: '#383b3f' }}>/</span>
-            <span style={{ color: '#ffffff', fontWeight: 590 }}>{getCurrentPageTitle()}</span>
+            <span style={{ color: 'var(--border-divider)' }}>/</span>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 590 }}>{getCurrentPageTitle()}</span>
           </div>
 
           {/* Right Header Badges & Theme Toggle */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Live Role Switcher */}
-            <select
-              value={activeRole}
-              onChange={(e) => handleSwitchRole(e.target.value as CampusRole)}
+            {/* Verified Read-Only Role Badge */}
+            <div
+              className="campus-verified-role-badge"
               style={{
-                background: '#141517',
-                border: '1px solid #23252a',
-                borderRadius: '6px',
-                color: '#d0d6e0',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '11px',
+                fontFamily: 'JetBrains Mono, monospace',
+                color: 'var(--text-secondary)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
                 padding: '4px 10px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-                outline: 'none',
+                borderRadius: '6px',
               }}
-              aria-label="Campus Role Switcher"
             >
-              <option value="student">Role: Student ▾</option>
-              <option value="faculty">Role: Faculty ▾</option>
-              <option value="org_admin">Role: Admin ▾</option>
-            </select>
+              <span
+                className="role-dot"
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: '#22c55e',
+                  display: 'inline-block',
+                }}
+              />
+              <span className="role-name">{activeRole.toUpperCase()}</span>
+            </div>
 
             <div
               style={{
@@ -654,9 +604,9 @@ export const CampusSidebarLayout: React.FC = () => {
                 alignItems: 'center',
                 gap: '6px',
                 fontSize: '12px',
-                color: '#8a8f98',
-                background: '#141517',
-                border: '1px solid #23252a',
+                color: 'var(--text-secondary)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
                 padding: '4px 10px',
                 borderRadius: '9999px',
               }}
@@ -671,19 +621,20 @@ export const CampusSidebarLayout: React.FC = () => {
                 }}
               />
               <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px' }}>
-                Sandbox Online
+                Service Online
               </span>
             </div>
 
             <button
               type="button"
               onClick={toggleTheme}
+              className="theme-toggle-btn"
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               style={{
                 background: 'transparent',
-                border: '1px solid #23252a',
+                border: '1px solid var(--border-subtle)',
                 borderRadius: '6px',
-                color: '#8a8f98',
+                color: 'var(--text-secondary)',
                 padding: '6px',
                 cursor: 'pointer',
                 display: 'flex',
